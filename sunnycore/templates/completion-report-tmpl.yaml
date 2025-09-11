@@ -1,0 +1,114 @@
+# Project Completion Report Template
+# 專案完成報告模板
+# Version: 2.0
+# Last Updated: 2024
+
+# Metadata - 元數據
+metadata:
+  template_version: "2.0"  # 模板版本
+  creation_date: ""  # 創建日期 (YYYY-MM-DD)
+  author: ""  # 作者
+  project_name: ""  # 專案名稱
+  completion_date: ""  # 完成日期 (YYYY-MM-DD)
+
+# Project Overview - 專案概覽
+project_overview:
+  name: ""  # 專案名稱
+  description: ""  # 專案描述
+  objectives: []  # 專案目標列表
+    # - "目標1"
+    # - "目標2"
+  duration:
+    start_date: ""  # 開始日期 (YYYY-MM-DD)
+    end_date: ""  # 結束日期 (YYYY-MM-DD)
+  team_members: []  # 團隊成員
+    # - name: "成員姓名"
+    #   role: "角色"
+
+# Development Summary - 開發總結
+development_summary:
+  purpose: ""  # 開發目的
+  
+  features:  # 功能列表
+    implemented: []  # 已實現功能
+      # - name: "功能名稱"
+      #   description: "功能描述"
+      #   status: "completed"  # completed/partial/pending
+    
+  challenges_encountered:  # 遇到過的難題
+    - challenge: ""  # 難題描述
+      solution: ""  # 解決方案
+      impact: ""  # 影響程度 (high/medium/low)
+      lessons_learned: ""  # 經驗教訓
+  
+  achievements: []  # 主要成就
+    # - "成就描述"
+  
+  technologies_used: []  # 使用的技術
+    # - name: "技術名稱"
+    #   version: "版本"
+    #   purpose: "使用目的"
+
+# Current Issues - 現有問題
+current_issues:
+  total_count: 0  # 問題總數
+  
+  issue_list:
+    - id: ""  # 問題ID
+      title: ""  # 問題標題
+      description: ""  # 問題描述
+      severity: ""  # 嚴重程度 (critical/high/medium/low)
+      status: ""  # 狀態 (open/in_progress/resolved/closed)
+      assigned_to: ""  # 負責人
+      created_date: ""  # 創建日期
+      due_date: ""  # 預期解決日期
+      tags: []  # 標籤
+        # - "bug"
+        # - "enhancement"
+
+# Potential Issues - 潛在問題
+potential_issues:
+  risk_assessment:
+    overall_risk_level: ""  # 整體風險等級 (high/medium/low)
+  
+  issue_list:
+    - id: ""  # 潛在問題ID
+      title: ""  # 問題標題
+      description: ""  # 問題描述
+      probability: ""  # 發生機率 (high/medium/low)
+      impact: ""  # 影響程度 (critical/high/medium/low)
+      mitigation_strategy: ""  # 緩解策略
+      monitoring_plan: ""  # 監控計劃
+      contingency_plan: ""  # 應急計劃
+
+# Quality Metrics - 品質指標
+quality_metrics:
+  code_coverage: ""  # 代碼覆蓋率
+  test_pass_rate: ""  # 測試通過率
+  performance_metrics: []  # 性能指標
+    # - metric: "響應時間"
+    #   value: "100ms"
+    #   target: "<200ms"
+  
+# Recommendations - 建議
+recommendations:
+  immediate_actions: []  # 立即行動項
+    # - "建議1"
+  
+  future_improvements: []  # 未來改進建議
+    # - priority: "high"  # high/medium/low
+    #   description: "改進描述"
+    #   estimated_effort: "工作量估計"
+  
+  best_practices: []  # 最佳實踐
+    # - "實踐描述"
+
+# Additional Notes - 附加說明
+additional_notes:
+  comments: ""  # 其他備註
+  references: []  # 參考資料
+    # - title: "參考標題"
+    #   url: "參考連結"
+  attachments: []  # 附件
+    # - name: "附件名稱"
+    #   path: "附件路徑"

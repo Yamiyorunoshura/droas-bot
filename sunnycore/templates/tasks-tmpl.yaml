@@ -1,0 +1,57 @@
+functional_requirements:
+  - task_id: "Task_1"
+    task_name: "{{task_1_description}}"
+    subtasks:
+      - subtask_id: "Task_1.1"
+        subtask_name: "{{subtask_1_1_description}}"
+        items:
+          - "{{specific_requirement_1}}"
+          - "{{specific_requirement_2}}"
+          - "{{specific_requirement_3}}"
+      - subtask_id: "Task_1.2"
+        subtask_name: "{{subtask_1_2_description}}"
+        items:
+          - "{{specific_requirement_1}}"
+          - "{{specific_requirement_2}}"
+          - "{{specific_requirement_3}}"
+      - subtask_id: "Task_1.3"
+        subtask_name: "{{subtask_1_3_description}}"
+        items:
+          - "{{specific_requirement_1}}"
+          - "{{specific_requirement_2}}"
+          - "{{specific_requirement_3}}"
+  - task_id: "Task_2"
+    task_name: "{{task_2_description}}"
+    subtasks:
+      - subtask_id: "Task_2.1"
+        subtask_name: "{{subtask_2_1_description}}"
+        items:
+          - "{{specific_requirement_1}}"
+          - "{{specific_requirement_2}}"
+          - "{{specific_requirement_3}}"
+      - subtask_id: "Task_2.2"
+        subtask_name: "{{subtask_2_2_description}}"
+        items:
+          - "{{specific_requirement_1}}"
+          - "{{specific_requirement_2}}"
+          - "{{specific_requirement_3}}"
+  # 根據需要添加更多功能性任務...
+
+non_functional_requirements:
+  - task_id: "Task_N"  # N = 功能性任務數量 + 1
+    task_name: "{{non_functional_task_description}}"
+    subtasks:
+      - subtask_id: "Task_N.1"
+        subtask_name: "{{non_functional_subtask_1_description}}"
+        items:
+          - "{{non_functional_requirement_1}}"
+          - "{{non_functional_requirement_2}}"
+          - "{{non_functional_requirement_3}}"
+      - subtask_id: "Task_N.2"
+        subtask_name: "{{non_functional_subtask_2_description}}"
+        items:
+          - "{{non_functional_requirement_1}}"
+          - "{{non_functional_requirement_2}}"
+          - "{{non_functional_requirement_3}}"
+  # 根據需要添加更多非功能性任務...
+

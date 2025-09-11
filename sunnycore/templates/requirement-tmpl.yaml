@@ -1,0 +1,111 @@
+# Requirements Specification Template
+# This YAML template provides a comprehensive structure for documenting project requirements
+
+project_info:
+  name: ""                    # Project name
+  version: "1.0.0"           # Version number
+  description: ""            # Brief project description
+  background: ""             # Project background and context
+  objectives: []             # Main project objectives
+
+functional_requirements:
+  - id: "F-001"                      # Unique identifier
+    title: ""                       # Requirement title
+    description: ""                 # Detailed description
+    priority: "High"                # High/Medium/Low
+    user_story: "As a [user], I want [goal] so that [benefit]"
+    acceptance_criteria:            # List of acceptance criteria
+      - ""
+      - ""
+    business_rules: []              # Associated business rules
+    dependencies: []                # Dependencies on other requirements
+    effort_estimate: ""             # Development effort estimate
+    notes: ""                       # Additional notes
+
+non_functional_requirements:
+  - id: "NFR-P-001"
+      description: ""               # Performance requirement description
+      metric: ""                    # Measurement metric
+      type: "performance"           
+      target_value: ""              # Target performance value
+      test_method: ""               # How to test this requirement
+  - id: "NFR-S-001"
+      description: ""               # Security requirement description
+      compliance_standard: ""       # Related compliance standard
+      type: "security"               
+      risk_level: "High"            # High/Medium/Low
+      mitigation_approach: ""       # How to address this requirement
+      
+  - id: "NFR-U-001"
+    - id: "NFR-U-001"
+      description: ""               # Usability requirement description
+      type: "usability"             
+      user_experience_goal: ""      # UX objective
+      accessibility_level: ""       # Accessibility standard (e.g., WCAG 2.1)
+      device_compatibility: []      # Supported devices/browsers
+      
+  - id: "NFR-SC-001"
+    - id: "NFR-SC-001"
+      description: ""               # Scalability requirement description
+      type: "scalability"           
+      capacity_requirement: ""      # Expected capacity
+      growth_projection: ""         # Future growth expectations
+      
+  - id: "NFR-R-001"
+    - id: "NFR-R-001"
+      description: ""               # Reliability requirement description
+      type: "reliability"           
+      availability_target: ""       # Uptime requirement (e.g., 99.9%)
+      recovery_time: ""             # Maximum recovery time
+      backup_frequency: ""          # Backup requirements
+
+constraints:
+  technical:                        # Technical constraints
+    - ""
+  business:                         # Business constraints  
+    - ""
+  time:                            # Time constraints
+    - ""
+  budget:                          # Budget constraints
+    - ""
+  regulatory:                      # Regulatory/compliance constraints
+    - ""
+
+assumptions_and_dependencies:
+  assumptions:                      # Project assumptions
+    - ""
+  external_dependencies:            # Dependencies on external systems/services
+    - ""
+  internal_dependencies:            # Dependencies on internal systems/teams
+    - ""
+  risks:                           # Identified risks
+    - risk: ""
+      impact: "High"               # High/Medium/Low
+      probability: "Medium"         # High/Medium/Low
+      mitigation: ""
+
+testing_requirements:
+  unit_testing:
+    coverage_target: "80%"          # Target code coverage
+    framework: ""                   # Testing framework
+  integration_testing:
+    approach: ""                    # Integration testing approach
+    test_environments: []           # Required test environments
+  acceptance_testing:
+    criteria: ""                    # User acceptance testing criteria
+    responsible_party: ""           # Who conducts UAT
+  performance_testing:
+    load_scenarios: []              # Performance test scenarios
+    success_criteria: ""            # Performance success criteria
+
+document_control:
+  created_date: ""                  # Document creation date
+  last_modified: ""                 # Last modification date
+  version_history:                  # Version history
+    - version: "1.0.0"
+      date: ""
+      changes: ""
+      author: ""
+  approval_status: "Draft"          # Draft/Under Review/Approved
+  approved_by: ""                   # Approver name
+  approval_date: ""                 # Approval date
