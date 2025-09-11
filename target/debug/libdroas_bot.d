@@ -1,0 +1,1 @@
+/Users/tszkinlai/Coding/DROAS-bot/target/debug/libdroas_bot.rlib: /Users/tszkinlai/Coding/DROAS-bot/src/core/bot_manager.rs /Users/tszkinlai/Coding/DROAS-bot/src/core/mod.rs /Users/tszkinlai/Coding/DROAS-bot/src/core/types.rs /Users/tszkinlai/Coding/DROAS-bot/src/lib.rs

@@ -32,7 +32,7 @@
   - 閱讀所有工作步驟中的無序列表項
   - 使用sequential thinking tool深度思考所有步驟的實現方式
   - 識別Dependencies和Parallel Tasks
-  - 使用todo-list tool創建詳細的執行計劃
+  - 使用plan tool創建詳細的執行計劃
 
   <questions>
   - 我是否完全理解了Implementation Plan中的所有需求？
