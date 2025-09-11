@@ -15,10 +15,13 @@ config = "0.13"
 async-trait = "0.1"
 futures = "0.3"
 dashmap = "5.5"
+regex = "1.10"
+notify = "6.1"
 
 [dev-dependencies]
 mockall = "0.12"
 tokio-test = "0.4"
+tempfile = "3.9"
 
 [lib]
 name = "droas_bot"

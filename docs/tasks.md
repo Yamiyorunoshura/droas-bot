@@ -14,15 +14,15 @@
     - [ ] Add basic CI workflow (lint, test)
     - [ ] Establish code style and lint rules
 
-- [ ] Task_2: Configuration Management (F-003)
-  - [ ] Task_2.1: Config Schema & Service
-    - [ ] Define YAML schema for per-child-bot config
-    - [ ] Implement Config Service for centralized config access
-    - [ ] Add syntax validation and error reporting
-  - [ ] Task_2.2: Hot Reload & Events
-    - [ ] Implement File Watcher for config changes
-    - [ ] Implement Event Bus for config change distribution
-    - [ ] Implement hot reload with <10s SLA
+- [x] Task_2: Configuration Management (F-003) - **COMPLETED & REVIEWED**
+  - [x] Task_2.1: Config Schema & Service
+    - [x] Define YAML schema for per-child-bot config
+    - [x] Implement Config Service for centralized config access
+    - [x] Add syntax validation and error reporting
+  - [x] Task_2.2: Hot Reload & Events
+    - [x] Implement File Watcher for config changes
+    - [x] Implement Event Bus for config change distribution
+    - [x] Implement hot reload with <10s SLA
 
 - [x] Task_1: Bot Manager Interface Design (F-001) - **COMPLETED & REVIEWED**
   - [x] Task_1.1: Core Data Structures

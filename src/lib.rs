@@ -1,8 +1,12 @@
 pub mod core;
+pub mod config;
 
 // Re-export main types at the crate level
 pub use core::{
-    BotManager, BotId, BotConfig, BotInstance, BotState, 
+    BotManager, BotId, BotInstance, BotState, 
     HealthStatus, BotManagerError, ProcessSupervisor, ServiceRegistry,
-    LlmConfig, ProtectionLevel, RestartPolicy
+    ProtectionLevel, RestartPolicy
 };
+
+// Re-export config types
+pub use config::{BotConfig, ConfigService, ConfigError, ValidationEngine, LlmConfig};
