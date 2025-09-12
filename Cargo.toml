@@ -19,6 +19,8 @@ regex = "1.10"
 notify = "6.1"
 uuid = { version = "1.6", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
+url = "2.5"
+lru = "0.12"
 
 [dev-dependencies]
 mockall = "0.12"

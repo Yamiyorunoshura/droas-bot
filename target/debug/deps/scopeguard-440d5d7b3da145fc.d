@@ -1,0 +1,5 @@
+/Users/tszkinlai/Coding/DROAS-bot/target/debug/deps/scopeguard-440d5d7b3da145fc.d: /Users/tszkinlai/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/scopeguard-1.2.0/src/lib.rs
+
+/Users/tszkinlai/Coding/DROAS-bot/target/debug/deps/libscopeguard-440d5d7b3da145fc.rmeta: /Users/tszkinlai/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/scopeguard-1.2.0/src/lib.rs
+
+/Users/tszkinlai/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/scopeguard-1.2.0/src/lib.rs:

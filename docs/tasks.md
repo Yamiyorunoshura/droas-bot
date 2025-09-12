@@ -48,15 +48,16 @@
     - [x] Implement health_check and status endpoints
     - [x] Implement auto-restart on failure with backoff
 
-- [ ] Task_4: Group Protection (Mother Bot) (F-002)
-  - [ ] Task_4.1: Inspection & Rules Engine
-    - [ ] Implement Message Inspector Service
-    - [ ] Implement configurable Rules Engine (lax/medium/strict)
-    - [ ] Implement Pattern Recognition for spam/flood/duplicate/link checks
-  - [ ] Task_4.2: Actions & Admin Controls
-    - [ ] Implement Action Executor (mute, delete, warn)
-    - [ ] Implement admin commands to adjust mute durations
-    - [ ] Add audit logging for actions
+- [ ] Task_4: Group Protection (Mother Bot) (F-002) - **QA REVIEW FAILED - NEEDS REWORK**
+  - [ ] Task_4.1: Inspection & Rules Engine - **IMPLEMENTATION INCOMPLETE (編譯錯誤)**
+    - [!] Implement Message Inspector Service - 已實現但無法編譯
+    - [!] Implement configurable Rules Engine (lax/medium/strict) - 已實現但枚舉不匹配
+    - [!] Implement Pattern Recognition for spam/flood/duplicate/link checks - 已實現但模組引用錯誤
+  - [ ] Task_4.2: Actions & Admin Controls - **IMPLEMENTATION INCOMPLETE (API整合缺失)**
+    - [!] Implement Action Executor (mute, delete, warn) - 僅模擬實現，缺Discord API
+    - [ ] Implement admin commands to adjust mute durations - 函數體空白
+    - [!] Add audit logging for actions - 已實現但無法測試
+    - **QA Notes**: 22個編譯錯誤，無法執行測試，需要大量修復工作
 
 - [ ] Task_5: Tool Call System (F-004)
   - [ ] Task_5.1: Interfaces & Gateway

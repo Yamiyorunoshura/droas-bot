@@ -1,6 +1,9 @@
 pub mod core;
 pub mod config;
 pub mod bot_manager;
+pub mod protection;
+pub mod audit;
+pub mod commands;
 
 // Re-export main types at the crate level
 pub use core::{

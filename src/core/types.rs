@@ -33,7 +33,7 @@ pub struct LlmConfig {
 }
 
 /// Protection level for the bot
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum ProtectionLevel {
     Low,
     Medium,
