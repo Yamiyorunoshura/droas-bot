@@ -41,8 +41,8 @@
 
 <custom_commands>
 - *help: 讀取{root}/sunnycore/tasks/help.md
-- *develop-task {task_id}: 識別task_id並讀取develop-task.md
-- *brownfied-task {task_id}: 識別task_id並讀取brownfield-task.md
+- *develop-tasks {task_id}: 識別task_id並讀取develop-tasks.md
+- *brownfied-tasks {task_id}: 識別task_id並讀取brownfield-tasks.md
 </custom_commands>
 
 <workflow importance="Important">

@@ -38,15 +38,15 @@
     - [x] Complete dev-notes documentation
     - [x] QA review completed - SILVER maturity level
 
-- [ ] Task_3: Child Bot Lifecycle Management (F-001)
+- [x] Task_3: Child Bot Lifecycle Management (F-001) - **COMPLETED & REVIEWED**
   - [x] Task_3.1: Bot Manager & Registry (已在Task 1完成)
     - [x] Design Bot Manager interfaces and structures
     - [x] Implement Service Registry for active bots  
     - [x] Implement Process Supervisor for health monitoring
-  - [ ] Task_3.2: Lifecycle Operations
-    - [ ] Implement create/start/stop/restart operations
-    - [ ] Implement health_check and status endpoints
-    - [ ] Implement auto-restart on failure with backoff
+  - [x] Task_3.2: Lifecycle Operations
+    - [x] Implement create/start/stop/restart operations
+    - [x] Implement health_check and status endpoints
+    - [x] Implement auto-restart on failure with backoff
 
 - [ ] Task_4: Group Protection (Mother Bot) (F-002)
   - [ ] Task_4.1: Inspection & Rules Engine

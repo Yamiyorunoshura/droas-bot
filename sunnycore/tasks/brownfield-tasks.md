@@ -4,7 +4,7 @@
     2. Review results document: {root}/docs/review-results/{task_id}-review.md
   </context>
   <templates>
-    1. Development notes template: {root}/sunnycore/templates/dev-notes/{task_id}-notes.md
+    1. Development notes template: {root}/sunnycore/templates/dev-notes-tmpl.yaml
   </templates>
 </input>
 
