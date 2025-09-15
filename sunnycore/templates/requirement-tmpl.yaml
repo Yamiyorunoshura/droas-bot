@@ -1,111 +1,125 @@
-# Requirements Specification Template
-# This YAML template provides a comprehensive structure for documenting project requirements
+# Requirements specification template (YAML)
+# - Use 2-space indentation and kebab-case keys
+ # - Duplicate this structure as needed; keep statements measurable and verifiable
 
-project_info:
-  name: ""                    # Project name
-  version: "1.0.0"           # Version number
-  description: ""            # Brief project description
-  background: ""             # Project background and context
-  objectives: []             # Main project objectives
+project-info:
+  name: ""
+  version: "1.0.0"
+  description: ""
+  background: ""
+  objectives: []
 
-functional_requirements:
-  - id: "F-001"                      # Unique identifier
-    title: ""                       # Requirement title
-    description: ""                 # Detailed description
-    priority: "High"                # High/Medium/Low
-    user_story: "As a [user], I want [goal] so that [benefit]"
-    acceptance_criteria:            # List of acceptance criteria
+functional-requirements:
+  - id: "F-001"
+    title: ""
+    description: ""
+    priority: "High"  # High|Medium|Low
+    user-story: "As a [user], I want [goal] so that [benefit]"
+    acceptance-criteria:
       - ""
       - ""
-    business_rules: []              # Associated business rules
-    dependencies: []                # Dependencies on other requirements
-    effort_estimate: ""             # Development effort estimate
-    notes: ""                       # Additional notes
+    business-rules: []
+    dependencies: []
+    effort-estimate: ""  # e.g., S/M/L or story points
+    notes: ""
 
-non_functional_requirements:
+non-functional-requirements:
+  # Performance
   - id: "NFR-P-001"
-      description: ""               # Performance requirement description
-      metric: ""                    # Measurement metric
-      type: "performance"           
-      target_value: ""              # Target performance value
-      test_method: ""               # How to test this requirement
+    type: "performance"
+    description: ""
+    metric: "p95-latency-ms"
+    target-value: ""  # e.g., <200
+    test-method: ""   # e.g., load-test scenario name
+    risk-level: "Medium"  # High|Medium|Low
+    mitigation-approach: ""
+
+  # Security
   - id: "NFR-S-001"
-      description: ""               # Security requirement description
-      compliance_standard: ""       # Related compliance standard
-      type: "security"               
-      risk_level: "High"            # High/Medium/Low
-      mitigation_approach: ""       # How to address this requirement
-      
+    type: "security"
+    description: ""
+    compliance-standard: ""  # e.g., ISO27001, SOC2
+    risk-level: "High"        # High|Medium|Low
+    mitigation-approach: ""
+    test-method: ""           # e.g., pen-test, SAST/DAST
+
+  # Usability
   - id: "NFR-U-001"
-    - id: "NFR-U-001"
-      description: ""               # Usability requirement description
-      type: "usability"             
-      user_experience_goal: ""      # UX objective
-      accessibility_level: ""       # Accessibility standard (e.g., WCAG 2.1)
-      device_compatibility: []      # Supported devices/browsers
-      
+    type: "usability"
+    description: ""
+    user-experience-goal: ""
+    accessibility-level: "WCAG 2.1 AA"
+    device-compatibility: []
+    test-method: ""
+
+  # Scalability
   - id: "NFR-SC-001"
-    - id: "NFR-SC-001"
-      description: ""               # Scalability requirement description
-      type: "scalability"           
-      capacity_requirement: ""      # Expected capacity
-      growth_projection: ""         # Future growth expectations
-      
+    type: "scalability"
+    description: ""
+    capacity-requirement: ""  # e.g., requests-per-second, dataset-size
+    growth-projection: ""
+    test-method: ""
+
+  # Reliability / Availability
   - id: "NFR-R-001"
-    - id: "NFR-R-001"
-      description: ""               # Reliability requirement description
-      type: "reliability"           
-      availability_target: ""       # Uptime requirement (e.g., 99.9%)
-      recovery_time: ""             # Maximum recovery time
-      backup_frequency: ""          # Backup requirements
+    type: "reliability"
+    description: ""
+    availability-target: ""   # e.g., 99.9%
+    recovery-time: ""         # RTO
+    recovery-point: ""        # RPO
+    backup-frequency: ""
+    test-method: ""
 
 constraints:
-  technical:                        # Technical constraints
+  technical:
     - ""
-  business:                         # Business constraints  
+  business:
     - ""
-  time:                            # Time constraints
+  time:
     - ""
-  budget:                          # Budget constraints
+  budget:
     - ""
-  regulatory:                      # Regulatory/compliance constraints
+  regulatory:
     - ""
 
-assumptions_and_dependencies:
-  assumptions:                      # Project assumptions
+assumptions-and-dependencies:
+  assumptions:
     - ""
-  external_dependencies:            # Dependencies on external systems/services
+  external-dependencies:
     - ""
-  internal_dependencies:            # Dependencies on internal systems/teams
+  internal-dependencies:
     - ""
-  risks:                           # Identified risks
-    - risk: ""
-      impact: "High"               # High/Medium/Low
-      probability: "Medium"         # High/Medium/Low
+  risks:
+    - id: "R-001"
+      risk: ""
+      impact: "High"      # High|Medium|Low
+      probability: "Medium"  # High|Medium|Low
       mitigation: ""
 
-testing_requirements:
-  unit_testing:
-    coverage_target: "80%"          # Target code coverage
-    framework: ""                   # Testing framework
-  integration_testing:
-    approach: ""                    # Integration testing approach
-    test_environments: []           # Required test environments
-  acceptance_testing:
-    criteria: ""                    # User acceptance testing criteria
-    responsible_party: ""           # Who conducts UAT
-  performance_testing:
-    load_scenarios: []              # Performance test scenarios
-    success_criteria: ""            # Performance success criteria
+testing-requirements:
+  unit-testing:
+    coverage-target: "80%"
+    framework: ""
+  integration-testing:
+    approach: ""
+    test-environments: []
+  acceptance-testing:
+    criteria: ""
+    responsible-party: ""
+  performance-testing:
+    load-scenarios: []
+    success-criteria: ""
 
-document_control:
-  created_date: ""                  # Document creation date
-  last_modified: ""                 # Last modification date
-  version_history:                  # Version history
+document-control:
+  created-date: ""
+  last-modified: ""
+  version-history:
     - version: "1.0.0"
       date: ""
       changes: ""
       author: ""
-  approval_status: "Draft"          # Draft/Under Review/Approved
-  approved_by: ""                   # Approver name
-  approval_date: ""                 # Approval date
+  approval-status: "Draft"   # Draft|Under Review|Approved
+  approved-by: ""
+  approval-date: ""
+
+

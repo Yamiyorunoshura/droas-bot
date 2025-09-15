@@ -13,7 +13,7 @@ version: '1.0'
 metadata:
   task_id: # 必填：實際任務ID
   project_name: # 必填：專案名稱
-  reviewer_ # 必填：reviewer姓名
+  reviewer: # 必填：reviewer姓名
   date: # 必填：YYYY-MM-DD格式
   review_type: # 必填：initial|follow_up|re_review
   review_iteration: # 必填：1|2|3|...
@@ -54,6 +54,11 @@ context:
     in_scope_covered: # yes|partial|no
     justification: # 範圍評估的證據
     out_of_scope_changes: [] # 列出任何範圍外變更或"未識別任何"
+
+acceptance_decision:
+  decision: # Accept|Accept with changes|Reject
+  rationale: # 決策理由（含關鍵證據與權衡）
+  conditions: [] # 若為 Accept with changes 或 Reject，列出條件/必要修正
 
 conformance_check:
   requirements_match:
@@ -164,6 +169,19 @@ findings:
       evidence: [] # List specific evidence with exact paths/line numbers
       recommendation: # Specific, actionable recommendation with implementation steps
 
+risks:
+  summary: # 風險總結（1-3 句）
+  entries:
+    - id: # RSK-1, RSK-2, etc.
+      title: # 風險標題
+      severity: # blocker|high|medium|low
+      likelihood: # high|medium|low
+      impact: # 影響說明
+      evidence: [] # 檔案/量測/PR 連結
+      mitigation: # 緩解措施
+      owner: # 負責人
+      due_date: # YYYY-MM-DD
+
 error_log:
   summary:
     total_errors: # 數量
@@ -202,6 +220,17 @@ recommendations:
         dependencies: [] # List any dependencies or prerequisites
         risks: [] # Identify potential implementation risks
         alternatives: [] # Consider alternative approaches if applicable
+
+action_items:
+  # 依優先順序與可指派性列出行動項
+  items:
+    - id: # ACT-1, ACT-2, etc.
+      title: # 行動項標題
+      priority: # priority_1|priority_2|priority_3
+      finding_ref: # 對應的發現ID（例如：ISS-1）
+      owner: # 負責人
+      due_date: # YYYY-MM-DD
+      status: # open|in_progress|done|blocked
 
 next_actions:
   blockers: [] # 列出所有阻礙項目或"未識別阻礙"

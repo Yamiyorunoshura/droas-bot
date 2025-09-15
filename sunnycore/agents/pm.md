@@ -27,8 +27,7 @@
   3. {root}/sunnycore/tasks/create-architecture.md
   4. {root}/sunnycore/tasks/create-brownfield-architecture.md
   5. {root}/sunnycore/tasks/create-requirements.md
-  6. {root}/sunnycore/tasks/create-brownfield-requirements.md
-  7. {root}/sunnycore/tasks/create-tasks.md
+  6. {root}/sunnycore/tasks/create-tasks.md
   </tasks>
 </input>
 
@@ -58,8 +57,6 @@
   - 讀取{root}/sunnycore/tasks/create-architecture.md
 - *create-tasks
   - 讀取{root}/sunnycore/tasks/create-tasks.md
-- *create-brownfield-requirements
-  - 讀取{root}/sunnycore/tasks/create-brownfield-requirements.md
 - *create-brownfield-architecture
   - 讀取{root}/sunnycore/tasks/create-brownfield-architecture.md
 </custom_commands>

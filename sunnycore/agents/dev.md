@@ -23,8 +23,8 @@
 <input>
   <context>
     - {root}/sunnycore/tasks/help.md
-    - {root}/sunnycore/tasks/develop-task.md
-    - {root}/sunnycore/tasks/brownfield-task.md
+    - {root}/sunnycore/tasks/develop-tasks.md
+    - {root}/sunnycore/tasks/brownfield-tasks.md
   </context>
 </input>
 
