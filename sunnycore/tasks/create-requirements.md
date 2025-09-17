@@ -68,7 +68,7 @@
   <stage id="5, finalize">
   - Cross-check consistency across FRs, NFRs, and acceptance criteria and ask for user's confirmation.
   - Populate the requirement template and place markdown formatted outputs under {root}/docs/requirements/.
-  - Run the {root}/sunnycore/scripts/shard-requirements.sh script to shard the requirements
+  - Run the {root}/sunnycore/scripts/shard-requirements.py script by using uv run to shard the requirements
 
   <checks>
   - [ ] Outputs include FRs, NFRs, and acceptance criteria per template
@@ -80,3 +80,11 @@
   </checks>
   </stage>
 </workflow>
+
+<example>
+markdown文件輸出方式：
+	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
+	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
+	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
+	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
+</example>

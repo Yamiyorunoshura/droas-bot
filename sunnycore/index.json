@@ -13,8 +13,8 @@
     { "id": "qa", "title": "QA Agent", "path": "warp code/agents/qa.md" }
   ],
   "scripts": [
-    { "id": "shard-architecture", "path": "warp code/scripts/shard-architecture.sh" },
-    { "id": "shard-requirements", "path": "warp code/scripts/shard-requirements.sh" }
+    { "id": "shard-architecture", "path": "warp code/scripts/shard-architecture.py" },
+    { "id": "shard-requirements", "path": "warp code/scripts/shard-requirements.py" }
   ],
   "templates": [
     { "id": "architecture-tmpl", "path": "warp code/templates/architecture-tmpl.yaml" },

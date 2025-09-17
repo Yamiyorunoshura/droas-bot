@@ -2,7 +2,7 @@
   <context>
     1. {root}/docs/requirements - Canonical requirements source
     2. {root}/docs/architecture/*.md - Existing architecture corpus
-    3. {root}/sunnycore/scripts/shard-architecture.sh - Architecture sharding script
+    3. {root}/sunnycore/scripts/shard-architecture.py - Architecture sharding script
   </context>
   <templates>
     {root}/sunnycore/templates/architecture-tmpl.yaml
@@ -17,7 +17,7 @@
 - Thoroughly review requirements and the extant architecture before proposing designs.
 - New modules must integrate without violating existing contracts; include an explicit impact analysis for any proposed changes.
 - Rigorously follow the template structure and section order.
-- Draft into {root}/docs/architecture.md, then execute {root}/warp code/scripts/shard-architecture.sh to shard.
+- Draft into {root}/docs/architecture.md, then execute {root}/warp code/scripts/shard-architecture.py to shard.
 - Use clear, concise English and 2-space indentation.
 </constraints>
 
@@ -54,8 +54,7 @@
   <stage id="3: author-and-shard">
   - Use the architecture template to draft markdown formatted {root}/docs/architecture.md.
   - Ensure sections emphasize new modules and integration impacts.
-  - Run the sharding script to split the document:
-    - bash '{root}/sunnycore/scripts/shard-architecture.sh'
+  - Run the sharding script to split the document: uv run '{root}/sunnycore/scripts/shard-architecture.py'
   - Verify files appear under {root}/docs/architecture/.
   </stage>
 
@@ -67,7 +66,15 @@
   - [ ] Compatibility with existing contracts articulated (no breaking changes)
   - [ ] {root}/docs/architecture.md exists and adheres to the template
   - [ ] Sharded files generated under {root}/docs/architecture/
-  - [ ] Paths and commands reference {root}/warp code/scripts/shard-architecture.sh
+  - [ ] Paths and commands reference {root}/warp code/scripts/shard-architecture.py
   </checks>
   </stage>
 </workflow>
+
+<example>
+markdown文件輸出方式：
+	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
+	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
+	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
+	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
+</example>

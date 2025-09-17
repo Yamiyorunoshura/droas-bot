@@ -1,7 +1,7 @@
 <input>
   <context>
   1. {root}/docs/requirements/*.md - Authoritative project requirements
-  2. {root}/sunnycore/scripts/shard-architecture.sh - Architecture sharding script
+  2. {root}/sunnycore/scripts/shard-architecture.py - Architecture sharding script
   </context>
   <templates>
   1. {root}/sunnycore/templates/architecture-tmpl.yaml - Canonical architecture template
@@ -16,7 +16,7 @@
 - Prior to authorship, instantiate TODO items for every workflow stage.
 - Exhaustively review all requirements under {root}/docs/requirements/*.md and determine the macro-architecture and critical interaction patterns before drafting.
 - Author the draft with the architecture template into {root}/docs/architecture.md; comprehensively cover components, boundaries, data flows, risks, and decisions; strictly preserve section ordering.
-- Post-draft, execute the sharding script: bash '{root}/warp code/scripts/shard-architecture.sh'; verify materialized files under {root}/docs/architecture/.
+- Post-draft, execute the sharding script: bash '{root}/warp code/scripts/shard-architecture.py'; verify materialized files under {root}/docs/architecture/.
 - Use clear, concise English and 2-space indentation; refrain from introducing non-existent paths or files.
 </constraints>
 
@@ -45,8 +45,7 @@
   <stage id="2: author">
   - Leverage the architecture template to draft markdown formatted {root}/docs/architecture.md.
   - Ensure sections comprehensively cover components, interactions, data flows, risks, and decisions.
-  - Execute the sharding script to partition the document:
-    - bash '{root}/sunnycore/scripts/shard-architecture.sh'
+  - Execute the sharding script to partition the document: uv run '{root}/sunnycore/scripts/shard-architecture.py'
   - Verify artifacts appear under {root}/docs/architecture/.
   </stage>
 
@@ -63,3 +62,11 @@
   </checks>
   </stage>
 </workflow>
+
+<example>
+markdown文件輸出方式：
+	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
+	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
+	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
+	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
+</example>
