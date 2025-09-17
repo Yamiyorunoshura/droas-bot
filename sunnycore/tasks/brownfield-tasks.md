@@ -23,9 +23,11 @@
 
 <workflow, importance = "Normal">
   <stage id="0: Create a todo list">
+  <tools: todo-list>
   - Read this file end-to-end
   - Enumerate all stages and sub-steps
   - Create one todo per step (atomic, outcome-focused)
+  </tools: todo-list>
 
   <questions>
   - Have all steps been enumerated without omission?
@@ -35,9 +37,11 @@
   </stage>
 
   <stage id="1: Analyse the current issues">
+  <tools: sequential-thinking>
   - Read the review results document
   - Analyse current issues and root causes
   - Define the minimal effective fix for each issue
+  </tools: sequential-thinking>
 
   <questions>
   - What are the root causes vs symptoms?
@@ -47,9 +51,11 @@
   </stage>
 
   <stage id="2: Fix the issues">
+  <tools: todo-list>
   - Update the todo list with concrete steps per solution
   - Implement fixes iteratively, one at a time
   - Run and pass tests after each fix
+  </tools: todo-list>
 
   <questions>
   - Is each change minimal and reversible?
@@ -59,10 +65,12 @@
   </stage>
 
   <stage id="3: Enact recommended actions">
+  <tools: todo-list>
   - Update the todo list with sequenced steps for the recommended actions
   - Enact the recommended actions iteratively
   - Run and pass tests after each action
-
+  </tools: todo-list>
+  
   <questions>
   - Are recommendations prioritized by value/effort?
   - Are acceptance criteria met per action?
@@ -71,8 +79,8 @@
   </stage>
 
   <stage id="4: Create a development notes">
-  - Conclude the development process
-  - Create development notes based on the template
+  - Conclude the development process and create development notes based on the template
+  - If there is already an existing development notes, update the development notes with the new information
   - Save the markdown dev-notes to the stated directory
 
   <questions>

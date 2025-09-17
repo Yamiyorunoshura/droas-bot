@@ -2,10 +2,10 @@
   <context>
     1. {root}/docs/requirements - Canonical requirements source
     2. {root}/docs/architecture/*.md - Existing architecture corpus
-    3. {root}/warp code/scripts/shard-architecture.sh - Architecture sharding script
+    3. {root}/sunnycore/scripts/shard-architecture.sh - Architecture sharding script
   </context>
   <templates>
-    {root}/warp code/templates/architecture-tmpl.yaml
+    {root}/sunnycore/templates/architecture-tmpl.yaml
   </templates>
 </input>
 
@@ -23,20 +23,26 @@
 
 <workflow importance="Critical">
   <stage id="0: plan-todos">
+  <tools: todo-list>
   - Review all working steps comprehensively.
   - Instantiate TODO items for each step.
+  </tools: todo-list>
   </stage>
 
   <stage id="1: assess-existing">
+  <tools: sequential-thinking>
   - Examine the current architecture under {root}/docs/architecture/*.md.
   - Identify extension points, constraints, and shared services.
   - Map affected domains, bounded contexts, and dependencies.
+  </tools: sequential-thinking>
   </stage>
 
   <stage id="2: design-new-modules">
+  <tools: sequential-thinking, context7>
   - Define responsibilities, boundaries, and interfaces for new modules.
   - Specify data flows and interactions with existing components.
   - Evaluate non-functional requirements (security, observability, performance) and compatibility.
+  </tools: sequential-thinking, context7>
   
   <questions>
   - Which extension points or APIs will the new modules depend on?
@@ -46,7 +52,7 @@
   </stage>
 
   <stage id="3: author-and-shard">
-  - Use the architecture template to draft {root}/docs/architecture.md.
+  - Use the architecture template to draft markdown formatted {root}/docs/architecture.md.
   - Ensure sections emphasize new modules and integration impacts.
   - Run the sharding script to split the document:
     - bash '{root}/sunnycore/scripts/shard-architecture.sh'

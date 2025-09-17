@@ -2,10 +2,10 @@
   <context>
     1. {root}/docs/requirements/*.md - Project functional and non-functional requirements
     2. {root}/docs/architecture/*.md - Architecture design and technical specifications
-    3. {root}/warp code/templates/tasks-tmpl.yaml - Task template format
+    3. {root}/sunnycore/templates/tasks-tmpl.yaml - Task template format
   </context>
   <templates>
-    1. warp code/templates/tasks-tmpl.yaml - Standard task structure template
+    1. sunnycore/templates/tasks-tmpl.yaml - Standard task structure template
   </templates>
 </input>
 
@@ -22,10 +22,12 @@
 
 <workflow importance="Important">
   <stage id="research">
+  <tools: sequential-thinking>
   - Read requirements and architecture sources.
   - Identify scope, success criteria, and constraints to drive task design.
   - Map non-functional requirements to cross-cutting tasks.
-
+  </tools: sequential-thinking>
+  
   <questions>
   - Are all FRs and NFRs discoverable and current?
   - What dependencies or sequencing constraints exist between tasks?
@@ -57,18 +59,3 @@
   </checks>
   </stage>
 </workflow>
-
-<example-tasks-snippet>
-```yaml
-# tasks-tmpl.yaml aligned structure (excerpt)
-- id: export-api-spec
-  title: Define CSV export API endpoints
-  acceptance:
-    - OpenAPI 3.0 spec includes params, rate limits, and error codes
-- id: export-streaming-plan
-  title: Decide streaming strategy and chunk size
-  acceptance:
-    - Justifies chunk size via latency and memory estimates
-```
-</example-tasks-snippet>
-</example>

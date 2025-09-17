@@ -26,21 +26,27 @@
 
 <workflow, importance = "Important">
   <stage id="0: todo">
+  <tools: todo-list>
   - Read all working steps
   - Create a todo item for each working step
+  </tools: todo-list>
   </stage>
   
   <stage id="1: understand-plan">
+  <tools: sequential-thinking>
   - Read the implementation plan
   - Think about the steps to implement the implementation plan based on TDD approach
+  </tools: sequential-thinking>
   </stage>
   
   <stage id="2: functional-requirements">
+  <tools: sequential-thinking>
   - Identify the functional requirements
   - Think about the test cases for each functional requirement and update the todo list
   - Write the test cases for each functional requirement
   - Write the code for each functional requirement
-  
+  </tools: sequential-thinking>
+
   <questions>
   - What are the acceptance criteria and boundary cases for each function?
   - Which external dependencies must be mocked or faked in tests?
@@ -49,11 +55,13 @@
   </stage>
   
   <stage id="3: non-functional-requirements">
+  <tools: sequential-thinking>
   - Identify the non-functional requirements
   - Think about the test cases for each non-functional requirement and update the todo list base on the test cases
   - Write the test cases for each non-functional requirement
   - Write the code for each non-functional requirement
-  
+  </tools: sequential-thinking>
+
   <questions>
   - What measurable budgets apply (latency, memory, throughput)?
   - How will observability (logs, metrics, traces) be validated?
@@ -62,10 +70,12 @@
   </stage>
   
   <stage id="4: refactor">
+  <tools: sequential-thinking>
   - Refactor the code to meet best practices and actual requirements
   - Think about the test cases for the refactoring and update the todo list base on the test cases
   - Refactor the code of functional requirements
   - Refactor the code of non-functional requirements
+  </tools: sequential-thinking>
   
   <questions>
   - Does the refactor preserve behavior and keep tests green?
@@ -76,6 +86,7 @@
   <stage id="5: dev-notes">
   - Use the development notes template to write the development notes for the code
   - Output the markdown format development notes to {root}/docs/dev-notes/{task_id}-dev-notes.md
+  - If there is already an existing development notes, update the development notes with the new information
   
   <checks>
   - [ ] All outputs in <output> are produced and consistent

@@ -22,14 +22,19 @@
 
 <workflow, importance = "Important">
   <stage id="0: setup">
+  <tools: todo-list>
   - Read all working steps
   - Create a todo item for each working step
+  </tools: todo-list>
   </stage>
 
   <stage id="1: functional">
+  <tools: sequential-thinking>
   - Identify functional requirements
   - Map each to the corresponding architecture component(s)
   - Draft an implementation plan for each functional requirement
+  </tools: sequential-thinking>
+
   <questions>
   - Are requirement IDs and architecture references complete and unambiguous?
   - Are cross-cutting concerns (auth, logging, i18n) captured where applicable?
@@ -37,9 +42,12 @@
   </stage>
 
   <stage id="2: non-functional">
+  <tools: sequential-thinking>
   - Identify non-functional requirements
   - Map each to the corresponding architecture capability
   - Create tasks and acceptance criteria for each non-functional requirement
+  </tools: sequential-thinking>
+  
   <questions>
   - Do tasks include measurable targets (latency, availability, security)?
   - Are dependencies and sequencing clear to avoid blocking?
