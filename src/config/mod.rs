@@ -7,6 +7,14 @@
 //! - 安全的敏感資料處理
 
 pub mod secrets;
+pub mod models;
+pub mod repository;
+pub mod cache;
+pub mod transaction;
+pub mod service;
+
+// Re-export main service for convenience
+pub use service::{GuildConfigService, ConfigServiceStats, ConfigUpdateResult};
 
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};

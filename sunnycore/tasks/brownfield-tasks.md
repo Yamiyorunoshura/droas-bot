@@ -93,7 +93,7 @@
   <checks>
   - [ ] Questions provided (2-3) for each stage
   - [ ] Tests pass after each fix/action
-  - [ ] Dev-notes created at {root}/docs/dev-notes/{task_id}-notes.md
+  - [ ] Dev-notes created at {root}/docs/dev-notes/{task_id}-dev-notes.md
   - [ ] No scope creep; todos remain atomic
   </checks>
 </workflow>
