@@ -3,11 +3,11 @@
  # - Duplicate this structure as needed; keep statements measurable and verifiable
 
 project-info:
-  name: ""
-  version: "1.0.0"
-  description: ""
-  background: ""
-  objectives: []
+  - name: ""
+  - version: "1.0.0"
+  - description: ""
+  - background: ""
+  - objectives: []
 
 functional-requirements:
   - id: "F-001"

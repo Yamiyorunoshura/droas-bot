@@ -22,10 +22,13 @@
 
 <input>
   <context>
-    - {root}/sunnycore/tasks/help.md
-    - {root}/sunnycore/tasks/develop-tasks.md
-    - {root}/sunnycore/tasks/brownfield-tasks.md
+    1. {root}/sunnycore/CLAUDE.md
   </context>
+  <tasks>
+    2. {root}/sunnycore/tasks/help.md
+    3. {root}/sunnycore/tasks/develop-tasks.md
+    4. {root}/sunnycore/tasks/brownfield-tasks.md
+  </tasks>
 </input>
 
 <output>

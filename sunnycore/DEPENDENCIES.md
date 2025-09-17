@@ -1,9 +1,3 @@
-# MCP servers
-- context7
-- sequential-thinking
-- playwright
-
-# Json example
 {
   "mcpServers": {
     "context7": {
@@ -14,11 +8,11 @@
         "@upstash/context7-mcp"
       ],
       "env": {
-        "CONTEXT7_API_KEY": "your-context7-api-key"
+        "CONTEXT7_API_KEY": "ctx7sk-e8a45a51-402a-4420-9f7d-5f57f65ceb0c"
       }
     },
     "sequential-thinking": {
-      "type": "stdio",
+      "type": "stdio",a
       "command": "npx",
       "args": [
         "-y",
@@ -43,10 +37,11 @@
       "env": {
         "EMBEDDING_PROVIDER": "OpenAI",
         "EMBEDDING_MODEL": "Qwen/Qwen3-Embedding-8B",
-        "OPENAI_API_KEY": "your-openai-api-key",
-        "OPENAI_BASE_URL": "your-openai-base-url",
-        "MILVUS_TOKEN": "your-milvus-token"
+        "OPENAI_API_KEY": "sk-ybskvxkencapuqiogkbydkklrhjisfvcnhegfznsoxlvbcoh",
+        "OPENAI_BASE_URL": "https://api.siliconflow.cn/v1",
+        "MILVUS_TOKEN": "b9a5f0b693757863ed655f0266b25a721642678944d38d709951954ce2dc07eaa265e1699bfaf2c68b6f7e374c4a74d02226152f"
       }
     }
   }
 }
+```

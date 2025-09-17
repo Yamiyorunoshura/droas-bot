@@ -13,16 +13,15 @@
 </role>
 
 <input>
-  <context>
+  <tasks>
   1. {root}/sunnycore/tasks/conclude.md
   2. {root}/sunnycore/tasks/curate-knowledge.md
   3. {root}/sunnycore/tasks/document-project.md
   4. {root}/sunnycore/tasks/help.md
+  </tasks>
+  <context>
+  5. {root}/sunnycore/CLAUDE.md
   </context>
-  <templates>
-  1. 任務文檔模板
-  2. 產品管理工作流程模板
-  </templates>
 </input>
 
 <output>

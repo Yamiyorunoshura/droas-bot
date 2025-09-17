@@ -29,6 +29,9 @@
   5. {root}/sunnycore/tasks/create-requirements.md
   6. {root}/sunnycore/tasks/create-tasks.md
   </tasks>
+  <context>
+  7. {root}/sunnycore/CLAUDE.md
+  </context>
 </input>
 
 <output>

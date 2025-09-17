@@ -15,7 +15,7 @@ CORE-005
 1.0
 
 ## status
-draft
+approved
 
 # 任務概覽
 

@@ -10,7 +10,7 @@
 
 <output>
   1. Code fixes implemented based on review findings
-  2. Comprehensive development notes: {root}/docs/dev-notes/{task_id}-notes.md
+  2. Comprehensive development notes: {root}/docs/dev-notes/{task_id}-dev-notes.md
 </output>
 
 <constraints, importance = "Important">

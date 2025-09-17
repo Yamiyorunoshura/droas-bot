@@ -2,26 +2,26 @@
 # 實施計劃模板 - 標準化YAML格式
 
 plan_overview:
-  task_id: "{task_id}"
-  task_name: "{task_name}"
-  created_date: "{created_date}"
-  version: "1.0"
-  status: "draft"  # draft | approved | in_progress | completed
+  - task_id: "{task_id}"
+  - task_name: "{task_name}"
+  - created_date: "{created_date}"
+  - version: "1.0"
+  - status: "draft"  # draft | approved | in_progress | completed
 
 task_overview:
-  description: "{task_description}"
-  scope: "{scope_description}"
-  objectives:
-    - "{objective_1}"
-    - "{objective_2}"
-    - "{objective_3}"
+  - description: "{task_description}"
+  - scope: "{scope_description}"
+  - objectives:
+      - "{objective_1}"
+      - "{objective_2}"
+      - "{objective_3}"
 
 required_files:
   # 需要閱讀的檔案清單
-  context_files:
-    - file_path: "{file_path}"
-      line_numbers: "{line_range}"  # 例如: "1-50" 或 "specific_lines"
-      purpose: "{reading_purpose}"
+  - context_files:
+      - file_path: "{file_path}"
+      - line_numbers: "{line_range}"  # 例如: "1-50" 或 "specific_lines"
+      - purpose: "{reading_purpose}"
   
 stakeholders:
   # 利害關係人管理

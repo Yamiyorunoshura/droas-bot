@@ -11,6 +11,7 @@
 pub mod api_client;
 pub mod circuit_breaker;
 pub mod client;
+pub mod commands;
 pub mod gateway;
 pub mod rate_limit;
 pub mod event_handler;

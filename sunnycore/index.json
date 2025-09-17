@@ -1,45 +1,45 @@
 {
   "meta": {
-    "name": "sunnycore-warp-index",
+    "name": "sunnycore-claude-index",
     "version": "2.0.0",
     "schemaVersion": "1.0",
     "generatedAt": "2025-09-12",
-    "root": "warp code"
+    "root": "claude code"
   },
   "agents": [
-    { "id": "dev", "title": "Developer Agent", "path": "warp code/agents/dev.md" },
-    { "id": "pm", "title": "Project Manager Agent", "path": "warp code/agents/pm.md" },
-    { "id": "po", "title": "Product Owner Agent", "path": "warp code/agents/po.md" },
-    { "id": "qa", "title": "QA Agent", "path": "warp code/agents/qa.md" }
+    { "id": "dev", "title": "Developer Agent", "path": "claude code/agents/dev.md" },
+    { "id": "pm", "title": "Project Manager Agent", "path": "claude code/agents/pm.md" },
+    { "id": "po", "title": "Product Owner Agent", "path": "claude code/agents/po.md" },
+    { "id": "qa", "title": "QA Agent", "path": "claude code/agents/qa.md" }
   ],
   "scripts": [
-    { "id": "shard-architecture", "path": "warp code/scripts/shard-architecture.py" },
-    { "id": "shard-requirements", "path": "warp code/scripts/shard-requirements.py" }
+    { "id": "shard-architecture", "path": "claude code/scripts/shard-architecture.py" },
+    { "id": "shard-requirements", "path": "claude code/scripts/shard-requirements.py" }
   ],
   "templates": [
-    { "id": "architecture-tmpl", "path": "warp code/templates/architecture-tmpl.yaml" },
-    { "id": "completion-report-tmpl", "path": "warp code/templates/completion-report-tmpl.yaml" },
-    { "id": "dev-notes-tmpl", "path": "warp code/templates/dev-notes-tmpl.yaml" },
-    { "id": "implementation-plan-tmpl", "path": "warp code/templates/implementation-plan-tmpl.yaml" },
-    { "id": "project-knowledge-tmpl", "path": "warp code/templates/project-knowledge-tmpl.yaml" },
-    { "id": "requirement-tmpl", "path": "warp code/templates/requirement-tmpl.yaml" },
-    { "id": "review-tmpl", "path": "warp code/templates/review-tmpl.yaml" },
-    { "id": "tasks-tmpl", "path": "warp code/templates/tasks-tmpl.yaml" }
+    { "id": "architecture-tmpl", "path": "claude code/templates/architecture-tmpl.yaml" },
+    { "id": "completion-report-tmpl", "path": "claude code/templates/completion-report-tmpl.yaml" },
+    { "id": "dev-notes-tmpl", "path": "claude code/templates/dev-notes-tmpl.yaml" },
+    { "id": "implementation-plan-tmpl", "path": "claude code/templates/implementation-plan-tmpl.yaml" },
+    { "id": "project-knowledge-tmpl", "path": "claude code/templates/project-knowledge-tmpl.yaml" },
+    { "id": "requirement-tmpl", "path": "claude code/templates/requirement-tmpl.yaml" },
+    { "id": "review-tmpl", "path": "claude code/templates/review-tmpl.yaml" },
+    { "id": "tasks-tmpl", "path": "claude code/templates/tasks-tmpl.yaml" }
   ],
   "tasks": [
-    { "id": "brownfield-tasks", "path": "warp code/tasks/brownfield-tasks.md" },
-    { "id": "conclude", "path": "warp code/tasks/conclude.md" },
-    { "id": "create-architecture", "path": "warp code/tasks/create-architecture.md" },
-    { "id": "create-brownfield-architecture", "path": "warp code/tasks/create-brownfield-architecture.md" },
-    { "id": "create-brownfield-requirements", "path": "warp code/tasks/create-brownfield-requirements.md" },
-    { "id": "create-requirements", "path": "warp code/tasks/create-requirements.md" },
-    { "id": "create-tasks", "path": "warp code/tasks/create-tasks.md" },
-    { "id": "curate-knowledge", "path": "warp code/tasks/curate-knowledge.md" },
-    { "id": "develop-tasks", "path": "warp code/tasks/develop-tasks.md" },
-    { "id": "document-project", "path": "warp code/tasks/document-project.md" },
-    { "id": "help", "path": "warp code/tasks/help.md" },
-    { "id": "plan-tasks", "path": "warp code/tasks/plan-tasks.md" },
-    { "id": "review", "path": "warp code/tasks/review.md" }
+    { "id": "brownfield-tasks", "path": "claude code/tasks/brownfield-tasks.md" },
+    { "id": "conclude", "path": "claude code/tasks/conclude.md" },
+    { "id": "create-architecture", "path": "claude code/tasks/create-architecture.md" },
+    { "id": "create-brownfield-architecture", "path": "claude code/tasks/create-brownfield-architecture.md" },
+    { "id": "create-brownfield-requirements", "path": "claude code/tasks/create-brownfield-requirements.md" },
+    { "id": "create-requirements", "path": "claude code/tasks/create-requirements.md" },
+    { "id": "create-tasks", "path": "claude code/tasks/create-tasks.md" },
+    { "id": "curate-knowledge", "path": "claude code/tasks/curate-knowledge.md" },
+    { "id": "develop-tasks", "path": "claude code/tasks/develop-tasks.md" },
+    { "id": "document-project", "path": "claude code/tasks/document-project.md" },
+    { "id": "help", "path": "claude code/tasks/help.md" },
+    { "id": "plan-tasks", "path": "claude code/tasks/plan-tasks.md" },
+    { "id": "review", "path": "claude code/tasks/review.md" }
   ],
   "relations": {
     "taskToTemplates": {
