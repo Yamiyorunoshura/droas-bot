@@ -10,15 +10,6 @@
   - Shell: POSIX-compatible bash, prefer functions + `set -e` for robustness
   - File/folder naming: kebab-case, no spaces
 
-### XML Tag Specifications
-```xml
-<reasoning>reasoning process</reasoning>
-<implementation>implementation details</implementation>
-<quality-assessment level="Bronze|Silver|Gold|Platinum">quality assessment</quality-assessment>
-<dependencies>dependency analysis</dependencies>
-<evidence>supporting evidence</evidence>
-```
-
 ### Documentation Consistency
 - Primary language: Traditional Chinese documentation and communication
 - Technical terms: Chinese-English correspondence for accuracy
@@ -26,33 +17,14 @@
 
 ## Behaviour
 
+### Task Execution
+- You must complete the tasks by following the unordered list items under each working stage
+
 ### Tool Usage Restrictions
-**Core Principle**: Agents must not use any tools unless explicitly specified by XML tags in the prompt
+**Core Principle**: Agents must not use any mcp or todo-list tools unless explicitly specified by XML tags in the prompt
 
 #### Conditional Tool Activation
 - Tools may only be used when the corresponding XML tags are present:
-  ```xml
-  <tools: context7>
-  - External API documentation reference needed
-  - Package dependency queries
-  </tools: context7>
-  
-  <tools: sequential-thinking>
-  - Complex problem decomposition
-  - Multi-step reasoning validation
-  </tools: sequential-thinking>
-  
-  <tools: playwright>
-  - Web interaction testing
-  - User flow simulation
-  </tools: playwright>
-  ```
-
-### Multi-Agent Collaboration Protocol
-- **Task Division**: Based on `agentToTasks` relationship mapping in `index.json`
-- **Sequential Execution**: Follow Greenfield/Brownfield workflow phases
-- **Context Passing**: Maintain context continuity across agent interactions
-- **Quality Gates**: Required validation checkpoints throughout development process
 
 ### Execution Mode
 1. **Context Validation**: Read and verify all input files

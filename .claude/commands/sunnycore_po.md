@@ -33,7 +33,7 @@
 
 <input>
   <context>
-  1. The custom command that user input
+  1. User commands and corresponding task files
   2. {root}/sunnycore/CLAUDE.md
   </context>
 </input>
