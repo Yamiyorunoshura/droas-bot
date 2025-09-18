@@ -4,10 +4,9 @@
 
 use crate::config::models::{GuildConfig, BackgroundAsset};
 use crate::discord::commands::framework::{
-    CommandHandler, CommandContext, CommandResult, CommandError, PermissionLevel,
+    CommandHandler, CommandContext, CommandResult, CommandError, PermissionLevel, BoxFuture,
 };
 use crate::discord::commands::services::http_service::HttpService;
-use async_trait::async_trait;
 use serenity::builder::CreateApplicationCommand;
 use serenity::model::application::command::CommandOptionType;
 use serenity::model::application::interaction::application_command::CommandDataOptionValue;
@@ -19,6 +18,7 @@ use tracing::{debug, error, info, warn};
 use uuid::Uuid;
 
 /// /set-background 命令處理器
+#[derive(Clone)]
 pub struct SetBackgroundHandler {
     http_service: Arc<HttpService>,
     assets_dir: String,
@@ -34,9 +34,17 @@ impl SetBackgroundHandler {
     }
 }
 
-#[async_trait]
 impl CommandHandler for SetBackgroundHandler {
-    async fn handle(&self, ctx: CommandContext) -> CommandResult<()> {
+    fn handle(&self, ctx: CommandContext) -> BoxFuture<'_, CommandResult<()>> {
+        let this = self.clone();
+        Box::pin(async move {
+            this.handle_impl(ctx).await
+        })
+    }
+}
+
+impl SetBackgroundHandler {
+    async fn handle_impl(&self, ctx: CommandContext) -> CommandResult<()> {
         debug!("開始處理 /set-background 命令");
         
         // 延遲回應，因為圖片處理可能需要時間

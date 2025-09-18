@@ -47,6 +47,7 @@ pub struct RateLimitInfo {
 }
 
 /// Discord API 客戶端
+#[derive(Clone)]
 pub struct DiscordApiClient {
     client: Client,
     bot_token: String,

@@ -21,11 +21,11 @@
 
 <workflow, importance = "Important">
   <stage id="0: create todo list">
-  <tools: todo-list>
+  <tools: todo-list, sequential-thinking>
   - Read this file end-to-end
   - Enumerate all stages and sub-steps
-  - Create one TODO per step (atomic, outcome-focused)
-  </tools: todo-list>
+  - Create a comprehensive plan after deep thinking and then update the todo items
+  </tools: todo-list, sequential-thinking>
 
   <questions>
   - Are all steps captured as actionable todos?

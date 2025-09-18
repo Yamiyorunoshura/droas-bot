@@ -22,10 +22,10 @@
 
 <workflow importance="Critical">
   <stage id="0: plan-todos">
-  <tools: todo-list>
+  <tools: todo-list, sequential-thinking>
   - Review this task end-to-end.
-  - Materialize TODO entries for each workflow stage.
-  </tools: todo-list>
+  - Create a comprehensive plan after deep thinking and then update the todo items
+  </tools: todo-list, sequential-thinking>
   </stage>
 
   <stage id="1: research">

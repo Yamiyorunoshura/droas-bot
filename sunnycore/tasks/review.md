@@ -25,10 +25,10 @@
 
 <workflow, importance = "Important">
   <stage id="0: plan-todos">
-  <tools: todo-list>
+  <tools: todo-list, sequential-thinking>
   - Read all working steps
-  - Create one todo item per stage
-  </tools: todo-list>
+  - Create a comprehensive plan after deep thinking and then update the todo items
+  </tools: todo-list, sequential-thinking>
   </stage>
 
   <stage id="1: review-plan">
@@ -47,6 +47,7 @@
   <tools: sequential-thinking>
   - Read and understand the code
   - Check alignment with the plan and the requirements
+  - Run tests to verify the code
   </tools: sequential-thinking>
   
   <questions>

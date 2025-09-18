@@ -5,7 +5,7 @@
   3. {root}/docs/architecture/*.md
   </context>
   <templates>
-  1. {root}/sunnycore/templates/dev-notes-tmpl.md - Development Notes Template
+  1. {root}/sunnycore/templates/dev-notes-tmpl.yaml - Development Notes Template
   </templates>
 </input>
 
@@ -26,10 +26,10 @@
 
 <workflow, importance = "Important">
   <stage id="0: todo">
-  <tools: todo-list>
+  <tools: todo-list, sequential-thinking>
   - Read all working steps
-  - Create a todo item for each working step
-  </tools: todo-list>
+  - Create a comprehensive plan after deep thinking and then update the todo items
+  </tools: todo-list, sequential-thinking>
   </stage>
   
   <stage id="1: understand-plan">

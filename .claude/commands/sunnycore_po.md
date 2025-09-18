@@ -13,14 +13,8 @@
 </role>
 
 <input>
-  <tasks>
-  1. {root}/sunnycore/tasks/conclude.md
-  2. {root}/sunnycore/tasks/curate-knowledge.md
-  3. {root}/sunnycore/tasks/document-project.md
-  4. {root}/sunnycore/tasks/help.md
-  </tasks>
   <context>
-  5. {root}/sunnycore/CLAUDE.md
+  1. {root}/sunnycore/CLAUDE.md
   </context>
 </input>
 

@@ -22,15 +22,8 @@
   <templates>
   1. {root}/sunnycore/templates/implementation-plan-tmpl.yaml
   </templates>
-  <tasks>
-  2. {root}/sunnycore/tasks/plan-tasks.md
-  3. {root}/sunnycore/tasks/create-architecture.md
-  4. {root}/sunnycore/tasks/create-brownfield-architecture.md
-  5. {root}/sunnycore/tasks/create-requirements.md
-  6. {root}/sunnycore/tasks/create-tasks.md
-  </tasks>
   <context>
-  7. {root}/sunnycore/CLAUDE.md
+  2. {root}/sunnycore/CLAUDE.md
   </context>
 </input>
 

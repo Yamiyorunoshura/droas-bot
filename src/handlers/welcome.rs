@@ -10,11 +10,12 @@ use tracing::{info, warn, error, debug};
 use tokio::time::Instant;
 
 /// 歡迎訊息處理器
-/// 
+///
 /// 負責處理成員加入事件，包括：
 /// - 查詢公會配置
 /// - 生成歡迎訊息
 /// - 發送歡迎訊息到 Discord
+#[derive(Clone)]
 pub struct WelcomeHandler {
     /// 公會配置服務（可選，用於更完整的實作）
     guild_service: Option<GuildConfigService>,

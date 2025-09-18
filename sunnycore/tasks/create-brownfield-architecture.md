@@ -23,10 +23,10 @@
 
 <workflow importance="Critical">
   <stage id="0: plan-todos">
-  <tools: todo-list>
+  <tools: todo-list, sequential-thinking>
   - Review all working steps comprehensively.
-  - Instantiate TODO items for each step.
-  </tools: todo-list>
+  - Create a comprehensive plan after deep thinking and then update the todo items
+  </tools: todo-list, sequential-thinking >
   </stage>
 
   <stage id="1: assess-existing">

@@ -6,10 +6,10 @@ use crate::config::service::GuildConfigService;
 use crate::error::{DroasError, DroasResult};
 use async_trait::async_trait;
 use serenity::builder::CreateApplicationCommand;
-use serenity::model::application::interaction::application_command::{
-    ApplicationCommandInteraction, CommandDataOption,
-};
-use serenity::model::application::interaction::{InteractionResponseType, MessageFlags};
+use serenity::model::application::command::CommandDataOption;
+use serenity::model::application::interaction::InteractionResponseType;
+use serenity::model::application::interaction::InteractionResponseFlags;
+use serenity::model::application::interaction::ApplicationCommandInteraction;
 use serenity::model::prelude::{GuildId, UserId};
 use serenity::model::Permissions;
 use serenity::prelude::Context;
@@ -18,6 +18,10 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::timeout;
 use tracing::{debug, error, info, warn};
+use std::future::Future;
+use std::pin::Pin;
+
+type BoxFuture<'a, T> = Pin<Box<dyn Future<Output = T> + Send + 'a>>;
 
 /// 命令執行結果類型別名
 pub type CommandResult<T> = Result<T, CommandError>;
@@ -149,7 +153,7 @@ impl CommandContext {
                     .interaction_response_data(|message| {
                         message
                             .content(format!("❌ {}", error))
-                            .flags(MessageFlags::EPHEMERAL)
+                            .flags(InteractionResponseFlags::EPHEMERAL)
                     })
             })
             .await
@@ -178,17 +182,16 @@ impl CommandContext {
 }
 
 /// 命令處理器 trait - 所有命令都必須實現此 trait
-#[async_trait]
-pub trait CommandHandler {
+pub trait CommandHandler: Send + Sync {
     /// 處理命令
-    async fn handle(&self, ctx: CommandContext) -> CommandResult<()>;
-    
+    fn handle(&self, ctx: CommandContext) -> BoxFuture<'_, CommandResult<()>>;
+
     /// 命令名稱
     fn name(&self) -> &'static str;
-    
+
     /// 命令描述
     fn description(&self) -> &'static str;
-    
+
     /// 所需權限級別
     fn required_permissions(&self) -> PermissionLevel;
     

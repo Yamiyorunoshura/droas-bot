@@ -6,6 +6,7 @@ use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 use tracing::{debug, info, warn, error};
 use tokio::time::timeout;
+use std::option::Option;
 
 /// 事件處理結果
 #[derive(Debug, Clone, PartialEq)]
@@ -35,9 +36,10 @@ struct DeduplicationEntry {
 }
 
 /// Discord 事件處理器
-/// 
+///
 /// 負責處理所有 Discord 事件，包括 GUILD_MEMBER_ADD 事件的接收、
 /// 驗證、去重和路由到相應的處理程序。
+#[derive(Clone)]
 pub struct EventHandler {
     pub guild_service: GuildConfigService,
     welcome_handler: WelcomeHandler,
@@ -45,6 +47,8 @@ pub struct EventHandler {
     deduplication_cache: Arc<Mutex<HashMap<String, DeduplicationEntry>>>,
     /// 去重緩存的有效期限（5分鐘）
     dedup_ttl: Duration,
+    /// 監控器（可選）
+    monitor: Option<Arc<crate::discord::monitoring::DiscordMonitor>>,
 }
 
 impl EventHandler {
@@ -55,11 +59,27 @@ impl EventHandler {
             welcome_handler,
             deduplication_cache: Arc::new(Mutex::new(HashMap::new())),
             dedup_ttl: Duration::from_secs(300), // 5分鐘
+            monitor: None,
+        }
+    }
+
+    /// 創建帶監控器的事件處理器
+    pub fn with_monitor(
+        guild_service: GuildConfigService,
+        welcome_handler: WelcomeHandler,
+        monitor: Arc<crate::discord::monitoring::DiscordMonitor>,
+    ) -> Self {
+        Self {
+            guild_service,
+            welcome_handler,
+            deduplication_cache: Arc::new(Mutex::new(HashMap::new())),
+            dedup_ttl: Duration::from_secs(300), // 5分鐘
+            monitor: Some(monitor),
         }
     }
 
     /// 處理 GUILD_MEMBER_ADD 事件
-    /// 
+    ///
     /// 此方法實現完整的事件處理流水線：
     /// 1. 事件驗證
     /// 2. 去重檢查
@@ -72,12 +92,26 @@ impl EventHandler {
         // 1. 事件驗證
         if !self.validate_event(event) {
             warn!("事件驗證失敗: guild_id={}, user_id={}", event.guild_id, event.user_id);
+
+            // 記錄失敗事件
+            let processing_time = start_time.elapsed();
+            if let Some(ref monitor) = self.monitor {
+                monitor.record_event_processing("member_join", processing_time.as_millis() as u64, "failed").await;
+            }
+
             return Ok(EventResult::Failed("事件驗證失敗".to_string()));
         }
 
         // 2. 去重檢查
         if let Some(reason) = self.check_duplication(event).await {
             debug!("事件被去重跳過: {}", reason);
+
+            // 記錄重複事件
+            let processing_time = start_time.elapsed();
+            if let Some(ref monitor) = self.monitor {
+                monitor.record_event_processing("member_join", processing_time.as_millis() as u64, "duplicate").await;
+            }
+
             return Ok(EventResult::Skipped(reason));
         }
 
@@ -97,10 +131,15 @@ impl EventHandler {
                     event.user_id,
                     processing_time.as_millis()
                 );
-                
+
                 // 記錄到去重緩存
                 self.record_processed_event(event).await;
-                
+
+                // 記錄成功事件
+                if let Some(ref monitor) = self.monitor {
+                    monitor.record_event_processing("member_join", processing_time.as_millis() as u64, "success").await;
+                }
+
                 Ok(EventResult::Success)
             },
             Ok(Err(e)) => {
@@ -111,6 +150,12 @@ impl EventHandler {
                     e,
                     processing_time.as_millis()
                 );
+
+                // 記錄失敗事件
+                if let Some(ref monitor) = self.monitor {
+                    monitor.record_event_processing("member_join", processing_time.as_millis() as u64, "failed").await;
+                }
+
                 Ok(EventResult::Failed(e.to_string()))
             },
             Err(_timeout_error) => {
@@ -120,6 +165,12 @@ impl EventHandler {
                     event.user_id,
                     processing_time.as_millis()
                 );
+
+                // 記錄超時事件
+                if let Some(ref monitor) = self.monitor {
+                    monitor.record_event_processing("member_join", processing_time.as_millis() as u64, "failed").await;
+                }
+
                 Ok(EventResult::Failed("事件處理超時".to_string()))
             }
         }

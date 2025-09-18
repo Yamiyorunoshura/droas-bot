@@ -33,6 +33,7 @@ pub struct BackgroundAsset {
 }
 
 /// Guild配置服務
+#[derive(Clone)]
 pub struct GuildConfigService {
     pool: SqlitePool,
 }

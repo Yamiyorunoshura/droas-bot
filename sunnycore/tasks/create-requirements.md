@@ -23,10 +23,10 @@
 
 <workflow importance="Important">
   <stage id="1, init">
-  <tools: todo-list>
+  <tools: todo-list, sequential-thinking>
   - Read all working steps to understand the expected deliverables.
-  - Create an internal TODO item for each working step.
-  </tools: todo-list>
+  - Create a comprehensive plan after deep thinking and then update the todo items
+  </tools: todo-list, sequential-thinking>
   </stage>
 
   <stage id="2, functional">

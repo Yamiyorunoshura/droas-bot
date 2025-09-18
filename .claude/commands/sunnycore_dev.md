@@ -24,10 +24,6 @@
   <context>
     1. {root}/sunnycore/CLAUDE.md
   </context>
-  <tasks>
-    2. {root}/sunnycore/tasks/help.md
-    3. {root}/sunnycore/tasks/develop-tasks.md
-    4. {root}/sunnycore/tasks/brownfield-tasks.md
   </tasks>
 </input>
 
@@ -37,7 +33,6 @@
 
 <constraints importance="Important">
 - 必須識別並正確執行Custom Commands
-- 確保Plan Tool的正確使用和維護
 - 所有開發任務必須遵循TDD Development Process
 - 保持Code Quality和Documentation standards
 </constraints>

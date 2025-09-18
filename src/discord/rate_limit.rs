@@ -5,6 +5,7 @@ use tokio::sync::RwLock;
 use tokio::time::sleep;
 use tracing::{debug, info, warn};
 use anyhow::Result;
+use std::sync::Arc;
 
 /// 速率限制信息
 #[derive(Debug, Clone)]
@@ -92,7 +93,7 @@ pub struct RateLimitStats {
 }
 
 /// Discord API 速率限制管理器
-/// 
+///
 /// 負責處理 Discord API 的速率限制，包括全域限制和路由特定限制。
 /// 實現指數退避算法和智能重試機制。
 pub struct RateLimiter {
@@ -114,6 +115,8 @@ pub struct RateLimiter {
     backoff_config: ExponentialBackoffConfig,
     /// 各路由的重試狀態
     retry_states: RwLock<HashMap<String, RetryState>>,
+    /// 監控器（可選）
+    monitor: Option<Arc<crate::discord::monitoring::DiscordMonitor>>,
 }
 
 impl RateLimiter {
@@ -129,9 +132,10 @@ impl RateLimiter {
             total_wait_time: AtomicU64::new(0),
             backoff_config: ExponentialBackoffConfig::default(),
             retry_states: RwLock::new(HashMap::new()),
+            monitor: None,
         }
     }
-    
+
     /// 使用自定義配置創建速率限制管理器
     pub fn with_config(backoff_config: ExponentialBackoffConfig) -> Self {
         Self {
@@ -144,51 +148,101 @@ impl RateLimiter {
             total_wait_time: AtomicU64::new(0),
             backoff_config,
             retry_states: RwLock::new(HashMap::new()),
+            monitor: None,
+        }
+    }
+
+    /// 創建帶監控器的速率限制管理器
+    pub fn with_monitor(monitor: Arc<crate::discord::monitoring::DiscordMonitor>) -> Self {
+        Self {
+            global_rate_limit: RwLock::new(None),
+            route_rate_limits: RwLock::new(HashMap::new()),
+            stats: RateLimitStats::default(),
+            request_counter: AtomicU64::new(0),
+            rate_limit_counter: AtomicU64::new(0),
+            global_limit_counter: AtomicU64::new(0),
+            total_wait_time: AtomicU64::new(0),
+            backoff_config: ExponentialBackoffConfig::default(),
+            retry_states: RwLock::new(HashMap::new()),
+            monitor: Some(monitor),
+        }
+    }
+
+    /// 創建帶自定義配置和監控器的速率限制管理器
+    pub fn with_config_and_monitor(
+        backoff_config: ExponentialBackoffConfig,
+        monitor: Arc<crate::discord::monitoring::DiscordMonitor>,
+    ) -> Self {
+        Self {
+            global_rate_limit: RwLock::new(None),
+            route_rate_limits: RwLock::new(HashMap::new()),
+            stats: RateLimitStats::default(),
+            request_counter: AtomicU64::new(0),
+            rate_limit_counter: AtomicU64::new(0),
+            global_limit_counter: AtomicU64::new(0),
+            total_wait_time: AtomicU64::new(0),
+            backoff_config,
+            retry_states: RwLock::new(HashMap::new()),
+            monitor: Some(monitor),
         }
     }
     
     /// 在發送請求前檢查速率限制
-    /// 
+    ///
     /// 如果需要等待，此方法會自動延遲適當的時間。
-    /// 
+    ///
     /// # Arguments
     /// * `route` - API 路由標識符
-    /// 
+    ///
     /// # Returns
     /// 等待的時間（如果有的話）
     pub async fn wait_if_rate_limited(&self, route: &str) -> Duration {
         let _start_time = Instant::now();
         let mut total_wait = Duration::from_secs(0);
-        
+        let mut had_global_limit = false;
+
         // 檢查全域限制
         if let Some(wait_time) = self.check_global_rate_limit().await {
             debug!("等待全域速率限制: {:.2}s", wait_time.as_secs_f64());
             sleep(wait_time).await;
             total_wait += wait_time;
-            
+
             // 更新統計
             self.global_limit_counter.fetch_add(1, Ordering::Relaxed);
+            had_global_limit = true;
+
+            // 記錄監控事件
+            if let Some(ref monitor) = self.monitor {
+                monitor.record_rate_limit_event(route, wait_time.as_millis() as u64, true).await;
+            }
         }
-        
+
         // 檢查路由特定限制
         if let Some(wait_time) = self.check_route_rate_limit(route).await {
             debug!("等待路由 {} 速率限制: {:.2}s", route, wait_time.as_secs_f64());
             sleep(wait_time).await;
             total_wait += wait_time;
-            
+
             // 更新統計
             self.rate_limit_counter.fetch_add(1, Ordering::Relaxed);
+
+            // 記錄監控事件（如果還沒有記錄過全域限制）
+            if let Some(ref monitor) = self.monitor {
+                if !had_global_limit {
+                    monitor.record_rate_limit_event(route, wait_time.as_millis() as u64, false).await;
+                }
+            }
         }
-        
+
         // 記錄請求
         self.request_counter.fetch_add(1, Ordering::Relaxed);
-        
+
         // 更新等待時間統計
         if total_wait > Duration::from_secs(0) {
             let wait_ms = total_wait.as_millis() as u64;
             self.total_wait_time.fetch_add(wait_ms, Ordering::Relaxed);
         }
-        
+
         total_wait
     }
     
