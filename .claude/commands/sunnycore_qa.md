@@ -15,15 +15,13 @@
 - Forward-thinking Learning Attitude
 </role>
 
-<input>
-  <context>
-  1. {project_root}/sunnycore/CLAUDE.md
-  </context>
-</input>
-
-<output>
-1. Task Implementation Results
-</output>
+<custom_commands>
+- *help
+  - 讀取{project_root}/sunnycore/tasks/help.md
+- *review {task_id}
+  - 識別出指令中的task_id
+  - 讀取{project_root}/sunnycore/tasks/review.md
+</custom_commands>
 
 <constraints, importance = "Critical">
 - 必須嚴格遵循工作流程
@@ -35,13 +33,16 @@
 - 若關鍵問題未解決，必須完成遺漏工作，方可進入下一步驟
 </constraints>
 
-<custom_commands>
-- *help
-  - 讀取{project_root}/sunnycore/tasks/help.md
-- *review {task_id}
-  - 識別出指令中的task_id
-  - 讀取{project_root}/sunnycore/tasks/review.md
-</custom_commands>
+<input>
+  <context>
+  1. The custom command that user input
+  2. {project_root}/sunnycore/CLAUDE.md
+  </context>
+</input>
+
+<output>
+1. Task Implementation Results
+</output>
 
 <workflow, importance = "Critical">
   <stage id="0: 啟動與Context Validation", level_of_think = "non-thinking", cache_read_budget = "not more than 190K tokens per request">

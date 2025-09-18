@@ -1,24 +1,196 @@
 # General rules
 
 ## Output style
-- Always respond in Traditional Chinese with a friendly, professional, and concise tone; provide structured paragraphs or bullet lists when reporting major changes.
-- Ensure replies are self-contained and do not rely on unstated context; reference identifiers from `index.json` or task documents when useful.
-- Wrap commands or file paths in backticks; use repository-relative paths and include line numbers when helpful (format: `path/to/file:42`).
-- Follow the final-response pattern: lead with outcomes or changes, then share supporting details and next steps; share suggestions only when natural follow-up actions exist.
-- Keep responses succinct and avoid dumping large files; when examples are required, quote only the relevant fragment and cite its source.
+
+### Code-Style Oriented
+- **Template-Driven**: Use standardized templates (`templates/` directory) to ensure document format consistency
+- **Code Standards**:
+  - Markdown: ATX headings (`#`), sentence-case titles, concise sections
+  - YAML: 2-space indentation, kebab-case keys (e.g. `dev-subagent-list`)
+  - Shell: POSIX-compatible bash, prefer functions + `set -e` for robustness
+  - File/folder naming: kebab-case, no spaces
+
+### XML Tag Specifications
+```xml
+<reasoning>reasoning process</reasoning>
+<implementation>implementation details</implementation>
+<quality-assessment level="Bronze|Silver|Gold|Platinum">quality assessment</quality-assessment>
+<dependencies>dependency analysis</dependencies>
+<evidence>supporting evidence</evidence>
+```
+
+### Documentation Consistency
+- Primary language: Traditional Chinese documentation and communication
+- Technical terms: Chinese-English correspondence for accuracy
+- Professional communication standards with structured XML output
 
 ## Behaviour
-- When requirements are unclear or data is missing, ask questions or investigate (via context7 or Playwright when appropriate) instead of guessing.
-- Maintain a TDD and quality-first mindset: outline validation steps, propose tests or checks, and note explicitly if verification could not be performed.
-- Respect repository constraints (ASCII preference, naming conventions, untouched changes) and inspect the working tree before modifying files.
-- Follow role expectations on assigned work—developers implement, PM/PO analyse and plan, QA reviews and highlights risks—while adhering to this shared baseline.
-- **Constraint:** Never add a todo item unless the prompt explicitly requests or requires it.
 
-## Spec coding
-- For development requests, consult `index.json` for the `taskToTemplates` and `taskToAgents` mappings to select the correct templates and collaborating agents.
-- When updating or creating documents, use ATX headings with concise wording; format YAML with two-space indentation and kebab-case keys; keep shell scripts POSIX-compatible and guard flows with `set -e`.
-- Check whether scripts need elevated permissions or user approval before running them; MCP tool calls are built-in interfaces and can be used directly.
-- Before starting new work or altering a workflow, provide a summary implementation plan, testing strategy, and notable risks, then report verification results afterward.
+### Tool Usage Restrictions
+**Core Principle**: Agents must not use any tools unless explicitly specified by XML tags in the prompt
+
+#### Conditional Tool Activation
+- Tools may only be used when the corresponding XML tags are present:
+  ```xml
+  <tools: context7>
+  - External API documentation reference needed
+  - Package dependency queries
+  </tools: context7>
+  
+  <tools: sequential-thinking>
+  - Complex problem decomposition
+  - Multi-step reasoning validation
+  </tools: sequential-thinking>
+  
+  <tools: playwright>
+  - Web interaction testing
+  - User flow simulation
+  </tools: playwright>
+  ```
+
+### Multi-Agent Collaboration Protocol
+- **Task Division**: Based on `agentToTasks` relationship mapping in `index.json`
+- **Sequential Execution**: Follow Greenfield/Brownfield workflow phases
+- **Context Passing**: Maintain context continuity across agent interactions
+- **Quality Gates**: Required validation checkpoints throughout development process
+
+### Execution Mode
+1. **Context Validation**: Read and verify all input files
+2. **Task Categorization**: Assign to appropriate agents based on domain expertise
+3. **Collaborative Execution**: Parallel task execution with specialized agents
+4. **Structured Output**: Generate standardized documentation using templates
+
+### File Structure Specifications
+```
+{root}/
+├── .claude/
+|    ├── commands/        # Custom command definitions  
+├── sunnycore/ 
+    ├── tasks/           # Task execution workflows
+    ├── templates/       # Standardized templates
+    ├── scripts/         # Utility scripts
+    └── CLAUDE.md        # Agent system configuration
+```
+
+### Naming Conventions
+- File names: kebab-case, no spaces (avoid introducing new spaced naming)
+- Task IDs: Correspond to file names, use hyphen separation
+- Agent IDs: Short identifiers (dev, pm, po, qa)
+- Template IDs: Descriptive names ending with `-tmpl`
+
+# QA rules
+
+## 7-Dimensional Review Standards
+
+### Review Dimension Framework
+Each review task must be systematically evaluated based on the following 7 dimensions:
+
+#### 1. Functional Requirements Compliance
+**Assessment Focus**:
+- Requirements traceability validation
+- Acceptance criteria completeness check  
+- Business logic correctness review
+
+**Quality Indicators**:
+- Bronze: Basic functionality implemented, some requirements not covered
+- Silver: Main functionality complete, edge cases handled properly
+- Gold: All requirements fully implemented with complete traceability
+- Platinum: Exceeds requirement expectations with forward-thinking design
+
+#### 2. Code Quality & Standards
+**Assessment Focus**:
+- Coding standards compliance
+- Code readability and maintainability
+- Technical debt assessment
+
+**Quality Indicators**:
+- Bronze: Basic functionality implemented, obvious quality issues exist
+- Silver: Follows basic standards, clear structure
+- Gold: High-quality implementation, excellent maintainability
+- Platinum: Exemplary code with educational value
+
+#### 3. Security & Performance
+**Assessment Focus**:
+- Security vulnerability identification and remediation
+- Performance bottleneck analysis
+- Resource utilization efficiency assessment
+
+**Quality Indicators**:
+- Bronze: Basic security considerations, acceptable performance
+- Silver: Comprehensive security protection, good performance
+- Gold: Enterprise-level security standards, optimized performance design
+- Platinum: Zero-trust security model, ultimate performance optimization
+
+#### 4. Testing Coverage & Quality
+**Assessment Focus**:
+- Unit test coverage
+- Integration test completeness
+- Test quality and edge cases
+
+**Quality Indicators**:
+- Bronze: Basic tests covering main paths
+- Silver: Complete test suite covering edge cases
+- Gold: High-quality tests including regression and performance testing
+- Platinum: Test-driven development with automated testing pipeline
+
+#### 5. Architecture & Design Alignment
+**Assessment Focus**:
+- Architectural principles adherence
+- Design pattern consistency
+- Module coupling and cohesion
+
+**Quality Indicators**:
+- Bronze: Basic architecture complete, some design inconsistencies
+- Silver: Good architectural design following design principles
+- Gold: Excellent architectural implementation, high cohesion low coupling
+- Platinum: Architectural exemplar with scalability and resilience
+
+#### 6. Documentation & Maintainability
+**Assessment Focus**:
+- Code documentation quality
+- API documentation completeness
+- Maintenance overhead assessment
+
+**Quality Indicators**:
+- Bronze: Basic comments, simple documentation
+- Silver: Complete code comments and usage instructions
+- Gold: Comprehensive documentation system including design decision records
+- Platinum: Exceptional documentation quality with automated generation and maintenance
+
+#### 7. Risk Assessment & Deployment Readiness
+**Assessment Focus**:
+- Rollback strategy validation
+- Deployment risk assessment
+- Production readiness checklist
+
+**Quality Indicators**:
+- Bronze: Basic deployment plan, partial risk identification
+- Silver: Complete deployment strategy with risk mitigation measures
+- Gold: Comprehensive risk management with automated deployment process
+- Platinum: Zero-downtime deployment with complete disaster recovery plan
+
+### Review Decision Matrix
+**Accept**: All dimensions reach Silver level or above
+**Accept with Changes**: 1-2 dimensions below Silver with clear improvement plan
+**Reject**: 3+ dimensions below Silver, or Bronze-level security/functional issues exist
+
+### Review Output Format
+```markdown
+## 7-Dimensional Assessment Results
+
+### Dimensional Scoring
+- Functional Requirements Compliance: [Bronze|Silver|Gold|Platinum]
+- Code Quality & Standards: [Bronze|Silver|Gold|Platinum]  
+- Security & Performance: [Bronze|Silver|Gold|Platinum]
+- Testing Coverage & Quality: [Bronze|Silver|Gold|Platinum]
+- Architecture & Design Alignment: [Bronze|Silver|Gold|Platinum]
+- Documentation & Maintainability: [Bronze|Silver|Gold|Platinum]
+- Risk Assessment & Deployment Readiness: [Bronze|Silver|Gold|Platinum]
+
+### Overall Quality Assessment
+**Decision**: [Accept|Accept with Changes|Reject]
+**Rationale**: [Detailed explanation based on 7-dimensional analysis]
+```
 
 # MCP tools introduction
 

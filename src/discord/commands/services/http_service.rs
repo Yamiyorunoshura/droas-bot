@@ -1,13 +1,13 @@
 //! 共享HTTP服務
-//! 
+//!
 //! 提供統一的HTTP客戶端和下載功能，供所有命令處理器使用。
 
-use crate::discord::commands::framework::{CommandResult, CommandError};
+use crate::discord::commands::framework::{CommandError, CommandResult};
 use reqwest::{Client, Response};
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
-use tracing::{debug, warn, error};
+use tracing::{debug, error, warn};
 
 /// HTTP服務配置
 #[derive(Debug, Clone)]
@@ -30,7 +30,7 @@ impl Default for HttpServiceConfig {
             timeout: Duration::from_secs(30),
             user_agent: "DROAS-Bot/0.1.0".to_string(),
             max_retries: 3,
-            retry_base_delay: 1000, // 1秒
+            retry_base_delay: 1000,              // 1秒
             max_download_size: 10 * 1024 * 1024, // 10MB
         }
     }
@@ -63,7 +63,7 @@ impl HttpService {
     /// 下載數據（帶重試機制）
     pub async fn download_data(&self, url: &str) -> CommandResult<Vec<u8>> {
         debug!("開始下載數據: {}", url);
-        
+
         for attempt in 0..=self.config.max_retries {
             match self.download_attempt(url).await {
                 Ok(data) => {
@@ -75,34 +75,41 @@ impl HttpService {
                         error!("下載失敗，已達最大重試次數: {}", e);
                         return Err(e);
                     }
-                    
+
                     if !self.is_retryable_error(&e) {
                         warn!("遇到不可重試錯誤: {}", e);
                         return Err(e);
                     }
-                    
+
                     let delay = self.calculate_retry_delay(attempt);
-                    debug!("下載失敗 (嘗試 {}): {}，{} 毫秒後重試", attempt + 1, e, delay);
+                    debug!(
+                        "下載失敗 (嘗試 {}): {}，{} 毫秒後重試",
+                        attempt + 1,
+                        e,
+                        delay
+                    );
                     sleep(Duration::from_millis(delay)).await;
                 }
             }
         }
-        
-        Err(CommandError::ExecutionFailed("未知錯誤：重試循環意外結束".to_string()))
+
+        Err(CommandError::ExecutionFailed(
+            "未知錯誤：重試循環意外結束".to_string(),
+        ))
     }
 
     /// 驗證URL安全性
     pub fn validate_url(&self, url: &str) -> CommandResult<()> {
         let parsed_url = url::Url::parse(url)
             .map_err(|_| CommandError::InvalidArguments("無效的URL格式".to_string()))?;
-        
+
         // 只允許HTTPS
         if parsed_url.scheme() != "https" {
             return Err(CommandError::InvalidArguments(
                 "出於安全考慮，只支援HTTPS網址".to_string(),
             ));
         }
-        
+
         // 檢查是否為本地地址（安全考慮）
         if let Some(host_str) = parsed_url.host_str() {
             if self.is_local_address(host_str) {
@@ -111,18 +118,19 @@ impl HttpService {
                 ));
             }
         }
-        
+
         Ok(())
     }
 
     /// 下載圖片數據（帶內容類型檢查）
     pub async fn download_image(&self, url: &str) -> CommandResult<Vec<u8>> {
         debug!("下載圖片數據: {}", url);
-        
+
         // 先驗證URL
         self.validate_url(url)?;
-        
-        let response = self.client
+
+        let response = self
+            .client
             .get(url)
             .send()
             .await
@@ -138,7 +146,7 @@ impl HttpService {
 
         // 檢查內容類型
         self.validate_image_content_type(&response)?;
-        
+
         // 檢查內容長度
         self.validate_content_length(&response)?;
 
@@ -163,7 +171,8 @@ impl HttpService {
 
     /// 單次下載嘗試
     async fn download_attempt(&self, url: &str) -> CommandResult<Vec<u8>> {
-        let response = self.client
+        let response = self
+            .client
             .get(url)
             .send()
             .await
@@ -198,17 +207,15 @@ impl HttpService {
     /// 驗證圖片內容類型
     fn validate_image_content_type(&self, response: &Response) -> CommandResult<()> {
         if let Some(content_type) = response.headers().get("content-type") {
-            let content_type_str = content_type
-                .to_str()
-                .unwrap_or("");
-                
+            let content_type_str = content_type.to_str().unwrap_or("");
+
             if !content_type_str.starts_with("image/") {
                 return Err(CommandError::InvalidArguments(format!(
                     "URL指向非圖片內容，Content-Type: {}",
                     content_type_str
                 )));
             }
-            
+
             // 檢查是否為支援的圖片類型
             match content_type_str {
                 "image/png" | "image/jpeg" | "image/jpg" => Ok(()),
@@ -231,8 +238,7 @@ impl HttpService {
                     if length > self.config.max_download_size {
                         return Err(CommandError::InvalidArguments(format!(
                             "檔案過大: {} bytes (最大允許: {} bytes)",
-                            length,
-                            self.config.max_download_size
+                            length, self.config.max_download_size
                         )));
                     }
                 }
@@ -244,19 +250,20 @@ impl HttpService {
     /// 檢查是否為本地地址
     fn is_local_address(&self, host: &str) -> bool {
         // IPv4本地地址
-        if host == "localhost" 
-            || host == "127.0.0.1" 
-            || host.starts_with("192.168.") 
-            || host.starts_with("10.") 
-            || host.starts_with("172.") {
+        if host == "localhost"
+            || host == "127.0.0.1"
+            || host.starts_with("192.168.")
+            || host.starts_with("10.")
+            || host.starts_with("172.")
+        {
             return true;
         }
-        
+
         // IPv6本地地址
         if host == "::1" || host.starts_with("fe80:") {
             return true;
         }
-        
+
         false
     }
 
@@ -265,8 +272,8 @@ impl HttpService {
         match error {
             CommandError::ExecutionFailed(msg) => {
                 // 網絡相關錯誤通常可以重試
-                msg.contains("網絡") 
-                    || msg.contains("連接") 
+                msg.contains("網絡")
+                    || msg.contains("連接")
                     || msg.contains("超時")
                     || msg.contains("HTTP請求失敗")
                     || msg.contains("讀取響應失敗")
@@ -316,18 +323,24 @@ mod tests {
     #[test]
     fn test_url_validation() {
         let service = HttpService::with_default_config().unwrap();
-        
+
         // 有效的HTTPS URL
-        assert!(service.validate_url("https://example.com/image.png").is_ok());
-        
+        assert!(service
+            .validate_url("https://example.com/image.png")
+            .is_ok());
+
         // 無效的HTTP URL
-        assert!(service.validate_url("http://example.com/image.png").is_err());
-        
+        assert!(service
+            .validate_url("http://example.com/image.png")
+            .is_err());
+
         // 本地地址
         assert!(service.validate_url("https://localhost/image.png").is_err());
         assert!(service.validate_url("https://127.0.0.1/image.png").is_err());
-        assert!(service.validate_url("https://192.168.1.1/image.png").is_err());
-        
+        assert!(service
+            .validate_url("https://192.168.1.1/image.png")
+            .is_err());
+
         // 無效的URL格式
         assert!(service.validate_url("not-a-url").is_err());
     }
@@ -335,14 +348,14 @@ mod tests {
     #[test]
     fn test_is_local_address() {
         let service = HttpService::with_default_config().unwrap();
-        
+
         assert!(service.is_local_address("localhost"));
         assert!(service.is_local_address("127.0.0.1"));
         assert!(service.is_local_address("192.168.1.1"));
         assert!(service.is_local_address("10.0.0.1"));
         assert!(service.is_local_address("::1"));
         assert!(service.is_local_address("fe80::1"));
-        
+
         assert!(!service.is_local_address("example.com"));
         assert!(!service.is_local_address("8.8.8.8"));
         assert!(!service.is_local_address("2001:4860:4860::8888"));
@@ -351,7 +364,7 @@ mod tests {
     #[test]
     fn test_retry_delay_calculation() {
         let service = HttpService::with_default_config().unwrap();
-        
+
         assert_eq!(service.calculate_retry_delay(0), 1000); // 1s
         assert_eq!(service.calculate_retry_delay(1), 2000); // 2s
         assert_eq!(service.calculate_retry_delay(2), 4000); // 4s
@@ -361,18 +374,18 @@ mod tests {
     #[test]
     fn test_is_retryable_error() {
         let service = HttpService::with_default_config().unwrap();
-        
+
         // 可重試的錯誤
         let network_error = CommandError::ExecutionFailed("網絡連接失敗".to_string());
         assert!(service.is_retryable_error(&network_error));
-        
+
         let timeout_error = CommandError::ExecutionFailed("連接超時".to_string());
         assert!(service.is_retryable_error(&timeout_error));
-        
+
         // 不可重試的錯誤
         let arg_error = CommandError::InvalidArguments("無效參數".to_string());
         assert!(!service.is_retryable_error(&arg_error));
-        
+
         let perm_error = CommandError::InsufficientPermissions("權限不足".to_string());
         assert!(!service.is_retryable_error(&perm_error));
     }

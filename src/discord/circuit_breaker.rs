@@ -1,12 +1,12 @@
 //! 熔斷機制模組
-//! 
+//!
 //! 實作 Circuit Breaker 模式，保護系統免受外部服務過載和不可用的影響。
 
 use std::sync::atomic::{AtomicU64, AtomicU8, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
-use tracing::{debug, info, warn, error};
+use tracing::{debug, error, info, warn};
 
 /// 熔斷器狀態
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -117,8 +117,12 @@ pub struct CircuitBreaker {
 impl CircuitBreaker {
     /// 創建新的熔斷器
     pub fn new(config: CircuitBreakerConfig) -> Self {
-        info!("創建熔斷器，配置: 失敗閾值={}, 恢復超時={}s, 成功閾值={}", 
-              config.failure_threshold, config.recovery_timeout.as_secs(), config.success_threshold);
+        info!(
+            "創建熔斷器，配置: 失敗閾值={}, 恢復超時={}s, 成功閾值={}",
+            config.failure_threshold,
+            config.recovery_timeout.as_secs(),
+            config.success_threshold
+        );
 
         Self {
             config,
@@ -141,7 +145,7 @@ impl CircuitBreaker {
         self.total_requests.fetch_add(1, Ordering::Relaxed);
 
         let current_state = CircuitState::from(self.state.load(Ordering::Acquire));
-        
+
         match current_state {
             CircuitState::Closed => {
                 debug!("熔斷器關閉狀態，允許請求");
@@ -169,9 +173,9 @@ impl CircuitBreaker {
     /// 記錄成功執行
     pub async fn record_success(&self) {
         self.successful_requests.fetch_add(1, Ordering::Relaxed);
-        
+
         let current_state = CircuitState::from(self.state.load(Ordering::Acquire));
-        
+
         match current_state {
             CircuitState::Closed => {
                 // 關閉狀態下的成功不需要特殊處理
@@ -181,9 +185,12 @@ impl CircuitBreaker {
                 // 半開狀態下需要計算連續成功次數
                 let mut internal_state = self.internal_state.write().await;
                 internal_state.half_open_successes += 1;
-                
-                debug!("熔斷器半開狀態記錄成功，連續成功次數: {}", internal_state.half_open_successes);
-                
+
+                debug!(
+                    "熔斷器半開狀態記錄成功，連續成功次數: {}",
+                    internal_state.half_open_successes
+                );
+
                 if internal_state.half_open_successes >= self.config.success_threshold {
                     info!("熔斷器達到成功閾值，從半開狀態轉為關閉狀態");
                     self.transition_to_closed(&mut internal_state).await;
@@ -199,15 +206,18 @@ impl CircuitBreaker {
     /// 記錄失敗執行
     pub async fn record_failure(&self) {
         self.failed_requests.fetch_add(1, Ordering::Relaxed);
-        
+
         let current_state = CircuitState::from(self.state.load(Ordering::Acquire));
         let mut internal_state = self.internal_state.write().await;
-        
+
         internal_state.consecutive_failures += 1;
         internal_state.last_failure_time = Some(Instant::now());
-        
-        debug!("熔斷器記錄失敗，連續失敗次數: {}", internal_state.consecutive_failures);
-        
+
+        debug!(
+            "熔斷器記錄失敗，連續失敗次數: {}",
+            internal_state.consecutive_failures
+        );
+
         match current_state {
             CircuitState::Closed => {
                 if internal_state.consecutive_failures >= self.config.failure_threshold {
@@ -264,7 +274,7 @@ impl CircuitBreaker {
     pub async fn get_stats(&self) -> CircuitBreakerStats {
         let internal_state = self.internal_state.read().await;
         let current_time = Instant::now();
-        
+
         let current_state_duration = if let Some(last_change) = internal_state.last_state_change {
             current_time.duration_since(last_change)
         } else {
@@ -292,7 +302,7 @@ impl CircuitBreaker {
     /// 檢查是否應該嘗試從開啟狀態重置
     async fn should_attempt_reset(&self) -> bool {
         let internal_state = self.internal_state.read().await;
-        
+
         if let Some(last_failure) = internal_state.last_failure_time {
             last_failure.elapsed() >= self.config.recovery_timeout
         } else {
@@ -302,34 +312,39 @@ impl CircuitBreaker {
 
     /// 轉換到關閉狀態
     async fn transition_to_closed(&self, internal_state: &mut CircuitBreakerState) {
-        self.state.store(CircuitState::Closed as u8, Ordering::Release);
+        self.state
+            .store(CircuitState::Closed as u8, Ordering::Release);
         internal_state.consecutive_failures = 0;
         internal_state.half_open_successes = 0;
         internal_state.state_changes += 1;
         internal_state.last_state_change = Some(Instant::now());
-        
+
         info!("熔斷器狀態轉換為關閉");
     }
 
     /// 轉換到開啟狀態
     async fn transition_to_open(&self, internal_state: &mut CircuitBreakerState) {
-        self.state.store(CircuitState::Open as u8, Ordering::Release);
+        self.state
+            .store(CircuitState::Open as u8, Ordering::Release);
         internal_state.half_open_successes = 0;
         internal_state.state_changes += 1;
         internal_state.last_state_change = Some(Instant::now());
-        
-        error!("熔斷器狀態轉換為開啟，將拒絕後續請求 {} 秒", 
-               self.config.recovery_timeout.as_secs());
+
+        error!(
+            "熔斷器狀態轉換為開啟，將拒絕後續請求 {} 秒",
+            self.config.recovery_timeout.as_secs()
+        );
     }
 
     /// 轉換到半開狀態
     async fn transition_to_half_open(&self) {
         let mut internal_state = self.internal_state.write().await;
-        self.state.store(CircuitState::HalfOpen as u8, Ordering::Release);
+        self.state
+            .store(CircuitState::HalfOpen as u8, Ordering::Release);
         internal_state.half_open_successes = 0;
         internal_state.state_changes += 1;
         internal_state.last_state_change = Some(Instant::now());
-        
+
         info!("熔斷器狀態轉換為半開，開始探測服務可用性");
     }
 }
@@ -385,30 +400,30 @@ mod tests {
             success_threshold: 2,
             request_timeout: Duration::from_millis(50),
         };
-        
+
         let cb = CircuitBreaker::new(config);
-        
+
         // 初始狀態應該是關閉
         assert_eq!(cb.get_state(), CircuitState::Closed);
         assert!(cb.can_execute().await);
-        
+
         // 記錄失敗直到觸發熔斷
         cb.record_failure().await;
         assert_eq!(cb.get_state(), CircuitState::Closed);
-        
+
         cb.record_failure().await;
         assert_eq!(cb.get_state(), CircuitState::Open);
-        
+
         // 開啟狀態下應該拒絕請求
         assert!(!cb.can_execute().await);
-        
+
         // 等待恢復超時
         sleep(Duration::from_millis(150)).await;
-        
+
         // 現在應該能夠嘗試半開
         assert!(cb.can_execute().await);
         assert_eq!(cb.get_state(), CircuitState::HalfOpen);
-        
+
         // 記錄成功以關閉熔斷器
         cb.record_success().await;
         cb.record_success().await;
@@ -423,22 +438,28 @@ mod tests {
             success_threshold: 1,
             request_timeout: Duration::from_millis(50),
         };
-        
+
         let cb = CircuitBreaker::new(config);
-        
+
         // 成功操作
         let result = cb.execute(async { Ok::<i32, &str>(42) }).await;
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), 42);
-        
+
         // 失敗操作
         let result = cb.execute(async { Err::<i32, &str>("error") }).await;
-        assert!(matches!(result, Err(CircuitBreakerError::OperationFailed("error"))));
-        
+        assert!(matches!(
+            result,
+            Err(CircuitBreakerError::OperationFailed("error"))
+        ));
+
         // 再次失敗應該觸發熔斷
         let result = cb.execute(async { Err::<i32, &str>("error") }).await;
-        assert!(matches!(result, Err(CircuitBreakerError::OperationFailed("error"))));
-        
+        assert!(matches!(
+            result,
+            Err(CircuitBreakerError::OperationFailed("error"))
+        ));
+
         // 現在熔斷器應該開啟
         let result = cb.execute(async { Ok::<i32, &str>(42) }).await;
         assert!(matches!(result, Err(CircuitBreakerError::CircuitOpen)));
@@ -452,29 +473,31 @@ mod tests {
             success_threshold: 1,
             request_timeout: Duration::from_millis(50),
         };
-        
+
         let cb = CircuitBreaker::new(config);
-        
+
         // 超時操作
-        let result = cb.execute(async {
-            sleep(Duration::from_millis(100)).await;
-            Ok::<i32, &str>(42)
-        }).await;
-        
+        let result = cb
+            .execute(async {
+                sleep(Duration::from_millis(100)).await;
+                Ok::<i32, &str>(42)
+            })
+            .await;
+
         assert!(matches!(result, Err(CircuitBreakerError::Timeout)));
     }
 
     #[tokio::test]
     async fn test_circuit_breaker_stats() {
         let cb = CircuitBreaker::with_defaults();
-        
+
         // 執行一些操作
         let _ = cb.can_execute().await;
         cb.record_success().await;
-        
+
         let _ = cb.can_execute().await;
         cb.record_failure().await;
-        
+
         let stats = cb.get_stats().await;
         assert_eq!(stats.total_requests, 2);
         assert_eq!(stats.successful_requests, 1);

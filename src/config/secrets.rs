@@ -1,15 +1,15 @@
 use anyhow::Result;
 
 /// 驗證 Discord Bot 令牌格式
-/// 
+///
 /// Discord Bot 令牌遵循特定格式：{application_id}.{timestamp}.{hmac}
 /// - 第一部分：17-19 字符的應用ID
 /// - 第二部分：6 字符的時間戳
 /// - 第三部分：27 字符的HMAC
-/// 
+///
 /// # Arguments
 /// * `token` - 要驗證的 Discord Bot 令牌
-/// 
+///
 /// # Returns
 /// * `Ok(())` - 如果令牌格式有效
 /// * `Err(...)` - 如果令牌格式無效，包含詳細錯誤信息
@@ -40,7 +40,10 @@ pub fn validate_discord_token_format(token: &str) -> Result<()> {
 
     // 檢查是否包含有效的 Base64 字符（包括 URL-safe Base64）
     for (i, part) in parts.iter().enumerate() {
-        if !part.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-' || c == '+' || c == '/') {
+        if !part
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-' || c == '+' || c == '/')
+        {
             anyhow::bail!("Discord token part {} contains invalid characters", i + 1);
         }
     }
@@ -49,13 +52,13 @@ pub fn validate_discord_token_format(token: &str) -> Result<()> {
 }
 
 /// 通過 Discord API 驗證令牌的有效性
-/// 
+///
 /// 這個函數向 Discord API 發送一個測試請求來驗證令牌是否有效。
 /// 使用 `/users/@me` 端點來檢查令牌是否能成功認證。
-/// 
+///
 /// # Arguments
 /// * `token` - 要驗證的 Discord Bot 令牌
-/// 
+///
 /// # Returns
 /// * `Ok(())` - 如果令牌在 Discord API 中有效
 /// * `Err(...)` - 如果令牌無效或API調用失敗
@@ -69,7 +72,7 @@ pub async fn validate_discord_token_with_api(token: &str) -> Result<()> {
 
     // 創建HTTP客戶端
     let client = reqwest::Client::new();
-    
+
     // 發送驗證請求到 Discord API
     let response = client
         .get("https://discord.com/api/v10/users/@me")
@@ -77,7 +80,9 @@ pub async fn validate_discord_token_with_api(token: &str) -> Result<()> {
         .header("User-Agent", "DROAS-Bot/0.1.0")
         .send()
         .await
-        .map_err(|e| anyhow::anyhow!("Failed to send verification request to Discord API: {}", e))?;
+        .map_err(|e| {
+            anyhow::anyhow!("Failed to send verification request to Discord API: {}", e)
+        })?;
 
     match response.status() {
         reqwest::StatusCode::OK => {
@@ -91,27 +96,30 @@ pub async fn validate_discord_token_with_api(token: &str) -> Result<()> {
             anyhow::bail!("Rate limited by Discord API during token validation");
         }
         status => {
-            anyhow::bail!("Unexpected response from Discord API during token validation: {}", status);
+            anyhow::bail!(
+                "Unexpected response from Discord API during token validation: {}",
+                status
+            );
         }
     }
 }
 
 /// 安全地記錄令牌相關錯誤，確保不洩露敏感信息
-/// 
+///
 /// 這個函數接收包含令牌的錯誤信息，並返回一個清理過的版本，
 /// 確保令牌不會出現在日誌或錯誤輸出中。
-/// 
+///
 /// # Arguments
 /// * `error_message` - 原始錯誤信息
 /// * `token` - 需要從錯誤信息中隱藏的令牌
-/// 
+///
 /// # Returns
 /// * 清理過的錯誤信息，令牌被替換為 "[REDACTED]"
 pub fn sanitize_token_error(error_message: &str, token: &str) -> String {
     if token.is_empty() {
         return error_message.to_string();
     }
-    
+
     error_message.replace(token, "[REDACTED]")
 }
 
@@ -157,19 +165,23 @@ mod tests {
     #[test]
     fn test_sanitize_token_error() {
         let token = "secret_token_123";
-        let error_message = "Failed to authenticate with token secret_token_123 due to network error";
-        
+        let error_message =
+            "Failed to authenticate with token secret_token_123 due to network error";
+
         let sanitized = sanitize_token_error(error_message, token);
-        
+
         assert!(!sanitized.contains(token), "清理後的錯誤信息不應包含令牌");
-        assert!(sanitized.contains("[REDACTED]"), "清理後的錯誤信息應包含 [REDACTED]");
+        assert!(
+            sanitized.contains("[REDACTED]"),
+            "清理後的錯誤信息應包含 [REDACTED]"
+        );
     }
 
     #[test]
     fn test_sanitize_empty_token() {
         let error_message = "Some error message";
         let sanitized = sanitize_token_error(error_message, "");
-        
+
         assert_eq!(sanitized, error_message, "空令牌時應返回原始錯誤信息");
     }
 }

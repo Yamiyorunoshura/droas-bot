@@ -7,12 +7,12 @@
 //! - 系統健康檢查
 //! - 性能監控
 
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
-use serde::{Deserialize, Serialize};
-use anyhow::Result;
 
 /// 速率限制指標
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -205,16 +205,21 @@ impl DiscordMonitor {
         }
 
         // 更新總等待時間
-        self.total_wait_time_ms.fetch_add(wait_time_ms, Ordering::Relaxed);
+        self.total_wait_time_ms
+            .fetch_add(wait_time_ms, Ordering::Relaxed);
 
         // 重新計算平均等待時間
-        metrics.average_wait_time_ms = self.total_wait_time_ms.load(Ordering::Relaxed) as f64 / metrics.rate_limit_hits as f64;
+        metrics.average_wait_time_ms =
+            self.total_wait_time_ms.load(Ordering::Relaxed) as f64 / metrics.rate_limit_hits as f64;
 
         metrics.last_updated = std::time::SystemTime::now();
 
         tracing::debug!(
             "記錄速率限制事件: route={}, wait_time={}ms, is_global={}, total_hits={}",
-            route, wait_time_ms, is_global, metrics.rate_limit_hits
+            route,
+            wait_time_ms,
+            is_global,
+            metrics.rate_limit_hits
         );
     }
 
@@ -231,12 +236,14 @@ impl DiscordMonitor {
         metrics.failed_calls += u64::from(!success);
 
         // 更新總響應時間
-        self.total_response_time_ms.fetch_add(response_time_ms, Ordering::Relaxed);
+        self.total_response_time_ms
+            .fetch_add(response_time_ms, Ordering::Relaxed);
 
         // 重新計算平均響應時間和成功率
         let total_calls = metrics.successful_calls + metrics.failed_calls;
         if total_calls > 0 {
-            metrics.average_response_time_ms = self.total_response_time_ms.load(Ordering::Relaxed) as f64 / total_calls as f64;
+            metrics.average_response_time_ms =
+                self.total_response_time_ms.load(Ordering::Relaxed) as f64 / total_calls as f64;
             metrics.success_rate = (metrics.successful_calls as f64 / total_calls as f64) * 100.0;
         }
 
@@ -244,7 +251,10 @@ impl DiscordMonitor {
 
         tracing::debug!(
             "記錄 API 調用: endpoint={}, response_time={}ms, success={}, success_rate={:.2}%",
-            endpoint, response_time_ms, success, metrics.success_rate
+            endpoint,
+            response_time_ms,
+            success,
+            metrics.success_rate
         );
     }
 
@@ -254,7 +264,11 @@ impl DiscordMonitor {
         metrics.timeout_calls += 1;
         metrics.last_updated = std::time::SystemTime::now();
 
-        tracing::warn!("記錄 API 超時: endpoint={}, total_timeouts={}", endpoint, metrics.timeout_calls);
+        tracing::warn!(
+            "記錄 API 超時: endpoint={}, total_timeouts={}",
+            endpoint,
+            metrics.timeout_calls
+        );
     }
 
     /// 記錄事件處理
@@ -263,7 +277,12 @@ impl DiscordMonitor {
     /// * `event_type` - 事件類型
     /// * `processing_time_ms` - 處理時間（毫秒）
     /// * `result` - 處理結果（"success", "duplicate", "failed"）
-    pub async fn record_event_processing(&self, event_type: &str, processing_time_ms: u64, result: &str) {
+    pub async fn record_event_processing(
+        &self,
+        event_type: &str,
+        processing_time_ms: u64,
+        result: &str,
+    ) {
         let mut metrics = self.event_metrics.write().await;
 
         metrics.total_events += 1;
@@ -276,11 +295,14 @@ impl DiscordMonitor {
         }
 
         // 更新總處理時間
-        self.total_processing_time_ms.fetch_add(processing_time_ms, Ordering::Relaxed);
+        self.total_processing_time_ms
+            .fetch_add(processing_time_ms, Ordering::Relaxed);
 
         // 重新計算平均處理時間和吞吐量
         if metrics.processed_events > 0 {
-            metrics.average_processing_time_ms = self.total_processing_time_ms.load(Ordering::Relaxed) as f64 / metrics.processed_events as f64;
+            metrics.average_processing_time_ms =
+                self.total_processing_time_ms.load(Ordering::Relaxed) as f64
+                    / metrics.processed_events as f64;
         }
 
         // 計算吞吐量（事件/秒）
@@ -324,11 +346,10 @@ impl DiscordMonitor {
         let event_health_score = self.calculate_event_health_score(&event_metrics);
 
         // 計算總體健康分數（加權平均）
-        let overall_health_score = (
-            rate_limit_health_score * 0.3 +
-            api_health_score * 0.4 +
-            event_health_score * 0.3
-        ).min(1.0).max(0.0);
+        let overall_health_score =
+            (rate_limit_health_score * 0.3 + api_health_score * 0.4 + event_health_score * 0.3)
+                .min(1.0)
+                .max(0.0);
 
         SystemHealth {
             overall_health: HealthStatus::from_score(overall_health_score),
@@ -479,8 +500,12 @@ mod tests {
     async fn test_rate_limit_metrics_recording() {
         let monitor = DiscordMonitor::new();
 
-        monitor.record_rate_limit_event("test_route", 100, false).await;
-        monitor.record_rate_limit_event("test_route", 200, true).await;
+        monitor
+            .record_rate_limit_event("test_route", 100, false)
+            .await;
+        monitor
+            .record_rate_limit_event("test_route", 200, true)
+            .await;
 
         let metrics = monitor.get_rate_limit_metrics().await;
         assert_eq!(metrics.total_requests, 2);
@@ -508,9 +533,15 @@ mod tests {
     async fn test_event_metrics_recording() {
         let monitor = DiscordMonitor::new();
 
-        monitor.record_event_processing("member_join", 50, "success").await;
-        monitor.record_event_processing("member_join", 30, "duplicate").await;
-        monitor.record_event_processing("member_join", 100, "failed").await;
+        monitor
+            .record_event_processing("member_join", 50, "success")
+            .await;
+        monitor
+            .record_event_processing("member_join", 30, "duplicate")
+            .await;
+        monitor
+            .record_event_processing("member_join", 100, "failed")
+            .await;
 
         let metrics = monitor.get_event_metrics().await;
         assert_eq!(metrics.total_events, 3);

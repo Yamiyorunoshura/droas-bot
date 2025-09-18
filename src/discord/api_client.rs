@@ -1,9 +1,9 @@
 //! Discord API 客戶端
-//! 
+//!
 //! 提供與 Discord REST API 的真實集成，包括重試機制和錯誤處理。
 
-use crate::error::{DroasError, DroasResult};
 use crate::discord::circuit_breaker::{CircuitBreaker, CircuitBreakerConfig, CircuitBreakerError};
+use crate::error::{DroasError, DroasResult};
 use reqwest::{Client, Response, StatusCode};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -57,9 +57,9 @@ pub struct DiscordApiClient {
 
 impl DiscordApiClient {
     /// 創建新的 Discord API 客戶端
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `bot_token` - Discord Bot Token（應該以 "Bot " 開頭）
     pub fn new(bot_token: String) -> Self {
         let client = Client::builder()
@@ -70,10 +70,10 @@ impl DiscordApiClient {
 
         // 創建針對 Discord API 的熔斷器配置
         let circuit_config = CircuitBreakerConfig {
-            failure_threshold: 3,  // 3 次失敗後觸發熔斷
+            failure_threshold: 3,                      // 3 次失敗後觸發熔斷
             recovery_timeout: Duration::from_secs(30), // 30 秒後嘗試恢復
-            success_threshold: 2,  // 2 次成功後關閉熔斷器
-            request_timeout: Duration::from_secs(10), // 10 秒請求超時
+            success_threshold: 2,                      // 2 次成功後關閉熔斷器
+            request_timeout: Duration::from_secs(10),  // 10 秒請求超時
         };
 
         Self {
@@ -99,32 +99,41 @@ impl DiscordApiClient {
     }
 
     /// 發送訊息到指定頻道（受熔斷器保護）
-    /// 
+    ///
     /// # Arguments
-    /// 
+    ///
     /// * `channel_id` - 頻道 ID
     /// * `message` - 訊息內容
-    /// 
+    ///
     /// # Returns
-    /// 
+    ///
     /// 發送結果，成功時返回訊息 ID
     pub async fn send_message(&self, channel_id: u64, message: &str) -> DroasResult<String> {
-        debug!("準備使用熔斷器保護發送 Discord 訊息到頻道 {}: {}", channel_id, 
-               message.chars().take(50).collect::<String>());
+        debug!(
+            "準備使用熔斷器保護發送 Discord 訊息到頻道 {}: {}",
+            channel_id,
+            message.chars().take(50).collect::<String>()
+        );
 
         // 使用熔斷器保護的 API 調用
-        let result = self.circuit_breaker.execute(async {
-            self.send_message_with_retry(channel_id, message).await
-        }).await;
+        let result = self
+            .circuit_breaker
+            .execute(async { self.send_message_with_retry(channel_id, message).await })
+            .await;
 
         match result {
             Ok(message_id) => {
-                info!("成功發送 Discord 訊息到頻道 {}: message_id={}", channel_id, message_id);
+                info!(
+                    "成功發送 Discord 訊息到頻道 {}: message_id={}",
+                    channel_id, message_id
+                );
                 Ok(message_id)
             }
             Err(CircuitBreakerError::CircuitOpen) => {
                 error!("熔斷器開啟，無法發送訊息到頻道 {}", channel_id);
-                Err(DroasError::discord("系統過載，當前無法發送 Discord 訊息。請稍後再試。"))
+                Err(DroasError::discord(
+                    "系統過載，當前無法發送 Discord 訊息。請稍後再試。",
+                ))
             }
             Err(CircuitBreakerError::Timeout) => {
                 error!("發送訊息到頻道 {} 超時", channel_id);
@@ -140,7 +149,7 @@ impl DiscordApiClient {
     /// 帶重試機制的訊息發送方法（內部使用）
     async fn send_message_with_retry(&self, channel_id: u64, message: &str) -> DroasResult<String> {
         let url = format!("{}/channels/{}/messages", DISCORD_API_BASE, channel_id);
-        
+
         let request_body = CreateMessageRequest {
             content: message.to_string(),
             embeds: None,
@@ -149,11 +158,15 @@ impl DiscordApiClient {
         // 實作重試機制
         let mut attempt = 0;
         const MAX_RETRIES: u32 = 3;
-        
+
         while attempt <= MAX_RETRIES {
             match self.send_message_attempt(&url, &request_body).await {
                 Ok(message_id) => {
-                    debug!("成功發送 Discord 訊息 (嘗試 {}): message_id={}", attempt + 1, message_id);
+                    debug!(
+                        "成功發送 Discord 訊息 (嘗試 {}): message_id={}",
+                        attempt + 1,
+                        message_id
+                    );
                     return Ok(message_id);
                 }
                 Err(e) => {
@@ -162,19 +175,23 @@ impl DiscordApiClient {
                         warn!("遇到不可重試錯誤，終止重試: {}", e);
                         return Err(e);
                     }
-                    
+
                     if attempt == MAX_RETRIES {
                         warn!("發送 Discord 訊息失敗，已達最大重試次數: {}", e);
                         return Err(e);
                     }
-                    
-                    debug!("發送 Discord 訊息失敗 (嘗試 {}): {}，準備重試...", attempt + 1, e);
-                    
+
+                    debug!(
+                        "發送 Discord 訊息失敗 (嘗試 {}): {}，準備重試...",
+                        attempt + 1,
+                        e
+                    );
+
                     // 指數退避延遲加上隨機抖動
                     let delay = self.calculate_backoff_delay(attempt);
                     debug!("重試延遲 {} 毫秒", delay.as_millis());
                     sleep(delay).await;
-                    
+
                     attempt += 1;
                 }
             }
@@ -184,8 +201,13 @@ impl DiscordApiClient {
     }
 
     /// 單次發送訊息嘗試
-    async fn send_message_attempt(&self, url: &str, request_body: &CreateMessageRequest) -> DroasResult<String> {
-        let response = self.client
+    async fn send_message_attempt(
+        &self,
+        url: &str,
+        request_body: &CreateMessageRequest,
+    ) -> DroasResult<String> {
+        let response = self
+            .client
             .post(url)
             .header("Authorization", &self.bot_token)
             .header("Content-Type", "application/json")
@@ -200,26 +222,30 @@ impl DiscordApiClient {
     /// 處理 Discord API 回應
     async fn handle_response(&self, response: Response) -> DroasResult<String> {
         let status = response.status();
-        
+
         // 檢查速率限制
         if let Some(rate_limit_info) = self.extract_rate_limit_info(&response) {
-            debug!("速率限制資訊: 剩餘 {}/{}, 重置時間 {}s", 
-                   rate_limit_info.remaining, rate_limit_info.limit, rate_limit_info.reset_after);
+            debug!(
+                "速率限制資訊: 剩餘 {}/{}, 重置時間 {}s",
+                rate_limit_info.remaining, rate_limit_info.limit, rate_limit_info.reset_after
+            );
         }
 
         match status {
             StatusCode::OK | StatusCode::CREATED => {
                 // 成功回應，解析訊息 ID
-                let response_text = response.text().await
+                let response_text = response
+                    .text()
+                    .await
                     .map_err(|e| DroasError::network(format!("讀取回應失敗: {}", e)))?;
-                
+
                 // 嘗試解析 JSON 並提取訊息 ID
                 if let Ok(json_value) = serde_json::from_str::<serde_json::Value>(&response_text) {
                     if let Some(id) = json_value.get("id").and_then(|v| v.as_str()) {
                         return Ok(id.to_string());
                     }
                 }
-                
+
                 warn!("無法從 Discord API 回應中解析訊息 ID: {}", response_text);
                 Ok("unknown".to_string())
             }
@@ -227,7 +253,7 @@ impl DiscordApiClient {
                 // 速率限制，需要等待
                 let retry_after = self.extract_retry_after(response).await?;
                 warn!("觸發 Discord API 速率限制，需等待 {} 秒", retry_after);
-                
+
                 sleep(Duration::from_secs_f64(retry_after)).await;
                 Err(DroasError::discord("速率限制"))
             }
@@ -258,7 +284,10 @@ impl DiscordApiClient {
             _ => {
                 let error_text = response.text().await.unwrap_or_default();
                 error!("未預期的 Discord API 回應 ({}): {}", status, error_text);
-                Err(DroasError::discord(format!("未預期的 API 回應: {}", status)))
+                Err(DroasError::discord(format!(
+                    "未預期的 API 回應: {}",
+                    status
+                )))
             }
         }
     }
@@ -266,20 +295,24 @@ impl DiscordApiClient {
     /// 提取速率限制資訊
     fn extract_rate_limit_info(&self, response: &Response) -> Option<RateLimitInfo> {
         let headers = response.headers();
-        
-        let limit = headers.get("x-ratelimit-limit")
+
+        let limit = headers
+            .get("x-ratelimit-limit")
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.parse().ok())?;
-            
-        let remaining = headers.get("x-ratelimit-remaining")
+
+        let remaining = headers
+            .get("x-ratelimit-remaining")
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.parse().ok())?;
-            
-        let reset_after = headers.get("x-ratelimit-reset-after")
+
+        let reset_after = headers
+            .get("x-ratelimit-reset-after")
             .and_then(|v| v.to_str().ok())
             .and_then(|v| v.parse().ok())?;
-            
-        let bucket = headers.get("x-ratelimit-bucket")
+
+        let bucket = headers
+            .get("x-ratelimit-bucket")
             .and_then(|v| v.to_str().ok())
             .map(|v| v.to_string());
 
@@ -294,9 +327,12 @@ impl DiscordApiClient {
     /// 提取重試等待時間
     async fn extract_retry_after(&self, mut response: Response) -> DroasResult<f64> {
         // 先嘗試從 headers 獲取
-        if let Some(retry_after) = response.headers().get("retry-after")
+        if let Some(retry_after) = response
+            .headers()
+            .get("retry-after")
             .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse::<f64>().ok()) {
+            .and_then(|v| v.parse::<f64>().ok())
+        {
             return Ok(retry_after);
         }
 
@@ -319,16 +355,18 @@ impl DiscordApiClient {
         if !self.bot_token.starts_with("Bot ") {
             return Err(DroasError::validation("Bot Token 必須以 'Bot ' 開頭"));
         }
-        
+
         if self.bot_token.len() < 10 {
             return Err(DroasError::validation("Bot Token 過短"));
         }
-        
+
         Ok(())
     }
 
     /// 獲取熔斷器統計資訊
-    pub async fn get_circuit_breaker_stats(&self) -> crate::discord::circuit_breaker::CircuitBreakerStats {
+    pub async fn get_circuit_breaker_stats(
+        &self,
+    ) -> crate::discord::circuit_breaker::CircuitBreakerStats {
         self.circuit_breaker.get_stats().await
     }
 
@@ -388,14 +426,14 @@ impl DiscordApiClient {
     fn calculate_backoff_delay(&self, attempt: u32) -> Duration {
         // 基本指數退避：1秒、2秒、4秒
         let base_delay_ms = 1000 * (2_u64.pow(attempt));
-        
+
         // 最大延遲限制為 30 秒
         let base_delay_ms = base_delay_ms.min(30_000);
-        
+
         // 添加 25% 的隨機抖動以避免驚群效應
         let jitter = self.generate_jitter(base_delay_ms);
         let final_delay_ms = base_delay_ms + jitter;
-        
+
         Duration::from_millis(final_delay_ms)
     }
 
@@ -406,11 +444,11 @@ impl DiscordApiClient {
             .duration_since(UNIX_EPOCH)
             .unwrap_or_else(|_| Duration::from_secs(0))
             .as_nanos() as u64;
-        
+
         // 簡單的線性同餘生成器
         let seed = now.wrapping_mul(1103515245).wrapping_add(12345);
         let random = (seed / 65536) % 32768;
-        
+
         // 返回 0-25% 基本延遲的隨機值
         let jitter_range = base_delay_ms / 4; // 25%
         random % jitter_range
@@ -422,7 +460,7 @@ impl Default for DiscordApiClient {
         // 從環境變數獲取 token，用於測試和開發
         let bot_token = std::env::var("DISCORD_BOT_TOKEN")
             .unwrap_or_else(|_| "Bot your_token_here".to_string());
-            
+
         Self::new(bot_token)
     }
 }
@@ -449,7 +487,7 @@ mod tests {
             content: "Test message".to_string(),
             embeds: None,
         };
-        
+
         let json = serde_json::to_string(&request).unwrap();
         assert!(json.contains("Test message"));
         assert!(!json.contains("embeds"));

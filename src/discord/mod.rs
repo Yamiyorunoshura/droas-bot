@@ -13,15 +13,19 @@ pub mod api_client;
 pub mod circuit_breaker;
 pub mod client;
 pub mod commands;
-pub mod gateway;
-pub mod rate_limit;
 pub mod event_handler;
+pub mod gateway;
 pub mod monitoring;
+pub mod rate_limit;
 
 pub use api_client::DiscordApiClient;
-pub use circuit_breaker::{CircuitBreaker, CircuitBreakerConfig, CircuitState, SharedCircuitBreaker};
+pub use circuit_breaker::{
+    CircuitBreaker, CircuitBreakerConfig, CircuitState, SharedCircuitBreaker,
+};
 pub use client::DiscordClient;
-pub use gateway::{GatewayManager, GatewayStatus};
-pub use rate_limit::{RateLimiter, RateLimit};
 pub use event_handler::{EventHandler, EventResult, TestMemberJoinEvent};
-pub use monitoring::{DiscordMonitor, RateLimitMetrics, ApiMetrics, EventMetrics, SystemHealth, HealthStatus};
+pub use gateway::{GatewayManager, GatewayStatus};
+pub use monitoring::{
+    ApiMetrics, DiscordMonitor, EventMetrics, HealthStatus, RateLimitMetrics, SystemHealth,
+};
+pub use rate_limit::{RateLimit, RateLimiter};

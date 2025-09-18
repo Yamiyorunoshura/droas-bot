@@ -1,9 +1,9 @@
 use anyhow::Result;
-use tracing::{debug, info};
+use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::{RwLock, Mutex};
-use chrono::{DateTime, Utc, Duration};
+use tokio::sync::{Mutex, RwLock};
+use tracing::{debug, info};
 
 /// 緩存項目
 #[derive(Debug, Clone)]
@@ -180,16 +180,22 @@ pub struct CacheManager {
 
 impl CacheManager {
     /// 創建新的緩存管理器
-    /// 
+    ///
     /// # Arguments
     /// * `max_entries` - 每個緩存的最大項目數
     /// * `ttl_seconds` - 默認TTL（秒）
     pub async fn new(max_entries: usize, ttl_seconds: i64) -> Result<Self> {
-        info!("初始化緩存管理器: max_entries={}, ttl={}s", max_entries, ttl_seconds);
+        info!(
+            "初始化緩存管理器: max_entries={}, ttl={}s",
+            max_entries, ttl_seconds
+        );
 
         let cache_manager = Self {
             font_cache: Arc::new(RwLock::new(LruCache::new(max_entries / 3, ttl_seconds))),
-            background_metadata_cache: Arc::new(RwLock::new(LruCache::new(max_entries / 3, ttl_seconds))),
+            background_metadata_cache: Arc::new(RwLock::new(LruCache::new(
+                max_entries / 3,
+                ttl_seconds,
+            ))),
             avatar_cache: Arc::new(RwLock::new(LruCache::new(max_entries / 3, ttl_seconds * 2))), // 頭像緩存更久
             cleanup_running: Arc::new(Mutex::new(false)),
         };
@@ -376,18 +382,18 @@ mod tests {
     #[tokio::test]
     async fn test_font_cache() {
         let manager = CacheManager::new(100, 3600).await.unwrap();
-        
+
         let font_data = vec![1, 2, 3, 4, 5];
         let font_name = "test_font";
-        
+
         // 測試緩存
         let result = manager.cache_font(font_name, font_data.clone()).await;
         assert!(result.is_ok());
-        
+
         // 測試讀取
         let cached_data = manager.get_font(font_name).await;
         assert_eq!(cached_data, Some(font_data));
-        
+
         // 測試不存在的字體
         let missing_data = manager.get_font("missing_font").await;
         assert_eq!(missing_data, None);
@@ -396,14 +402,16 @@ mod tests {
     #[tokio::test]
     async fn test_background_metadata_cache() {
         let manager = CacheManager::new(100, 3600).await.unwrap();
-        
+
         let metadata = "test metadata";
         let asset_id = "test_asset_123";
-        
+
         // 測試緩存
-        let result = manager.cache_background_metadata(asset_id, metadata.to_string()).await;
+        let result = manager
+            .cache_background_metadata(asset_id, metadata.to_string())
+            .await;
         assert!(result.is_ok());
-        
+
         // 測試讀取
         let cached_metadata = manager.get_background_metadata(asset_id).await;
         assert_eq!(cached_metadata, Some(metadata.to_string()));
@@ -412,14 +420,14 @@ mod tests {
     #[tokio::test]
     async fn test_avatar_cache() {
         let manager = CacheManager::new(100, 3600).await.unwrap();
-        
+
         let avatar_data = vec![10, 20, 30, 40, 50];
         let user_id = "user_456";
-        
+
         // 測試緩存
         let result = manager.cache_avatar(user_id, avatar_data.clone()).await;
         assert!(result.is_ok());
-        
+
         // 測試讀取
         let cached_avatar = manager.get_avatar(user_id).await;
         assert_eq!(cached_avatar, Some(avatar_data));
@@ -428,14 +436,14 @@ mod tests {
     #[tokio::test]
     async fn test_lru_eviction() {
         let mut lru = LruCache::new(2, 3600); // 只允許2個項目
-        
+
         // 添加兩個項目
         lru.insert("key1".to_string(), "value1".to_string());
         lru.insert("key2".to_string(), "value2".to_string());
-        
+
         // 添加第三個項目應該觸發LRU淘汰
         lru.insert("key3".to_string(), "value3".to_string());
-        
+
         // key1應該被淘汰
         assert!(lru.get("key1").is_none());
         assert!(lru.get("key2").is_some());
@@ -445,15 +453,15 @@ mod tests {
     #[tokio::test]
     async fn test_ttl_expiration() {
         let mut lru = LruCache::new(10, 1); // 1秒TTL
-        
+
         lru.insert("test_key".to_string(), "test_value".to_string());
-        
+
         // 立即讀取應該成功
         assert!(lru.get("test_key").is_some());
-        
+
         // 等待超過TTL
         sleep(TokioDuration::from_secs(2)).await;
-        
+
         // 現在應該過期了
         assert!(lru.get("test_key").is_none());
     }
@@ -461,19 +469,22 @@ mod tests {
     #[tokio::test]
     async fn test_cleanup() {
         let manager = CacheManager::new(100, 1).await.unwrap(); // 1秒TTL
-        
+
         // 添加一些數據
         manager.cache_font("font1", vec![1, 2, 3]).await.unwrap();
-        manager.cache_background_metadata("bg1", "metadata".to_string()).await.unwrap();
+        manager
+            .cache_background_metadata("bg1", "metadata".to_string())
+            .await
+            .unwrap();
         manager.cache_avatar("user1", vec![4, 5, 6]).await.unwrap();
-        
+
         // 等待過期
         sleep(TokioDuration::from_secs(2)).await;
-        
+
         // 執行清理
         let result = manager.cleanup().await;
         assert!(result.is_ok());
-        
+
         // 確認數據已被清理
         assert!(manager.get_font("font1").await.is_none());
         assert!(manager.get_background_metadata("bg1").await.is_none());
@@ -483,21 +494,24 @@ mod tests {
     #[tokio::test]
     async fn test_clear_all() {
         let manager = CacheManager::new(100, 3600).await.unwrap();
-        
+
         // 添加一些數據
         manager.cache_font("font1", vec![1, 2, 3]).await.unwrap();
-        manager.cache_background_metadata("bg1", "metadata".to_string()).await.unwrap();
+        manager
+            .cache_background_metadata("bg1", "metadata".to_string())
+            .await
+            .unwrap();
         manager.cache_avatar("user1", vec![4, 5, 6]).await.unwrap();
-        
+
         // 確認數據存在
         assert!(manager.get_font("font1").await.is_some());
         assert!(manager.get_background_metadata("bg1").await.is_some());
         assert!(manager.get_avatar("user1").await.is_some());
-        
+
         // 清空緩存
         let result = manager.clear_all().await;
         assert!(result.is_ok());
-        
+
         // 確認數據已被清空
         assert!(manager.get_font("font1").await.is_none());
         assert!(manager.get_background_metadata("bg1").await.is_none());
@@ -507,13 +521,16 @@ mod tests {
     #[tokio::test]
     async fn test_get_stats() {
         let manager = CacheManager::new(100, 3600).await.unwrap();
-        
+
         // 添加一些數據
         manager.cache_font("font1", vec![1, 2, 3]).await.unwrap();
-        manager.cache_background_metadata("bg1", "metadata".to_string()).await.unwrap();
-        
+        manager
+            .cache_background_metadata("bg1", "metadata".to_string())
+            .await
+            .unwrap();
+
         let stats = manager.get_stats().await;
-        
+
         assert!(stats.font_cache.total_entries > 0);
         assert!(stats.background_metadata_cache.total_entries > 0);
         assert_eq!(stats.avatar_cache.total_entries, 0);
@@ -522,12 +539,12 @@ mod tests {
     #[tokio::test]
     async fn test_memory_usage() {
         let manager = CacheManager::new(100, 3600).await.unwrap();
-        
+
         let initial_usage = manager.get_memory_usage().await;
-        
+
         // 添加一些數據
         manager.cache_font("font1", vec![1; 1000]).await.unwrap();
-        
+
         let after_usage = manager.get_memory_usage().await;
         assert!(after_usage > initial_usage);
     }

@@ -3,18 +3,18 @@
 //! This module contains comprehensive tests for rate limiting and retry handling functionality.
 //! Tests include unit tests, integration tests, and performance benchmarks.
 
+use anyhow::Result;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use tokio::time::sleep;
-use anyhow::Result;
 use tempfile::NamedTempFile;
+use tokio::time::sleep;
 
 // Import our project modules
-use droas_bot::discord::rate_limit::{RateLimiter, ExponentialBackoffConfig, RateLimitStats};
-use droas_bot::discord::event_handler::{EventHandler, TestMemberJoinEvent, EventResult};
+use droas_bot::database::schema::{GuildConfig, GuildConfigService};
 use droas_bot::discord::api_client::DiscordApiClient;
 use droas_bot::discord::circuit_breaker::{CircuitBreaker, CircuitBreakerConfig};
-use droas_bot::database::schema::{GuildConfigService, GuildConfig};
+use droas_bot::discord::event_handler::{EventHandler, EventResult, TestMemberJoinEvent};
+use droas_bot::discord::rate_limit::{ExponentialBackoffConfig, RateLimitStats, RateLimiter};
 use droas_bot::handlers::welcome::WelcomeHandler;
 
 /// Helper function to create test services
@@ -22,7 +22,8 @@ async fn create_test_services() -> Result<(GuildConfigService, NamedTempFile)> {
     let temp_file = NamedTempFile::new().expect("無法創建臨時檔案");
     let database_url = format!("sqlite://{}", temp_file.path().display());
 
-    let pool = sqlx::SqlitePool::connect(&database_url).await
+    let pool = sqlx::SqlitePool::connect(&database_url)
+        .await
         .expect("無法連接測試資料庫");
 
     // 創建測試表格
@@ -34,7 +35,7 @@ async fn create_test_services() -> Result<(GuildConfigService, NamedTempFile)> {
             background_ref TEXT,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-        "#
+        "#,
     )
     .execute(&pool)
     .await
@@ -55,7 +56,9 @@ mod rate_limiting_tests {
         let limiter = RateLimiter::new();
 
         // Test basic rate limiting functionality
-        limiter.handle_rate_limit_response("test_route", 1.0, false).await;
+        limiter
+            .handle_rate_limit_response("test_route", 1.0, false)
+            .await;
 
         // Should wait when rate limited
         let wait_time = limiter.wait_if_rate_limited("test_route").await;
@@ -82,9 +85,8 @@ mod rate_limiting_tests {
         let attempt_count = Arc::new(Mutex::new(0));
         let attempt_count_clone = Arc::clone(&attempt_count);
 
-        let result = limiter.retry_with_exponential_backoff(
-            "test_route",
-            move || {
+        let result = limiter
+            .retry_with_exponential_backoff("test_route", move || {
                 let counter = Arc::clone(&attempt_count_clone);
                 async move {
                     let mut count = counter.lock().unwrap();
@@ -98,8 +100,8 @@ mod rate_limiting_tests {
                         Ok("Success")
                     }
                 }
-            }
-        ).await;
+            })
+            .await;
 
         // Should succeed on 3rd attempt
         assert_eq!(result.unwrap(), "Success");
@@ -123,8 +125,11 @@ mod rate_limiting_tests {
         let avg_time_per_request = duration.as_millis() as f64 / 100.0;
 
         // Should process requests very quickly when not rate limited
-        assert!(avg_time_per_request < 1.0,
-                "Rate limiting performance too slow: {}ms per request", avg_time_per_request);
+        assert!(
+            avg_time_per_request < 1.0,
+            "Rate limiting performance too slow: {}ms per request",
+            avg_time_per_request
+        );
     }
 
     #[tokio::test]
@@ -141,16 +146,18 @@ mod rate_limiting_tests {
 
         // Test circuit breaker with failing operations
         for i in 0..5 {
-            let result = circuit_breaker.execute(async {
-                Err::<(), String>("Simulated failure".to_string())
-            }).await;
+            let result = circuit_breaker
+                .execute(async { Err::<(), String>("Simulated failure".to_string()) })
+                .await;
 
             assert!(result.is_err());
 
             if i >= 2 {
                 // Circuit should be open after 3 failures
-                assert_eq!(circuit_breaker.get_state(),
-                          droas_bot::discord::circuit_breaker::CircuitState::Open);
+                assert_eq!(
+                    circuit_breaker.get_state(),
+                    droas_bot::discord::circuit_breaker::CircuitState::Open
+                );
             }
         }
     }
@@ -161,10 +168,14 @@ mod rate_limiting_tests {
         let limiter = RateLimiter::new();
 
         // Set global rate limit
-        limiter.handle_rate_limit_response("any_route", 0.5, true).await;
+        limiter
+            .handle_rate_limit_response("any_route", 0.5, true)
+            .await;
 
         // Set route-specific rate limit
-        limiter.handle_rate_limit_response("specific_route", 1.0, false).await;
+        limiter
+            .handle_rate_limit_response("specific_route", 1.0, false)
+            .await;
 
         // Global limit should affect all routes
         let wait_time1 = limiter.wait_if_rate_limited("different_route").await;
@@ -261,8 +272,11 @@ mod idempotency_tests {
         let duration = start.elapsed();
         let avg_time_per_check = duration.as_millis() as f64 / 1000.0;
 
-        assert!(avg_time_per_check < 1.0,
-                "Idempotency check too slow: {}ms per check", avg_time_per_check);
+        assert!(
+            avg_time_per_check < 1.0,
+            "Idempotency check too slow: {}ms per check",
+            avg_time_per_check
+        );
     }
 
     #[tokio::test]
@@ -377,8 +391,11 @@ mod integration_tests {
         let duration = start.elapsed();
 
         // Should handle concurrent requests efficiently
-        assert!(duration < Duration::from_secs(5),
-                "System too slow under load: {:?}", duration);
+        assert!(
+            duration < Duration::from_secs(5),
+            "System too slow under load: {:?}",
+            duration
+        );
 
         // Check that all events were processed
         let (total_entries, processed_entries) = event_handler.get_cache_stats();
@@ -401,7 +418,9 @@ mod integration_tests {
 
         // Test rate limiting awareness in API client
         let limiter = RateLimiter::new();
-        limiter.handle_rate_limit_response("api_call", 0.1, true).await;
+        limiter
+            .handle_rate_limit_response("api_call", 0.1, true)
+            .await;
 
         let wait_time = limiter.wait_if_rate_limited("api_call").await;
         assert!(wait_time > Duration::from_millis(50));
@@ -424,7 +443,9 @@ mod chaos_tests {
         for i in 0..1000 {
             if i % 10 == 0 {
                 // Simulate rate limiting every 10th request
-                limiter.handle_rate_limit_response("chaos_test", 0.1, false).await;
+                limiter
+                    .handle_rate_limit_response("chaos_test", 0.1, false)
+                    .await;
             }
 
             let wait_time = limiter.wait_if_rate_limited("chaos_test").await;
@@ -440,8 +461,16 @@ mod chaos_tests {
         }
 
         // Should handle chaos gracefully
-        assert!(success_count > 800, "Too many requests failed under chaos: {}", success_count);
-        assert!(rate_limited_count < 200, "Too many requests rate limited: {}", rate_limited_count);
+        assert!(
+            success_count > 800,
+            "Too many requests failed under chaos: {}",
+            success_count
+        );
+        assert!(
+            rate_limited_count < 200,
+            "Too many requests rate limited: {}",
+            rate_limited_count
+        );
     }
 
     #[tokio::test]
@@ -474,8 +503,16 @@ mod chaos_tests {
         }
 
         // Should handle duplicates correctly
-        assert!(processed_events <= 450, "Too many unique events processed: {}", processed_events);
-        assert!(duplicate_events >= 50, "Too few duplicates detected: {}", duplicate_events);
+        assert!(
+            processed_events <= 450,
+            "Too many unique events processed: {}",
+            processed_events
+        );
+        assert!(
+            duplicate_events >= 50,
+            "Too few duplicates detected: {}",
+            duplicate_events
+        );
     }
 
     #[tokio::test]
@@ -485,7 +522,9 @@ mod chaos_tests {
 
         // Simulate burst of rate limits
         for i in 0..20 {
-            limiter.handle_rate_limit_response("recovery_test", 0.5, false).await;
+            limiter
+                .handle_rate_limit_response("recovery_test", 0.5, false)
+                .await;
 
             let wait_time = limiter.wait_if_rate_limited("recovery_test").await;
             assert!(wait_time > Duration::from_millis(400));
@@ -505,8 +544,11 @@ mod chaos_tests {
         }
 
         let recovery_time = start.elapsed();
-        assert!(recovery_time < Duration::from_millis(100),
-                "System recovery too slow: {:?}", recovery_time);
+        assert!(
+            recovery_time < Duration::from_millis(100),
+            "System recovery too slow: {:?}",
+            recovery_time
+        );
     }
 }
 
@@ -524,15 +566,20 @@ mod performance_benchmarks {
         const REQUEST_COUNT: usize = 10000;
 
         for i in 0..REQUEST_COUNT {
-            limiter.wait_if_rate_limited(&format!("benchmark_route_{}", i % 100)).await;
+            limiter
+                .wait_if_rate_limited(&format!("benchmark_route_{}", i % 100))
+                .await;
         }
 
         let duration = start.elapsed();
         let requests_per_second = REQUEST_COUNT as f64 / duration.as_secs_f64();
 
         // Should handle at least 1000 requests per second
-        assert!(requests_per_second > 1000.0,
-                "Rate limiting throughput too low: {} requests/second", requests_per_second);
+        assert!(
+            requests_per_second > 1000.0,
+            "Rate limiting throughput too low: {} requests/second",
+            requests_per_second
+        );
     }
 
     #[tokio::test]

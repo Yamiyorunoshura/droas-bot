@@ -18,7 +18,12 @@ impl MockRateLimiter {
         }
     }
 
-    pub async fn handle_rate_limit_response(&self, route: &str, retry_after: f64, _is_global: bool) {
+    pub async fn handle_rate_limit_response(
+        &self,
+        route: &str,
+        retry_after: f64,
+        _is_global: bool,
+    ) {
         let mut limits = self.limits.lock().unwrap();
         let expiry_time = Instant::now() + Duration::from_millis((retry_after * 1000.0) as u64);
         limits.insert(route.to_string(), expiry_time);
@@ -36,7 +41,10 @@ impl MockRateLimiter {
 
     pub fn get_stats(&self) -> MockRateLimitStats {
         let limits = self.limits.lock().unwrap();
-        let active_limits = limits.values().filter(|&&expiry| expiry > Instant::now()).count();
+        let active_limits = limits
+            .values()
+            .filter(|&&expiry| expiry > Instant::now())
+            .count();
         MockRateLimitStats {
             active_limits,
             total_entries: limits.len(),
@@ -98,7 +106,9 @@ mod tests {
         let limiter = MockRateLimiter::new();
 
         // 模擬收到速率限制回應
-        limiter.handle_rate_limit_response("test_route", 1.0, false).await;
+        limiter
+            .handle_rate_limit_response("test_route", 1.0, false)
+            .await;
 
         // 應該等待當被速率限制時
         let wait_time = limiter.wait_if_rate_limited("test_route").await;
@@ -142,7 +152,11 @@ mod tests {
         }
         let rate_limit_duration = start.elapsed();
         let avg_rate_limit_time = rate_limit_duration.as_millis() as f64 / 100.0;
-        assert!(avg_rate_limit_time < 1.0, "速率限制性能過慢: {}ms", avg_rate_limit_time);
+        assert!(
+            avg_rate_limit_time < 1.0,
+            "速率限制性能過慢: {}ms",
+            avg_rate_limit_time
+        );
 
         // 測試冪等性檢查性能（目標 < 5ms）
         let start = Instant::now();
@@ -151,7 +165,11 @@ mod tests {
         }
         let idempotency_duration = start.elapsed();
         let avg_idempotency_time = idempotency_duration.as_millis() as f64 / 100.0;
-        assert!(avg_idempotency_time < 1.0, "冪等性檢查性能過慢: {}ms", avg_idempotency_time);
+        assert!(
+            avg_idempotency_time < 1.0,
+            "冪等性檢查性能過慢: {}ms",
+            avg_idempotency_time
+        );
     }
 
     #[tokio::test]
@@ -161,9 +179,7 @@ mod tests {
         let handler = MockEventHandler::new();
 
         // 模擬高頻率成員加入事件
-        let events: Vec<(u64, u64)> = (0..100)
-            .map(|i| (123456789, 555666777 + i))
-            .collect();
+        let events: Vec<(u64, u64)> = (0..100).map(|i| (123456789, 555666777 + i)).collect();
 
         let mut processed_count = 0;
         let mut duplicate_count = 0;
@@ -206,7 +222,9 @@ mod tests {
 
             // 模擬10%的速率限制概率
             if i % 10 == 0 {
-                limiter.handle_rate_limit_response("stress_test", 0.1, false).await;
+                limiter
+                    .handle_rate_limit_response("stress_test", 0.1, false)
+                    .await;
             }
 
             let wait_time = limiter.wait_if_rate_limited("stress_test").await;
@@ -227,7 +245,9 @@ mod tests {
 
         // 添加大量事件到緩存
         for i in 0..1000 {
-            handler.record_processed_event(123456789, 555666777 + i).await;
+            handler
+                .record_processed_event(123456789, 555666777 + i)
+                .await;
         }
 
         // 檢查緩存大小
@@ -237,7 +257,11 @@ mod tests {
         // 測試記憶體使用（通過檢查Set大小來估計）
         let events = handler.processed_events.lock().unwrap();
         let estimated_memory = events.capacity() * std::mem::size_of::<String>();
-        assert!(estimated_memory < 1024 * 1024, "記憶體使用過多: {} bytes", estimated_memory);
+        assert!(
+            estimated_memory < 1024 * 1024,
+            "記憶體使用過多: {} bytes",
+            estimated_memory
+        );
     }
 }
 

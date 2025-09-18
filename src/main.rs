@@ -1,7 +1,7 @@
 use anyhow::Result;
+use std::sync::Arc;
 use tracing::info;
 use tracing_subscriber;
-use std::sync::Arc;
 
 mod assets;
 mod config;
@@ -37,7 +37,7 @@ async fn main() -> Result<()> {
     };
 
     // TODO: Initialize database connection
-    
+
     // Initialize Discord client
     let mut discord_client = match DiscordClient::new(Arc::clone(&config)).await {
         Ok(client) => {
@@ -49,19 +49,19 @@ async fn main() -> Result<()> {
             return Ok(());
         }
     };
-    
+
     // Connect to Discord
     if let Err(e) = discord_client.connect().await {
         tracing::error!("Failed to connect to Discord: {}", e);
         return Ok(());
     }
-    
+
     // Start Discord client (this will block until shutdown)
     info!("Starting Discord client...");
     if let Err(e) = discord_client.start().await {
         tracing::error!("Discord client error: {}", e);
     }
-    
+
     info!("DROAS Bot shutting down...");
 
     Ok(())

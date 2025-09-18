@@ -3,9 +3,9 @@ pub mod cache;
 pub mod fonts;
 
 use anyhow::Result;
-use tracing::info;
 use std::path::Path;
 use tokio::fs;
+use tracing::info;
 
 /// 資源管理器，統一管理背景圖片、字體等資源
 pub struct AssetManager {
@@ -21,10 +21,10 @@ pub struct AssetManager {
 
 impl AssetManager {
     /// 創建新的資源管理器
-    /// 
+    ///
     /// # Arguments
     /// * `root_path` - 資源根目錄路徑
-    /// 
+    ///
     /// # Returns
     /// * `Result<Self>` - 成功返回 AssetManager 實例，失敗返回錯誤
     pub async fn new<P: AsRef<Path>>(root_path: P) -> Result<Self> {
@@ -37,7 +37,7 @@ impl AssetManager {
         // 創建子目錄
         let backgrounds_path = Path::new(&root_path).join("backgrounds");
         let fonts_path = Path::new(&root_path).join("fonts");
-        
+
         fs::create_dir_all(&backgrounds_path).await?;
         fs::create_dir_all(&fonts_path).await?;
 
@@ -47,7 +47,7 @@ impl AssetManager {
         let fonts = fonts::FontManager::new(&fonts_path).await?;
 
         info!("資源管理器初始化成功");
-        
+
         Ok(Self {
             root_path,
             background,
@@ -131,23 +131,26 @@ mod tests {
     async fn test_get_storage_stats() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = AssetManager::new(temp_dir.path()).await.unwrap();
-        
+
         let stats = manager.get_storage_stats().await;
         assert!(stats.is_ok());
         let stats = stats.unwrap();
-        
+
         // 初始狀態背景應該是空的，但字體目錄可能有README檔案
         assert_eq!(stats.background_assets_size, 0);
         // 字體大小可能不為0（因為有README.md檔案）
         assert!(stats.font_assets_size >= 0);
-        assert_eq!(stats.total_disk_size, stats.background_assets_size + stats.font_assets_size);
+        assert_eq!(
+            stats.total_disk_size,
+            stats.background_assets_size + stats.font_assets_size
+        );
     }
 
     #[tokio::test]
     async fn test_cleanup() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = AssetManager::new(temp_dir.path()).await.unwrap();
-        
+
         let result = manager.cleanup().await;
         assert!(result.is_ok());
     }

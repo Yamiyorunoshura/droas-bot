@@ -1,5 +1,5 @@
-use std::process::Command;
 use std::path::Path;
+use std::process::Command;
 
 #[cfg(test)]
 mod ci_tests {
@@ -8,15 +8,15 @@ mod ci_tests {
     #[test]
     fn test_project_compiles() {
         // Test that the project compiles without errors
-        let output = Command::new("cargo")
-            .args(&["check"])
-            .output();
-        
+        let output = Command::new("cargo").args(&["check"]).output();
+
         match output {
             Ok(result) => {
-                assert!(result.status.success(), 
-                    "Project should compile successfully. stderr: {}", 
-                    String::from_utf8_lossy(&result.stderr));
+                assert!(
+                    result.status.success(),
+                    "Project should compile successfully. stderr: {}",
+                    String::from_utf8_lossy(&result.stderr)
+                );
             }
             Err(_) => {
                 // If cargo is not available, skip this test
@@ -50,10 +50,8 @@ mod ci_tests {
     #[test]
     fn test_code_formatting() {
         // Test that code is properly formatted
-        let output = Command::new("cargo")
-            .args(&["fmt", "--check"])
-            .output();
-        
+        let output = Command::new("cargo").args(&["fmt", "--check"]).output();
+
         match output {
             Ok(result) => {
                 // If cargo fmt is available, check formatting
@@ -76,7 +74,7 @@ mod ci_tests {
         let output = Command::new("cargo")
             .args(&["clippy", "--", "-D", "warnings"])
             .output();
-        
+
         match output {
             Ok(result) => {
                 if result.status.success() {

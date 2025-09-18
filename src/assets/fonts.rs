@@ -1,8 +1,8 @@
 use anyhow::Result;
-use tracing::{debug, info, warn};
 use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::io::AsyncReadExt;
+use tracing::{debug, info, warn};
 
 /// 支持的字體格式
 #[derive(Debug, Clone, PartialEq)]
@@ -51,7 +51,7 @@ pub struct FontManager {
 
 impl FontManager {
     /// 創建新的字體管理器
-    /// 
+    ///
     /// # Arguments
     /// * `fonts_path` - 字體存儲目錄
     pub async fn new<P: AsRef<Path>>(fonts_path: P) -> Result<Self> {
@@ -71,10 +71,10 @@ impl FontManager {
     /// 確保默認字體存在
     async fn ensure_default_fonts(&self) -> Result<()> {
         let default_font_path = self.fonts_path.join("default.ttf");
-        
+
         if !default_font_path.exists() {
             info!("創建默認字體佔位符");
-            
+
             // 創建一個README檔案指導用戶放置字體
             let readme_content = r#"# 字體目錄
 
@@ -97,7 +97,7 @@ impl FontManager {
 ## 默認字體
 如果沒有找到其他字體，系統會嘗試使用系統默認字體。
 "#;
-            
+
             let readme_path = self.fonts_path.join("README.md");
             fs::write(readme_path, readme_content).await?;
         }
@@ -115,19 +115,20 @@ impl FontManager {
         }
 
         let mut entries = fs::read_dir(&self.fonts_path).await?;
-        
+
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
-            
+
             if path.is_file() {
                 if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
                     if let Some(format) = FontFormat::from_extension(ext) {
                         if let Ok(metadata) = fs::metadata(&path).await {
-                            let name = path.file_stem()
+                            let name = path
+                                .file_stem()
                                 .and_then(|s| s.to_str())
                                 .unwrap_or("unknown")
                                 .to_string();
-                                
+
                             fonts.push(FontInfo {
                                 name,
                                 file_path: path,
@@ -145,10 +146,10 @@ impl FontManager {
     }
 
     /// 讀取字體數據
-    /// 
+    ///
     /// # Arguments
     /// * `font_name` - 字體名稱
-    /// 
+    ///
     /// # Returns
     /// * `Result<Vec<u8>>` - 字體二進制數據
     pub async fn load_font_data(&self, font_name: &str) -> Result<Vec<u8>> {
@@ -156,16 +157,20 @@ impl FontManager {
 
         // 嘗試多種檔案擴展名
         let possible_extensions = ["ttf", "otf"];
-        
+
         for ext in &possible_extensions {
             let font_path = self.fonts_path.join(format!("{}.{}", font_name, ext));
-            
+
             if font_path.exists() {
                 let mut file = fs::File::open(&font_path).await?;
                 let mut data = Vec::new();
                 file.read_to_end(&mut data).await?;
-                
-                debug!("字體載入成功: {}, size={} bytes", font_path.display(), data.len());
+
+                debug!(
+                    "字體載入成功: {}, size={} bytes",
+                    font_path.display(),
+                    data.len()
+                );
                 return Ok(data);
             }
         }
@@ -191,14 +196,17 @@ impl FontManager {
     }
 
     /// 獲取首選字體
-    /// 
+    ///
     /// 根據優先順序返回可用的字體：
     /// 1. 指定的字體名稱
     /// 2. 中文友好的字體
     /// 3. 任何可用的字體
-    pub async fn get_preferred_font(&self, preferred_name: Option<&str>) -> Result<Option<FontInfo>> {
+    pub async fn get_preferred_font(
+        &self,
+        preferred_name: Option<&str>,
+    ) -> Result<Option<FontInfo>> {
         let fonts = self.list_fonts().await?;
-        
+
         if fonts.is_empty() {
             warn!("沒有找到任何字體檔案");
             return Ok(None);
@@ -206,15 +214,29 @@ impl FontManager {
 
         // 如果指定了偏好字體
         if let Some(name) = preferred_name {
-            if let Some(font) = fonts.iter().find(|f| f.name.to_lowercase() == name.to_lowercase()) {
+            if let Some(font) = fonts
+                .iter()
+                .find(|f| f.name.to_lowercase() == name.to_lowercase())
+            {
                 return Ok(Some(font.clone()));
             }
         }
 
         // 尋找中文友好的字體
-        let chinese_friendly = ["noto", "microsoft", "yahei", "simhei", "simsun", "source", "sans"];
+        let chinese_friendly = [
+            "noto",
+            "microsoft",
+            "yahei",
+            "simhei",
+            "simsun",
+            "source",
+            "sans",
+        ];
         for keyword in &chinese_friendly {
-            if let Some(font) = fonts.iter().find(|f| f.name.to_lowercase().contains(keyword)) {
+            if let Some(font) = fonts
+                .iter()
+                .find(|f| f.name.to_lowercase().contains(keyword))
+            {
                 return Ok(Some(font.clone()));
             }
         }
@@ -234,7 +256,8 @@ impl FontManager {
 
         // 檢查檔案大小（至少要有基本的字體頭部）
         let metadata = fs::metadata(font_path).await?;
-        if metadata.len() < 1024 {  // 至少1KB
+        if metadata.len() < 1024 {
+            // 至少1KB
             warn!("字體檔案太小: {} bytes", metadata.len());
             return Ok(false);
         }
@@ -262,7 +285,7 @@ impl FontManager {
     /// 獲取字體目錄總大小
     pub async fn get_total_size(&self) -> Result<u64> {
         let mut total_size = 0u64;
-        
+
         if let Ok(mut entries) = fs::read_dir(&self.fonts_path).await {
             while let Some(entry) = entries.next_entry().await? {
                 if let Ok(metadata) = entry.metadata().await {
@@ -308,7 +331,7 @@ mod tests {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await;
         assert!(manager.is_ok());
-        
+
         // 檢查README檔案是否被創建
         let readme_path = temp_dir.path().join("README.md");
         assert!(readme_path.exists());
@@ -316,10 +339,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_font_format_detection() {
-        assert_eq!(FontFormat::from_extension("ttf"), Some(FontFormat::TrueType));
-        assert_eq!(FontFormat::from_extension("TTF"), Some(FontFormat::TrueType));
-        assert_eq!(FontFormat::from_extension("otf"), Some(FontFormat::OpenType));
-        assert_eq!(FontFormat::from_extension("OTF"), Some(FontFormat::OpenType));
+        assert_eq!(
+            FontFormat::from_extension("ttf"),
+            Some(FontFormat::TrueType)
+        );
+        assert_eq!(
+            FontFormat::from_extension("TTF"),
+            Some(FontFormat::TrueType)
+        );
+        assert_eq!(
+            FontFormat::from_extension("otf"),
+            Some(FontFormat::OpenType)
+        );
+        assert_eq!(
+            FontFormat::from_extension("OTF"),
+            Some(FontFormat::OpenType)
+        );
         assert_eq!(FontFormat::from_extension("woff"), None);
     }
 
@@ -327,11 +362,13 @@ mod tests {
     async fn test_list_fonts() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         // 創建測試字體檔案
         let ttf_content = create_mock_ttf_header();
-        create_test_font_file(temp_dir.path(), "test_font", &ttf_content).await.unwrap();
-        
+        create_test_font_file(temp_dir.path(), "test_font", &ttf_content)
+            .await
+            .unwrap();
+
         let fonts = manager.list_fonts().await.unwrap();
         assert_eq!(fonts.len(), 1);
         assert_eq!(fonts[0].name, "test_font");
@@ -342,16 +379,18 @@ mod tests {
     async fn test_load_font_data() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         let ttf_content = create_mock_ttf_header();
-        create_test_font_file(temp_dir.path(), "test_font", &ttf_content).await.unwrap();
-        
+        create_test_font_file(temp_dir.path(), "test_font", &ttf_content)
+            .await
+            .unwrap();
+
         // 測試載入存在的字體
         let loaded_data = manager.load_font_data("test_font").await;
         assert!(loaded_data.is_ok());
         let loaded_data = loaded_data.unwrap();
         assert_eq!(loaded_data, ttf_content);
-        
+
         // 測試載入不存在的字體
         let missing_data = manager.load_font_data("missing_font").await;
         assert!(missing_data.is_err());
@@ -361,10 +400,12 @@ mod tests {
     async fn test_load_font_data_by_path() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         let ttf_content = create_mock_ttf_header();
-        let font_path = create_test_font_file(temp_dir.path(), "test_font", &ttf_content).await.unwrap();
-        
+        let font_path = create_test_font_file(temp_dir.path(), "test_font", &ttf_content)
+            .await
+            .unwrap();
+
         let loaded_data = manager.load_font_data_by_path(&font_path).await;
         assert!(loaded_data.is_ok());
         let loaded_data = loaded_data.unwrap();
@@ -375,19 +416,25 @@ mod tests {
     async fn test_get_preferred_font() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         let ttf_content = create_mock_ttf_header();
-        
+
         // 創建多個測試字體
-        create_test_font_file(temp_dir.path(), "arial", &ttf_content).await.unwrap();
-        create_test_font_file(temp_dir.path(), "noto_sans_cjk", &ttf_content).await.unwrap();
-        create_test_font_file(temp_dir.path(), "times", &ttf_content).await.unwrap();
-        
+        create_test_font_file(temp_dir.path(), "arial", &ttf_content)
+            .await
+            .unwrap();
+        create_test_font_file(temp_dir.path(), "noto_sans_cjk", &ttf_content)
+            .await
+            .unwrap();
+        create_test_font_file(temp_dir.path(), "times", &ttf_content)
+            .await
+            .unwrap();
+
         // 測試指定偏好字體
         let preferred = manager.get_preferred_font(Some("arial")).await.unwrap();
         assert!(preferred.is_some());
         assert_eq!(preferred.unwrap().name, "arial");
-        
+
         // 測試中文友好字體優先
         let preferred = manager.get_preferred_font(None).await.unwrap();
         assert!(preferred.is_some());
@@ -398,26 +445,33 @@ mod tests {
     async fn test_validate_font() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         // 測試有效字體
         let ttf_content = create_mock_ttf_header();
-        let valid_font_path = create_test_font_file(temp_dir.path(), "valid_font", &ttf_content).await.unwrap();
+        let valid_font_path = create_test_font_file(temp_dir.path(), "valid_font", &ttf_content)
+            .await
+            .unwrap();
         let is_valid = manager.validate_font(&valid_font_path).await.unwrap();
         assert!(is_valid);
-        
+
         // 測試無效字體（太小）
         let small_content = vec![0, 1, 2, 3];
-        let small_font_path = create_test_font_file(temp_dir.path(), "small_font", &small_content).await.unwrap();
+        let small_font_path = create_test_font_file(temp_dir.path(), "small_font", &small_content)
+            .await
+            .unwrap();
         let is_valid = manager.validate_font(&small_font_path).await.unwrap();
         assert!(!is_valid);
-        
+
         // 測試無效魔數
         let mut invalid_content = vec![0xFF, 0xFF, 0xFF, 0xFF]; // 無效魔數
         invalid_content.extend(vec![0; 1020]);
-        let invalid_font_path = create_test_font_file(temp_dir.path(), "invalid_font", &invalid_content).await.unwrap();
+        let invalid_font_path =
+            create_test_font_file(temp_dir.path(), "invalid_font", &invalid_content)
+                .await
+                .unwrap();
         let is_valid = manager.validate_font(&invalid_font_path).await.unwrap();
         assert!(!is_valid);
-        
+
         // 測試不存在的檔案
         let missing_path = temp_dir.path().join("missing.ttf");
         let is_valid = manager.validate_font(&missing_path).await.unwrap();
@@ -428,13 +482,17 @@ mod tests {
     async fn test_get_total_size() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         let ttf_content = create_mock_ttf_header();
-        create_test_font_file(temp_dir.path(), "font1", &ttf_content).await.unwrap();
-        create_test_font_file(temp_dir.path(), "font2", &ttf_content).await.unwrap();
-        
+        create_test_font_file(temp_dir.path(), "font1", &ttf_content)
+            .await
+            .unwrap();
+        create_test_font_file(temp_dir.path(), "font2", &ttf_content)
+            .await
+            .unwrap();
+
         let total_size = manager.get_total_size().await.unwrap();
-        
+
         // 總大小應該包括兩個字體檔案和README檔案
         // 每個字體檔案約1KB，README檔案可能幾百字節
         assert!(total_size > 2000); // 至少2KB
@@ -444,7 +502,7 @@ mod tests {
     async fn test_get_fonts_path() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = FontManager::new(temp_dir.path()).await.unwrap();
-        
+
         assert_eq!(manager.get_fonts_path(), temp_dir.path());
     }
 }

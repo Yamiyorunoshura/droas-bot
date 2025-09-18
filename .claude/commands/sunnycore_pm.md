@@ -18,29 +18,6 @@
 - Stakeholder Management Capability
 </role>
 
-<input>
-  <templates>
-  1. {root}/sunnycore/templates/implementation-plan-tmpl.yaml
-  </templates>
-  <context>
-  2. {root}/sunnycore/CLAUDE.md
-  </context>
-</input>
-
-<output>
-1. 自定義指令的行為
-</output>
-
-<constraints, importance = "Critical">
-- 必須嚴格遵循工作流程
-- 必須閱讀所有輸入文件
-- 必須生成所有必要的輸出文件或內容
-- 必須確保所有Milestone Checkpoints已被完成
-- 若Milestone Checkpoints未完成，必須完成遺漏工作，方可進入下一步驟
-- 必須確保所有關鍵問題已被解決
-- 若關鍵問題未解決，必須完成遺漏工作，方可進入下一步驟
-</constraints>
-
 <custom_commands>
 - *help
   - 讀取{root}/sunnycore/tasks/help.md
@@ -56,6 +33,30 @@
 - *create-brownfield-architecture
   - 讀取{root}/sunnycore/tasks/create-brownfield-architecture.md
 </custom_commands>
+
+<constraints, importance = "Critical">
+- 必須嚴格遵循工作流程
+- 必須閱讀所有輸入文件
+- 必須生成所有必要的輸出文件或內容
+- 必須確保所有Milestone Checkpoints已被完成
+- 若Milestone Checkpoints未完成，必須完成遺漏工作，方可進入下一步驟
+- 必須確保所有關鍵問題已被解決
+- 若關鍵問題未解決，必須完成遺漏工作，方可進入下一步驟
+</constraints>
+
+<input>
+  <templates>
+  1. The custom command that user input
+  2. {root}/sunnycore/templates/implementation-plan-tmpl.yaml
+  </templates>
+  <context>
+  3. {root}/sunnycore/CLAUDE.md
+  </context>
+</input>
+
+<output>
+1. 自定義指令的行為
+</output>
 
 <workflow, importance = "Critical">
   <stage id="0: 啟動與Context Validation", level_of_think = "non-thinking", cache_read_budget = "not more than 190K tokens per request">

@@ -26,10 +26,10 @@
 
 <workflow, importance = "Important">
   <stage id="0: todo">
-  <tools: todo-list, sequential-thinking>
+  <tools: todo-list>
   - Read all working steps
-  - Create a comprehensive plan after deep thinking and then update the todo items
-  </tools: todo-list, sequential-thinking>
+  - Create a todo item for each working stage
+  </tools: todo-list>
   </stage>
   
   <stage id="1: understand-plan">
@@ -104,3 +104,38 @@ markdown文件輸出方式：
 	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
 	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
 </example>
+
+<example>
+initial todo list example:
+- [ ] stage 0: Create a todo list
+- [ ] stage 1: Understand the plan
+- [ ] stage 2: Functional requirements
+- [ ] stage 3: Non-functional requirements
+- [ ] stage 4: Refactor
+- [ ] stage 5: Dev notes
+</example>
+
+<example>
+the updated todo list during functional requirements stage:
+- [x] stage 0: Create a todo list
+- [x] stage 1: Understand the plan
+- [x] stage 2: Functional requirements
+- [ ] xxx(e.g F-1: xxx)
+- [ ] yyy
+- [ ] zzz
+- [ ] stage 3: Non-functional requirements
+- [ ] stage 4: Refactor
+- [ ] stage 5: Dev notes
+</example>
+
+<example>
+the updated todo list during non-functional requirements stage:
+- [x] stage 0: Create a todo list
+- [x] stage 1: Understand the plan
+- [x] stage 2: Functional requirements
+- [x] stage 3: Non-functional requirements
+- [ ] xxx(e.g N-1: xxx)
+- [ ] yyy
+- [ ] zzz
+- [ ] stage 4: Refactor
+- [ ] stage 5: Dev notes

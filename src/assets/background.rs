@@ -1,10 +1,10 @@
 use anyhow::Result;
-use tracing::{debug, info, warn, error};
+use chrono::Utc;
 use std::path::{Path, PathBuf};
 use tokio::fs;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tracing::{debug, error, info, warn};
 use uuid::Uuid;
-use chrono::Utc;
 
 /// 支持的圖片格式
 #[derive(Debug, Clone, PartialEq)]
@@ -65,7 +65,7 @@ pub struct BackgroundManager {
 
 impl BackgroundManager {
     /// 創建新的背景管理器
-    /// 
+    ///
     /// # Arguments
     /// * `storage_path` - 背景圖片存儲目錄
     pub async fn new<P: AsRef<Path>>(storage_path: P) -> Result<Self> {
@@ -106,7 +106,11 @@ impl BackgroundManager {
             }
         }
 
-        debug!("圖片驗證通過: format={:?}, size={} bytes", format, data.len());
+        debug!(
+            "圖片驗證通過: format={:?}, size={} bytes",
+            format,
+            data.len()
+        );
         Ok(())
     }
 
@@ -114,27 +118,40 @@ impl BackgroundManager {
     fn generate_file_path(&self, guild_id: &str, format: &ImageFormat) -> PathBuf {
         let asset_id = Uuid::new_v4().to_string();
         let filename = format!("{}_{}.{}", guild_id, asset_id, format.extension());
-        self.storage_path.join("guild").join(guild_id).join(filename)
+        self.storage_path
+            .join("guild")
+            .join(guild_id)
+            .join(filename)
     }
 
     /// 上傳背景圖片
-    /// 
+    ///
     /// # Arguments
     /// * `guild_id` - Discord Guild ID
     /// * `data` - 圖片二進制數據
     /// * `format` - 圖片格式
-    /// 
+    ///
     /// # Returns
     /// * `Result<BackgroundInfo>` - 成功返回背景信息
-    pub async fn upload_background(&self, guild_id: &str, data: &[u8], format: ImageFormat) -> Result<BackgroundInfo> {
-        debug!("上傳背景圖片: guild_id={}, size={} bytes", guild_id, data.len());
+    pub async fn upload_background(
+        &self,
+        guild_id: &str,
+        data: &[u8],
+        format: ImageFormat,
+    ) -> Result<BackgroundInfo> {
+        debug!(
+            "上傳背景圖片: guild_id={}, size={} bytes",
+            guild_id,
+            data.len()
+        );
 
         // 驗證圖片數據
         self.validate_image_data(data, &format)?;
 
         // 生成檔案路徑
         let file_path = self.generate_file_path(guild_id, &format);
-        let asset_id = file_path.file_stem()
+        let asset_id = file_path
+            .file_stem()
             .and_then(|s| s.to_str())
             .unwrap_or("unknown")
             .to_string();
@@ -162,10 +179,10 @@ impl BackgroundManager {
     }
 
     /// 獲取背景圖片數據
-    /// 
+    ///
     /// # Arguments
     /// * `asset_path` - 資源檔案路徑
-    /// 
+    ///
     /// # Returns
     /// * `Result<Vec<u8>>` - 圖片二進制數據
     pub async fn get_background_data<P: AsRef<Path>>(&self, asset_path: P) -> Result<Vec<u8>> {
@@ -173,7 +190,10 @@ impl BackgroundManager {
         debug!("讀取背景圖片: {}", asset_path.display());
 
         if !asset_path.exists() {
-            return Err(anyhow::anyhow!("背景圖片檔案不存在: {}", asset_path.display()));
+            return Err(anyhow::anyhow!(
+                "背景圖片檔案不存在: {}",
+                asset_path.display()
+            ));
         }
 
         let mut file = fs::File::open(asset_path).await?;
@@ -185,10 +205,10 @@ impl BackgroundManager {
     }
 
     /// 刪除背景圖片
-    /// 
+    ///
     /// # Arguments
     /// * `asset_path` - 資源檔案路徑
-    /// 
+    ///
     /// # Returns
     /// * `Result<bool>` - 是否成功刪除
     pub async fn delete_background<P: AsRef<Path>>(&self, asset_path: P) -> Result<bool> {
@@ -206,10 +226,10 @@ impl BackgroundManager {
     }
 
     /// 列出指定 Guild 的所有背景圖片
-    /// 
+    ///
     /// # Arguments
     /// * `guild_id` - Discord Guild ID
-    /// 
+    ///
     /// # Returns
     /// * `Result<Vec<PathBuf>>` - 背景圖片檔案路徑列表
     pub async fn list_guild_backgrounds(&self, guild_id: &str) -> Result<Vec<PathBuf>> {
@@ -252,29 +272,48 @@ impl BackgroundManager {
                 // 遍歷guild子目錄
                 let guild_dir = entry.path();
                 let mut guild_entries = fs::read_dir(guild_dir).await?;
-                
+
                 while let Some(guild_entry) = guild_entries.next_entry().await? {
                     if guild_entry.path().is_dir() {
                         // 檢查guild特定的背景
-                        if let Err(e) = self.cleanup_guild_directory(&guild_entry.path(), &mut cleaned_files, &mut total_size_freed).await {
-                            error!("清理Guild目錄失敗: {}, error: {}", guild_entry.path().display(), e);
+                        if let Err(e) = self
+                            .cleanup_guild_directory(
+                                &guild_entry.path(),
+                                &mut cleaned_files,
+                                &mut total_size_freed,
+                            )
+                            .await
+                        {
+                            error!(
+                                "清理Guild目錄失敗: {}, error: {}",
+                                guild_entry.path().display(),
+                                e
+                            );
                         }
                     }
                 }
             }
         }
 
-        info!("背景圖片清理完成: 清理了 {} 個檔案，釋放了 {} bytes", cleaned_files, total_size_freed);
+        info!(
+            "背景圖片清理完成: 清理了 {} 個檔案，釋放了 {} bytes",
+            cleaned_files, total_size_freed
+        );
         Ok(())
     }
 
     /// 清理特定 Guild 目錄
-    async fn cleanup_guild_directory(&self, guild_dir: &Path, cleaned_files: &mut u32, total_size_freed: &mut u64) -> Result<()> {
+    async fn cleanup_guild_directory(
+        &self,
+        guild_dir: &Path,
+        cleaned_files: &mut u32,
+        total_size_freed: &mut u64,
+    ) -> Result<()> {
         let mut entries = fs::read_dir(guild_dir).await?;
-        
+
         while let Some(entry) = entries.next_entry().await? {
             let path = entry.path();
-            
+
             if path.is_file() {
                 // 檢查是否為支持的圖片格式
                 let should_remove = if let Some(ext) = path.extension().and_then(|s| s.to_str()) {
@@ -302,7 +341,7 @@ impl BackgroundManager {
     /// 獲取所有背景圖片的總大小
     pub async fn get_total_size(&self) -> Result<u64> {
         let mut total_size = 0u64;
-        
+
         if let Ok(mut entries) = fs::read_dir(&self.storage_path).await {
             while let Some(entry) = entries.next_entry().await? {
                 if let Ok(metadata) = entry.metadata().await {
@@ -319,10 +358,13 @@ impl BackgroundManager {
     }
 
     /// 遞歸計算目錄大小
-    fn get_directory_size<'a>(&'a self, dir_path: &'a Path) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64>> + 'a>> {
+    fn get_directory_size<'a>(
+        &'a self,
+        dir_path: &'a Path,
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<u64>> + 'a>> {
         Box::pin(async move {
             let mut size = 0u64;
-            
+
             if let Ok(mut entries) = fs::read_dir(dir_path).await {
                 while let Some(entry) = entries.next_entry().await? {
                     if let Ok(metadata) = entry.metadata().await {
@@ -349,15 +391,11 @@ mod tests {
     fn create_test_png_data() -> Vec<u8> {
         // 最小有效的PNG檔案（1x1像素透明圖片）
         vec![
-            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
-            0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
-            0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
-            0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
-            0x89, 0x00, 0x00, 0x00, 0x0B, 0x49, 0x44, 0x41,
-            0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
-            0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
-            0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE,
-            0x42, 0x60, 0x82
+            0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D, 0x49, 0x48,
+            0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x06, 0x00, 0x00,
+            0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00, 0x0B, 0x49, 0x44, 0x41, 0x54, 0x78,
+            0x9C, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+            0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
         ]
     }
 
@@ -365,9 +403,8 @@ mod tests {
     fn create_test_jpeg_data() -> Vec<u8> {
         // 最小有效的JPEG檔案頭部
         vec![
-            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
-            0x49, 0x46, 0x00, 0x01, 0x01, 0x01, 0x00, 0x48,
-            0x00, 0x48, 0x00, 0x00, 0xFF, 0xD9
+            0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x01,
+            0x00, 0x48, 0x00, 0x48, 0x00, 0x00, 0xFF, 0xD9,
         ]
     }
 
@@ -390,20 +427,24 @@ mod tests {
     async fn test_upload_and_get_background() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = BackgroundManager::new(temp_dir.path()).await.unwrap();
-        
+
         let png_data = create_test_png_data();
         let guild_id = "test_guild_123";
-        
+
         // 測試上傳
-        let background_info = manager.upload_background(guild_id, &png_data, ImageFormat::Png).await;
+        let background_info = manager
+            .upload_background(guild_id, &png_data, ImageFormat::Png)
+            .await;
         assert!(background_info.is_ok());
         let background_info = background_info.unwrap();
-        
+
         assert_eq!(background_info.format, ImageFormat::Png);
         assert_eq!(background_info.file_size, png_data.len() as u64);
-        
+
         // 測試讀取
-        let retrieved_data = manager.get_background_data(&background_info.file_path).await;
+        let retrieved_data = manager
+            .get_background_data(&background_info.file_path)
+            .await;
         assert!(retrieved_data.is_ok());
         assert_eq!(retrieved_data.unwrap(), png_data);
     }
@@ -412,10 +453,12 @@ mod tests {
     async fn test_invalid_image_validation() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = BackgroundManager::new(temp_dir.path()).await.unwrap();
-        
+
         let invalid_data = vec![0x00, 0x01, 0x02, 0x03]; // 無效數據
-        
-        let result = manager.upload_background("test_guild", &invalid_data, ImageFormat::Png).await;
+
+        let result = manager
+            .upload_background("test_guild", &invalid_data, ImageFormat::Png)
+            .await;
         assert!(result.is_err());
     }
 
@@ -423,13 +466,15 @@ mod tests {
     async fn test_file_size_validation() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = BackgroundManager::new(temp_dir.path()).await.unwrap();
-        
+
         // 創建過大的檔案（6MB）
         let large_data = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]; // PNG header
         let mut large_data = large_data;
         large_data.extend(vec![0; 6 * 1024 * 1024]); // 6MB of data
-        
-        let result = manager.upload_background("test_guild", &large_data, ImageFormat::Png).await;
+
+        let result = manager
+            .upload_background("test_guild", &large_data, ImageFormat::Png)
+            .await;
         assert!(result.is_err());
     }
 
@@ -437,15 +482,21 @@ mod tests {
     async fn test_list_guild_backgrounds() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = BackgroundManager::new(temp_dir.path()).await.unwrap();
-        
+
         let png_data = create_test_png_data();
         let jpeg_data = create_test_jpeg_data();
         let guild_id = "test_guild_456";
-        
+
         // 上傳多個背景
-        manager.upload_background(guild_id, &png_data, ImageFormat::Png).await.unwrap();
-        manager.upload_background(guild_id, &jpeg_data, ImageFormat::Jpeg).await.unwrap();
-        
+        manager
+            .upload_background(guild_id, &png_data, ImageFormat::Png)
+            .await
+            .unwrap();
+        manager
+            .upload_background(guild_id, &jpeg_data, ImageFormat::Jpeg)
+            .await
+            .unwrap();
+
         // 列出背景
         let backgrounds = manager.list_guild_backgrounds(guild_id).await.unwrap();
         assert_eq!(backgrounds.len(), 2);
@@ -455,20 +506,26 @@ mod tests {
     async fn test_delete_background() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = BackgroundManager::new(temp_dir.path()).await.unwrap();
-        
+
         let png_data = create_test_png_data();
         let guild_id = "test_guild_789";
-        
+
         // 上傳背景
-        let background_info = manager.upload_background(guild_id, &png_data, ImageFormat::Png).await.unwrap();
-        
+        let background_info = manager
+            .upload_background(guild_id, &png_data, ImageFormat::Png)
+            .await
+            .unwrap();
+
         // 確認檔案存在
         assert!(background_info.file_path.exists());
-        
+
         // 刪除背景
-        let deleted = manager.delete_background(&background_info.file_path).await.unwrap();
+        let deleted = manager
+            .delete_background(&background_info.file_path)
+            .await
+            .unwrap();
         assert!(deleted);
-        
+
         // 確認檔案不存在
         assert!(!background_info.file_path.exists());
     }
@@ -477,15 +534,18 @@ mod tests {
     async fn test_get_total_size() {
         let temp_dir = TempDir::new().expect("無法創建臨時目錄");
         let manager = BackgroundManager::new(temp_dir.path()).await.unwrap();
-        
+
         // 初始大小應該是0
         let initial_size = manager.get_total_size().await.unwrap();
         assert_eq!(initial_size, 0);
-        
+
         // 上傳一個檔案
         let png_data = create_test_png_data();
-        manager.upload_background("test_guild", &png_data, ImageFormat::Png).await.unwrap();
-        
+        manager
+            .upload_background("test_guild", &png_data, ImageFormat::Png)
+            .await
+            .unwrap();
+
         // 大小應該增加
         let new_size = manager.get_total_size().await.unwrap();
         assert!(new_size > initial_size);
