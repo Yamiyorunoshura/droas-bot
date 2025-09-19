@@ -16,6 +16,8 @@ pub mod commands;
 pub mod event_handler;
 pub mod gateway;
 pub mod monitoring;
+pub mod monitoring_server;
+pub mod prometheus_metrics;
 pub mod rate_limit;
 
 pub use api_client::DiscordApiClient;
@@ -28,4 +30,8 @@ pub use gateway::{GatewayManager, GatewayStatus};
 pub use monitoring::{
     ApiMetrics, DiscordMonitor, EventMetrics, HealthStatus, RateLimitMetrics, SystemHealth,
 };
+pub use prometheus_metrics::{
+    PrometheusMetrics, init_global_metrics, get_global_metrics, update_global_system_metrics,
+};
+pub use monitoring_server::{MonitoringServer, MonitoringServerConfig};
 pub use rate_limit::{RateLimit, RateLimiter};

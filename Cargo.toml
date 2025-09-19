@@ -50,6 +50,9 @@ async-trait = "0.1"
 # Caching
 moka = { version = "0.12", features = ["future"] }
 
+# Prometheus metrics
+prometheus = { version = "0.13", features = ["process"] }
+
 [dev-dependencies]
 tokio-test = "0.4"
 tempfile = "3.8"

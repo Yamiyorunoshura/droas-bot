@@ -20,46 +20,6 @@
 - Ensure no filenames/paths use spaces; prefer kebab-case.
 </constraints>
 
-<workflow importance="Important">
-  <stage id="research">
-  <tools: sequential-thinking>
-  - Read requirements and architecture sources.
-  - Identify scope, success criteria, and constraints to drive task design.
-  - Map non-functional requirements to cross-cutting tasks.
-  </tools: sequential-thinking>
-  
-  <questions>
-  - Are all FRs and NFRs discoverable and current?
-  - What dependencies or sequencing constraints exist between tasks?
-  - What are acceptance signals for each task?
-  </questions>
-  </stage>
-
-  <stage id="draft">
-  - Use the template to generate atomic tasks.
-  - Include brief acceptance hints for verifiability.
-  - Group tasks logically while avoiding overlaps.
-  </stage>
-
-  <stage id="review">
-  - De-duplicate and prune non-actionable items.
-  - Ensure traceability from each task to requirement(s).
-  - Validate formatting against the template.
-  </stage>
-
-  <stage id="finalize">
-  - Write markdown format tasks to {root}/docs/tasks.md.
-  - Include a short introduction explaining grouping and scope.
-
-  <checks>
-  - [ ] File {root}/docs/tasks.md exists and is valid Markdown.
-  - [ ] Tasks conform to template fields and 2-space indentation.
-  - [ ] Each task is atomic, outcome-oriented, and verifiable.
-  - [ ] No filenames or keys use spaces; kebab-case enforced.
-  </checks>
-  </stage>
-</workflow>
-
 <example>
 markdown文件輸出方式：
 	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
@@ -76,3 +36,43 @@ todo list example:
 - [ ] stage 3: Review
 - [ ] stage 4: Finalize
 </example>
+
+<workflow importance="Important">
+  <stage id="1: research">
+  <tools: sequential-thinking>
+  - Read requirements and architecture sources.
+  - Identify scope, success criteria, and constraints to drive task design.
+  - Map non-functional requirements to cross-cutting tasks.
+  </tools: sequential-thinking>
+  
+  <questions>
+  - Are all FRs and NFRs discoverable and current?
+  - What dependencies or sequencing constraints exist between tasks?
+  - What are acceptance signals for each task?
+  </questions>
+  </stage>
+
+  <stage id="2: draft">
+  - Use the template to generate atomic tasks.
+  - Include brief acceptance hints for verifiability.
+  - Group tasks logically while avoiding overlaps.
+  </stage>
+
+  <stage id="3: review">
+  - De-duplicate and prune non-actionable items.
+  - Ensure traceability from each task to requirement(s).
+  - Validate formatting against the template.
+  </stage>
+
+  <stage id="4: finalize">
+  - Write markdown format tasks to {root}/docs/tasks.md.
+  - Include a short introduction explaining grouping and scope.
+
+  <checks>
+  - [ ] File {root}/docs/tasks.md exists and is valid Markdown.
+  - [ ] Tasks conform to template fields and 2-space indentation.
+  - [ ] Each task is atomic, outcome-oriented, and verifiable.
+  - [ ] No filenames or keys use spaces; kebab-case enforced.
+  </checks>
+  </stage>
+</workflow>

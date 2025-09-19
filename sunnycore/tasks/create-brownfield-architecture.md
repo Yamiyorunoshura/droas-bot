@@ -21,11 +21,28 @@
 - Use clear, concise English and 2-space indentation.
 </constraints>
 
+<example>
+markdown文件輸出方式：
+	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
+	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
+	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
+	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
+</example>
+
+<example>
+todo list example:
+- [ ] stage 0: Create a todo list
+- [ ] stage 1: Assess the existing
+- [ ] stage 2: Design new modules
+- [ ] stage 3: Author and shard
+- [ ] stage 4: Finalize
+</example>
+
 <workflow importance="Critical">
   <stage id="0: plan-todos">
   <tools: todo-list>
   - Review all working steps comprehensively.
-  - Create a todo item for each working stage
+  - Take reference from the example and create a todo item 
   </tools: todo-list, sequential-thinking >
   </stage>
 
@@ -70,20 +87,3 @@
   </checks>
   </stage>
 </workflow>
-
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
-
-<example>
-todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Assess the existing
-- [ ] stage 2: Design new modules
-- [ ] stage 3: Author and shard
-- [ ] stage 4: Finalize
-</example>

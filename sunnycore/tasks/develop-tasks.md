@@ -1,8 +1,7 @@
 <input>
   <context>
   1. {root}/docs/implementation-plan/{task_id}-plan.md - Implementation Plan (實作計劃)
-  2. {root}/sunnycore/templates/dev-notes-tmpl.md - Development Notes Template (開發筆記模板)
-  3. {root}/docs/architecture/*.md
+  2. {root}/docs/architecture/*.md
   </context>
   <templates>
   1. {root}/sunnycore/templates/dev-notes-tmpl.yaml - Development Notes Template
@@ -24,11 +23,54 @@
 - Avoid introducing new directories or files beyond those specified
 </constraints>
 
+<example>
+markdown文件輸出方式：
+	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
+	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
+	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
+	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
+</example>
+
+<example>
+initial todo list example:
+- [ ] stage 0: Create a todo list
+- [ ] stage 1: Understand the plan
+- [ ] stage 2: Functional requirements
+- [ ] stage 3: Non-functional requirements
+- [ ] stage 4: Refactor
+- [ ] stage 5: Dev notes
+</example>
+
+<example>
+the updated todo list during functional requirements stage:
+- [x] stage 0: Create a todo list
+- [x] stage 1: Understand the plan
+- [x] stage 2: Functional requirements
+- [ ] xxx(e.g F-1: xxx)
+- [ ] yyy
+- [ ] zzz
+- [ ] stage 3: Non-functional requirements
+- [ ] stage 4: Refactor
+- [ ] stage 5: Dev notes
+</example>
+
+<example>
+the updated todo list during non-functional requirements stage:
+- [x] stage 0: Create a todo list
+- [x] stage 1: Understand the plan
+- [x] stage 2: Functional requirements
+- [x] stage 3: Non-functional requirements
+- [ ] xxx(e.g N-1: xxx)
+- [ ] yyy
+- [ ] zzz
+- [ ] stage 4: Refactor
+- [ ] stage 5: Dev notes
+
 <workflow, importance = "Important">
   <stage id="0: todo">
   <tools: todo-list>
   - Read all working steps
-  - Create a todo item for each working stage
+  - Take reference from the example and create a todo item 
   </tools: todo-list>
   </stage>
   
@@ -96,46 +138,3 @@
   </checks>
   </stage>
 </workflow>
-
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
-
-<example>
-initial todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Understand the plan
-- [ ] stage 2: Functional requirements
-- [ ] stage 3: Non-functional requirements
-- [ ] stage 4: Refactor
-- [ ] stage 5: Dev notes
-</example>
-
-<example>
-the updated todo list during functional requirements stage:
-- [x] stage 0: Create a todo list
-- [x] stage 1: Understand the plan
-- [x] stage 2: Functional requirements
-- [ ] xxx(e.g F-1: xxx)
-- [ ] yyy
-- [ ] zzz
-- [ ] stage 3: Non-functional requirements
-- [ ] stage 4: Refactor
-- [ ] stage 5: Dev notes
-</example>
-
-<example>
-the updated todo list during non-functional requirements stage:
-- [x] stage 0: Create a todo list
-- [x] stage 1: Understand the plan
-- [x] stage 2: Functional requirements
-- [x] stage 3: Non-functional requirements
-- [ ] xxx(e.g N-1: xxx)
-- [ ] yyy
-- [ ] zzz
-- [ ] stage 4: Refactor
-- [ ] stage 5: Dev notes

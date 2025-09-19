@@ -25,11 +25,48 @@
 - Must record an acceptance decision with rationale: Accept / Accept with changes / Reject.
 </constraints>
 
+<example>
+Minimal review result outline:
+
+# Overview
+- Scope: ...
+- Decision: Accept with changes — rationale: ...
+
+# Findings
+- Issue: ...
+- Evidence: ...
+- Impact: ...
+- Recommendation: ...
+
+# Risks
+- ...
+
+# Action Items
+- [P1] ...
+</example>
+
+<example>
+markdown文件輸出方式：
+	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
+	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
+	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
+	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
+</example>
+
+<example>
+todo list example:
+- [ ] stage 0: Create a todo list
+- [ ] stage 1: Review the plan
+- [ ] stage 2: Review the code
+- [ ] stage 3: Review the dev notes
+- [ ] stage 4: Produce the results
+</example>
+
 <workflow, importance = "Important">
   <stage id="0: plan-todos">
   <tools: todo-list>
   - Read all working steps
-  - Create a todo item for each working stage
+  - Take reference from the example and create a todo item 
   </tools: todo-list, sequential-thinking>
   </stage>
 
@@ -77,41 +114,3 @@
   </checks>
   </stage>
 </workflow>
-
-<example>
-Minimal review result outline:
-
-# Overview
-- Scope: ...
-- Decision: Accept with changes — rationale: ...
-
-# Findings
-- Issue: ...
-- Evidence: ...
-- Impact: ...
-- Recommendation: ...
-
-# Risks
-- ...
-
-# Action Items
-- [P1] ...
-</example>
-
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
-
-<example>
-todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Review the plan
-- [ ] stage 2: Review the code
-- [ ] stage 3: Review the dev notes
-- [ ] stage 4: Produce the results
-</example>
-

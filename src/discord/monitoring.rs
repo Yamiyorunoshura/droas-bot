@@ -6,6 +6,7 @@
 //! - 事件處理指標
 //! - 系統健康檢查
 //! - 性能監控
+//! - Prometheus 指標導出
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
@@ -13,6 +14,8 @@ use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::RwLock;
+
+use crate::discord::prometheus_metrics::PrometheusMetrics;
 
 /// 速率限制指標
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -167,6 +170,8 @@ pub struct DiscordMonitor {
     total_response_time_ms: AtomicU64,
     /// 總處理時間（用於計算平均值）
     total_processing_time_ms: AtomicU64,
+    /// Prometheus 指標收集器
+    prometheus_metrics: Arc<RwLock<PrometheusMetrics>>,
 }
 
 impl DiscordMonitor {
@@ -180,6 +185,7 @@ impl DiscordMonitor {
             total_wait_time_ms: AtomicU64::new(0),
             total_response_time_ms: AtomicU64::new(0),
             total_processing_time_ms: AtomicU64::new(0),
+            prometheus_metrics: Arc::new(RwLock::new(PrometheusMetrics::new().unwrap_or_default())),
         }
     }
 
@@ -249,6 +255,13 @@ impl DiscordMonitor {
 
         metrics.last_updated = std::time::SystemTime::now();
 
+        // 記錄到 Prometheus
+        let prometheus_metrics = self.prometheus_metrics.read().await;
+        prometheus_metrics.record_http_request(
+            response_time_ms as f64 / 1000.0,
+            if success { 200 } else { 500 }
+        );
+
         tracing::debug!(
             "記錄 API 調用: endpoint={}, response_time={}ms, success={}, success_rate={:.2}%",
             endpoint,
@@ -312,6 +325,15 @@ impl DiscordMonitor {
         }
 
         metrics.last_updated = std::time::SystemTime::now();
+
+        // 記錄到 Prometheus
+        let prometheus_metrics = self.prometheus_metrics.read().await;
+        prometheus_metrics.record_event_processing(processing_time_ms as f64 / 1000.0);
+
+        // 如果事件處理失敗，記錄失敗指標
+        if result == "failed" {
+            prometheus_metrics.record_event_failure();
+        }
 
         tracing::debug!(
             "記錄事件處理: event_type={}, processing_time={}ms, result={}, throughput={:.2} events/sec",
