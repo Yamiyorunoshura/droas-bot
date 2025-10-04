@@ -1,140 +1,79 @@
-<input>
-  <context>
-  1. {root}/docs/implementation-plan/{task_id}-plan.md - Implementation Plan (實作計劃)
-  2. {root}/docs/architecture/*.md
-  </context>
-  <templates>
-  1. {root}/sunnycore/templates/dev-notes-tmpl.yaml - Development Notes Template
-  </templates>
-</input>
+[輸入]
+  1. {root}/docs/implementation-plan/{task_id}-plan.md --實作計畫
+  2. {root}/docs/architecture/*.md --架構設計
+  3. {root}/sunnycore/templates/dev-notes-tmpl.yaml --開發筆記模板
 
-<output>
-1. {root}/docs/dev-notes/{task_id}-dev-notes.md - 完整的Development Notes文檔
-2. high quality, tested code implementation
-3. complete Test Coverage and Test Cases
-4. refactored code that meets best practices
-</output>
+[輸出]
+  1. {root}/docs/dev-notes/{task_id}-dev-notes.md --完整開發筆記文件
+  2. 高品質、已測試的程式碼實作
+  3. 完整測試覆蓋率與測試案例
+  4. 符合最佳實踐的重構程式碼
 
-<constraints, importance = "Important">
-- keep file paths as specified
-- Preserve indentation and numbering styles used in this document
-- Do not change the semantics of <input> and <output>
-- Follow TDD: do not leave failing tests without implementation
-- Avoid introducing new directories or files beyond those specified
-</constraints>
+[約束]
+  1. 必須遵守實作計畫中定義的驗收標準與架構對應
+  2. 必須遵循 TDD 循環：先實作測試（RED）、最小程式碼（GREEN）、然後重構（REFACTOR）
+  3. 必須保留本文件使用的縮排和編號風格
+  4. 允許修改實作計畫中指定的模組及其測試檔案，以及必要的配置檔案；若需修改計畫外檔案須記錄於開發筆記並說明理由
+  5. 實作計畫必須包含：驗收標準、架構對應、測試條件等必要元素
+  6. 開發筆記需包含：實作摘要、技術決策、風險考量、測試結果等完整章節（參照模板）
 
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
+[工具]
+  1. **sequentialthinking**
+    - [步驟1-5:各階段的分析與推理]
+  2. **todo_write**
+    - [步驟1-5:追蹤任務與狀態]
+  3. **claude-context**
+    - [步驟1:分段處理大型實作計畫]
 
-<example>
-initial todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Understand the plan
-- [ ] stage 2: Functional requirements
-- [ ] stage 3: Non-functional requirements
-- [ ] stage 4: Refactor
-- [ ] stage 5: Dev notes
-</example>
+[工具指引]
+  1. **sequentialthinking**
+    - 簡單任務推理：1-3 totalThoughts
+    - 中等任務推理：3-5 totalThoughts
+    - 複雜任務推理：5-8 totalThoughts
+    - 完成原本推理步數後依然有疑問：nextThoughtNeeded = true
+    - 你必須完成所有設定的推理步數
+  2. **todo_write**
+    - 在準備階段創建待辦清單，包含所有主要任務
+    - 每完成一個步驟即更新對應待辦項目狀態為 completed
+    - 狀態閘門：僅允許單一任務為 in_progress；完成後立即標記 completed
+  3. **claude-context**
+    - 使用場景：當實作計畫文件過大需要分段處理時
+    - 可用於分段讀取與理解複雜的實作計畫
 
-<example>
-the updated todo list during functional requirements stage:
-- [x] stage 0: Create a todo list
-- [x] stage 1: Understand the plan
-- [x] stage 2: Functional requirements
-- [ ] xxx(e.g F-1: xxx)
-- [ ] yyy
-- [ ] zzz
-- [ ] stage 3: Non-functional requirements
-- [ ] stage 4: Refactor
-- [ ] stage 5: Dev notes
-</example>
+[步驟]
+  1. 準備階段
+    - 閱讀 plan-tasks 階段產出的基於 TDD 的實作計畫
+    - 若發現實作計畫存在錯誤、驗收標準不明確或架構衝突，應記錄問題並尋求澄清，不可自行臆測
+    - 提取驗收標準與計畫的驗證/測試條件
+    - 創建 todo list 以追蹤後續開發任務，包含各階段的主要任務（如：實作測試、最小實作、重構優化、文檔產出）
 
-<example>
-the updated todo list during non-functional requirements stage:
-- [x] stage 0: Create a todo list
-- [x] stage 1: Understand the plan
-- [x] stage 2: Functional requirements
-- [x] stage 3: Non-functional requirements
-- [ ] xxx(e.g N-1: xxx)
-- [ ] yyy
-- [ ] zzz
-- [ ] stage 4: Refactor
-- [ ] stage 5: Dev notes
+  2. RED階段：實作測試
+    - 基於實作計畫中的驗收標準實作測試案例（RED 階段）
+    - 將每個驗收標準轉換為可執行的測試程式碼
+    - 確保測試最初如預期般失敗，並驗證計畫的覆蓋率
+    - 若測試無法正確失敗，記錄問題並調整測試實作
 
-<workflow, importance = "Important">
-  <stage id="0: todo">
-  <tools: todo-list>
-  - Read all working steps
-  - Take reference from the example and create a todo item 
-  </tools: todo-list>
-  </stage>
-  
-  <stage id="1: understand-plan">
-  <tools: sequential-thinking>
-  - Read the implementation plan
-  - Think about the steps to implement the implementation plan based on TDD approach
-  </tools: sequential-thinking>
-  </stage>
-  
-  <stage id="2: functional-requirements">
-  <tools: sequential-thinking>
-  - Identify the functional requirements
-  - Think about the test cases for each functional requirement and update the todo list
-  - Write the test cases for each functional requirement
-  - Write the code for each functional requirement
-  </tools: sequential-thinking>
+  3. GREEN階段：最小實作
+    - 實作最小程式碼以使測試通過（GREEN 階段）
+    - 遵循實作計畫中指定的架構對應
+    - 確保所有測試從 RED 轉為 GREEN
+    - 若實作無法滿足驗收標準，記錄問題並尋求計畫澄清或升級處理
 
-  <questions>
-  - What are the acceptance criteria and boundary cases for each function?
-  - Which external dependencies must be mocked or faked in tests?
-  - How will error handling and retries be validated?
-  </questions>
-  </stage>
-  
-  <stage id="3: non-functional-requirements">
-  <tools: sequential-thinking>
-  - Identify the non-functional requirements
-  - Think about the test cases for each non-functional requirement and update the todo list base on the test cases
-  - Write the test cases for each non-functional requirement
-  - Write the code for each non-functional requirement
-  </tools: sequential-thinking>
+  4. REFACTOR階段：重構優化
+    - 在保持所有測試綠燈的情況下進行重構（REFACTOR 階段）
+    - 應用計畫的優化與跨領域關注點，不降低覆蓋率
+    - 提升程式碼品質與可維護性，符合品質目標
+    - 若重構導致測試失敗，立即回退並重新評估重構策略
 
-  <questions>
-  - What measurable budgets apply (latency, memory, throughput)?
-  - How will observability (logs, metrics, traces) be validated?
-  - Are security/compliance constraints testable and enforced?
-  </questions>
-  </stage>
-  
-  <stage id="4: refactor">
-  <tools: sequential-thinking>
-  - Refactor the code to meet best practices and actual requirements
-  - Think about the test cases for the refactoring and update the todo list base on the test cases
-  - Refactor the code of functional requirements
-  - Refactor the code of non-functional requirements
-  </tools: sequential-thinking>
-  
-  <questions>
-  - Does the refactor preserve behavior and keep tests green?
-  - Are interfaces clearer and modules decoupled without added complexity?
-  </questions>
-  </stage>
-  
-  <stage id="5: dev-notes">
-  - Use the development notes template to write the development notes for the code
-  - Output the markdown format development notes to {root}/docs/dev-notes/{task_id}-dev-notes.md
-  - If there is already an existing development notes, update the development notes with the new information
-  
-  <checks>
-  - [ ] All outputs in <output> are produced and consistent
-  - [ ] All tests pass in CI with acceptable coverage thresholds
-  - [ ] Code style and repository conventions are followed
-  - [ ] Dev notes path and filename follow the specified pattern
-  </checks>
-  </stage>
-</workflow>
+  5. 驗證與文檔階段
+    - 根據所有驗收標準和計畫的測試條件驗證實作
+    - 根據模板結構生成開發筆記，包含實作摘要、技術決策、風險考量、測試結果等章節
+    - 將文件輸出至 {root}/docs/dev-notes/{task_id}-dev-notes.md
+
+[DoD]
+  - [ ] 實作計畫中的所有驗收標準已滿足
+  - [ ] 測試覆蓋計畫中指定的所有驗證方法
+  - [ ] 實作遵循 TDD 循環：RED → GREEN → REFACTOR
+  - [ ] 程式碼對應至計畫的架構元件
+  - [ ] [輸出] 中的所有產出已產生且一致
+  - [ ] 所有待辦項目已完成

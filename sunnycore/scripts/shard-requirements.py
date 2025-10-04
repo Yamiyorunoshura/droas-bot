@@ -45,7 +45,8 @@ def log_error(message: str) -> None:
 
 
 def get_project_root() -> Path:
-    return Path(__file__).resolve().parents[1]
+    # scripts 目錄的上上層即為專案根目錄（跳過 claude code 目錄）
+    return Path(__file__).resolve().parents[2]
 
 
 def ensure_uv_and_venv(python_version: str = "3.13") -> None:

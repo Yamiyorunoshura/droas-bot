@@ -38,3 +38,7 @@ assets/cache/
 *.sqlite
 logs/
 temp/
+
+# Sunnycore
+.claude/
+sunnycore/

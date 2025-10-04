@@ -1,8 +1,0 @@
-# clippy configuration for DROAS Bot
-msrv = "1.70"
-too-many-arguments-threshold = 7
-type-complexity-threshold = 250
-single-char-binding-names-threshold = 5
-literal-representation-threshold = 10
-avoid-breaking-exported-api = true
-disallowed-names = ["foo", "bar", "baz", "TODO"]

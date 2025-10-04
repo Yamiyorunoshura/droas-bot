@@ -1,125 +1,34 @@
-# Requirements specification template (YAML)
-# - Use 2-space indentation and kebab-case keys
- # - Duplicate this structure as needed; keep statements measurable and verifiable
+---
+# Requirements Template - Optimized for minimal token usage
+# 需求模板 - 優化版本
 
 project-info:
-  - name: ""
-  - version: "1.0.0"
-  - description: ""
-  - background: ""
-  - objectives: []
+  name: ""
+  description: ""
 
 functional-requirements:
   - id: "F-001"
     title: ""
     description: ""
-    priority: "High"  # High|Medium|Low
-    user-story: "As a [user], I want [goal] so that [benefit]"
-    acceptance-criteria:
-      - ""
-      - ""
-    business-rules: []
-    dependencies: []
-    effort-estimate: ""  # e.g., S/M/L or story points
-    notes: ""
+    priority: "High|Medium|Low"
+    acceptance-criteria: []
 
 non-functional-requirements:
-  # Performance
   - id: "NFR-P-001"
-    type: "performance"
+    type: "performance|security|usability|scalability|reliability"
     description: ""
-    metric: "p95-latency-ms"
-    target-value: ""  # e.g., <200
-    test-method: ""   # e.g., load-test scenario name
-    risk-level: "Medium"  # High|Medium|Low
-    mitigation-approach: ""
-
-  # Security
-  - id: "NFR-S-001"
-    type: "security"
-    description: ""
-    compliance-standard: ""  # e.g., ISO27001, SOC2
-    risk-level: "High"        # High|Medium|Low
-    mitigation-approach: ""
-    test-method: ""           # e.g., pen-test, SAST/DAST
-
-  # Usability
-  - id: "NFR-U-001"
-    type: "usability"
-    description: ""
-    user-experience-goal: ""
-    accessibility-level: "WCAG 2.1 AA"
-    device-compatibility: []
-    test-method: ""
-
-  # Scalability
-  - id: "NFR-SC-001"
-    type: "scalability"
-    description: ""
-    capacity-requirement: ""  # e.g., requests-per-second, dataset-size
-    growth-projection: ""
-    test-method: ""
-
-  # Reliability / Availability
-  - id: "NFR-R-001"
-    type: "reliability"
-    description: ""
-    availability-target: ""   # e.g., 99.9%
-    recovery-time: ""         # RTO
-    recovery-point: ""        # RPO
-    backup-frequency: ""
+    target-value: ""
     test-method: ""
 
 constraints:
-  technical:
-    - ""
-  business:
-    - ""
-  time:
-    - ""
-  budget:
-    - ""
-  regulatory:
-    - ""
+  technical: []
+  business: []
+  regulatory: []
 
-assumptions-and-dependencies:
-  assumptions:
-    - ""
-  external-dependencies:
-    - ""
-  internal-dependencies:
-    - ""
+assumptions-and-risks:
+  assumptions: []
   risks:
     - id: "R-001"
-      risk: ""
-      impact: "High"      # High|Medium|Low
-      probability: "Medium"  # High|Medium|Low
+      description: ""
+      impact: "High|Medium|Low"
       mitigation: ""
-
-testing-requirements:
-  unit-testing:
-    coverage-target: "80%"
-    framework: ""
-  integration-testing:
-    approach: ""
-    test-environments: []
-  acceptance-testing:
-    criteria: ""
-    responsible-party: ""
-  performance-testing:
-    load-scenarios: []
-    success-criteria: ""
-
-document-control:
-  created-date: ""
-  last-modified: ""
-  version-history:
-    - version: "1.0.0"
-      date: ""
-      changes: ""
-      author: ""
-  approval-status: "Draft"   # Draft|Under Review|Approved
-  approved-by: ""
-  approval-date: ""
-
-

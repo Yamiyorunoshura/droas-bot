@@ -1,261 +1,49 @@
 ---
-description: 統一架構系統templates文檔
-last_updated: '2025-09-03'
-name: review-tmpl
-template_type: yaml
-version: '1.0'
----
+# Review Report Template - Simplified
+# 審查報告模板 - 精簡版
 
----
-# Implementation Review Report Template
-# All sections must be filled with actual content or marked as "N/A - [reason]"
+task_id: ""
+reviewer: ""
+date: ""
+review_type: "initial|follow_up"
 
-metadata:
-  task_id: # 必填：實際任務ID
-  project_name: # 必填：專案名稱
-  reviewer: # 必填：reviewer姓名
-  date: # 必填：YYYY-MM-DD格式
-  review_type: # 必填：initial|follow_up|re_review
-  review_iteration: # 必填：1|2|3|...
+acceptance_decision: "Accept|Accept with changes|Reject"
+rationale: |
+  # Decision rationale with key evidence
+
+quality_scores:
+  # Score 1-5 for each dimension
+  functional_compliance: 0
+  code_quality: 0
+  security_performance: 0
+  test_coverage: 0
+  architecture_alignment: 0
+  documentation: 0
+  deployment_readiness: 0
   
-  # 僅限後續審查：
-  re_review_metadata:
-    previous_review_date: # 先前審查的YYYY-MM-DD
-    previous_review_path: # 先前審查文件路徑
-    remediation_scope: # full|partial|targeted
-    trigger_reason: # scheduled|issue_found|stakeholder_request|other
-    
-    previous_findings_status:
-      # 追蹤每個先前發現：
-      - finding_id: # 先前發現ID（例如：ISS-1）
-        status: # resolved|in_progress|deferred|wontfix
-        resolution_date: # 如已解決則為YYYY-MM-DD
-        evidence: # 解決證據的路徑/連結
-        notes: # 解決註記或狀態原因
+  # Calculated scores
+  overall_score: 0.0  # Average of 7 dimensions (1.0-5.0)
+  maturity_level: "bronze|silver|gold|platinum"  # Required for curate-knowledge
 
-  sources:
-    plan:
-      path: # implement計劃路徑
-    specs:
-      requirements: # requirements.md路徑
-      task: # task.md路徑
-      design: # design.md路徑
-    evidence:
-      prs: [] # PR連結或ID清單
-      commits: [] # 提交雜湊清單
-      artifacts: [] # 相關產物路徑清單
-      
-  assumptions: [] # 列出所有審查假設
-  constraints: [] # 列出所有識別的約束
-
-context:
-  summary: # 必填：描述implement的1-3個句子
-  scope_alignment:
-    in_scope_covered: # yes|partial|no
-    justification: # 範圍評估的證據
-    out_of_scope_changes: [] # 列出任何範圍外變更或"未識別任何"
-
-acceptance_decision:
-  decision: # Accept|Accept with changes|Reject
-  rationale: # 決策理由（含關鍵證據與權衡）
-  conditions: [] # 若為 Accept with changes 或 Reject，列出條件/必要修正
-
-conformance_check:
-  requirements_match:
-    status: # pass|partial|fail
-    justification: # 詳細說明
-    evidence: [] # 列出有路徑的支持證據
-    
-  plan_alignment:
-    status: # pass|partial|fail  
-    justification: # 詳細說明
-    deviations: # 列出所有偏離或"未識別任何"
-      - description: # 偏離內容
-        impact: # low|medium|high
-        evidence: # 檔案路徑或測量
-
-quality_assessment:
-  
-  ratings:
-    completeness:
-      score: # 1-5
-      justification: # Detailed reasoning with examples
-      evidence: # File paths or specific examples with line numbers
-      
-    consistency:
-      score: # 1-5
-      justification: # Detailed reasoning with examples
-      evidence: # File paths or specific examples with line numbers
-      
-    readability_maintainability:
-      score: # 1-5
-      justification: # Detailed reasoning with examples
-      evidence: # File paths or specific examples with line numbers
-      
-    security:
-      score: # 1-5
-      justification: # Security findings and analysis
-      evidence: # File paths or specific examples with line numbers
-      
-    performance:
-      score: # 1-5
-      justification: # Performance metrics or observations
-      evidence: # Measurements or benchmarks with specific data
-      
-    test_quality:
-      score: # 1-5
-      justification: # Coverage and results analysis
-      evidence: # Test reports or coverage data with specific metrics
-      
-    documentation:
-      score: # 1-5
-      justification: # Documentation adequacy assessment
-      evidence: # Updated documentation paths with specific sections
-      
-  summary_score:
-    score: # 整體分數1-5
-    calculation_method: # 摘要分數如何得出
-
-  implementation_maturity:
-    level: # bronze|silver|gold|platinum
-    rationale: # 依據品質分數、品質門檻與量化指標的綜合說明
-    computed_from:
-      - # 例：所有必填章節完整、無blocker、覆蓋率 -->=70% → silver
-    
-  quantitative_metrics:
-    code_metrics:
-      lines_of_code: # 總程式碼行數
-      cyclomatic_complexity: # 平均複雜度分數
-      technical_debt_ratio: # 百分比
-      code_duplication: # 百分比
-      
-    quality_gates:
-      passing_tests: # 數量/百分比
-      code_coverage: # 百分比
-      static_analysis_issues: # 按嚴重性計數
-      security_vulnerabilities: # 按嚴重性計數
-      
-    # 僅限重新審查：
-    trend_analysis:
-      quality_trend: # improving|stable|declining
-      score_delta: # 與先前審查的+/-X.X
-      improvement_areas: [] # 改進區域
-      regression_areas: [] # 退步區域
+scoring_guide: |
+  # Platinum (4.0): All criteria fully met, no issues
+  # Gold (3.0): Most criteria met, 1-2 minor issues
+  # Silver (2.0): Minimum standards met, 3-4 issues
+  # Bronze (1.0): Below minimum standards, multiple critical issues
 
 findings:
-  # Template for each finding - copy to add more findings
-  
-  severity_classification:
-    blocker: "Critical issues that prevent deployment or cause system failure"
-    high: "Significant issues affecting functionality, security, or performance"
-    medium: "Important issues affecting code quality or maintainability"
-    low: "Minor issues or improvement opportunities"
-  
-  area_classification:
-    security: "Authentication, authorization, data protection, vulnerability issues"
-    performance: "Response time, resource usage, scalability concerns"
-    correctness: "Functional bugs, logic errors, requirement violations"
-    consistency: "Code style, naming conventions, architectural alignment"
-    documentation: "Missing or inadequate documentation, unclear specifications"
-    testing: "Test coverage, test quality, testing strategy issues"
-    other: "Issues not covered by other categories"
-  
-  structured_findings:
-    - id: # ISS-1, ISS-2, etc.
-      title: # Clear, specific issue title
-      severity: # blocker|high|medium|low
-      area: # security|performance|correctness|consistency|documentation|testing|other
-      description: # Detailed problem description
-      evidence: [] # List specific evidence with exact paths/line numbers
-      recommendation: # Specific, actionable recommendation with implementation steps
+  - severity: "blocker|high|medium|low"
+    area: "security|performance|correctness|testing|documentation|other"
+    description: ""
+    evidence: ""
+    recommendation: ""
 
-risks:
-  summary: # 風險總結（1-3 句）
-  entries:
-    - id: # RSK-1, RSK-2, etc.
-      title: # 風險標題
-      severity: # blocker|high|medium|low
-      likelihood: # high|medium|low
-      impact: # 影響說明
-      evidence: [] # 檔案/量測/PR 連結
-      mitigation: # 緩解措施
-      owner: # 負責人
-      due_date: # YYYY-MM-DD
+test_summary:
+  coverage_percentage: ""
+  all_passed: true|false
+  test_output: ""
 
-error_log:
-  summary:
-    total_errors: # 數量
-    by_severity:
-      blocker: 0
-      high: 0
-      medium: 0
-      low: 0
-  entries:
-    - code: # ERR-代碼（例如：ERR-AUTH-001）
-      severity: # blocker|high|medium|low
-      area: # security|performance|correctness|consistency|documentation|testing|other
-      description: # 錯誤/異常的簡述
-      evidence: [] # 具體檔案/行號/PR/測量連結
-      remediation: # 建議修復步驟
-      status: # open|fixed|wontfix
-
-recommendations:
-  # Template for each recommendation - copy to add more recommendations
-  
-  prioritization_framework:
-    priority_1: "Critical improvements with high impact and feasible implementation"
-    priority_2: "Important improvements with moderate impact or complexity"
-    priority_3: "Nice-to-have improvements with lower impact or higher complexity"
-  
-  structured_recommendations:
-    - id: # REC-1, REC-2, etc.
-      title: # Clear recommendation title
-      priority: # priority_1|priority_2|priority_3
-      rationale: # Why this recommendation is helpful
-      steps: [] # List all implementation steps with specific actions and responsibilities
-      success_criteria: [] # List measurable success conditions with specific metrics
-      
-      implementation_details:
-        effort_estimate: # small|medium|large
-        dependencies: [] # List any dependencies or prerequisites
-        risks: [] # Identify potential implementation risks
-        alternatives: [] # Consider alternative approaches if applicable
-
-action_items:
-  # 依優先順序與可指派性列出行動項
-  items:
-    - id: # ACT-1, ACT-2, etc.
-      title: # 行動項標題
-      priority: # priority_1|priority_2|priority_3
-      finding_ref: # 對應的發現ID（例如：ISS-1）
-      owner: # 負責人
-      due_date: # YYYY-MM-DD
-      status: # open|in_progress|done|blocked
-
-next_actions:
-  blockers: [] # 列出所有阻礙項目或"未識別阻礙"
-  prioritized_fixes: [] # 按優先順序排列修復（參考發現ID）
-  follow_up: [] # 列出有負責人/時間線的後續行動
-
-appendix:
-  test_summary:
-    coverage:
-      lines: # 百分比
-      branches: # 百分比
-      functions: # 百分比
-    results:
-      - suite: # 測試套件名稱
-        status: # pass|fail
-        notes: # 任何相關註記
-        
-  measurements:
-    performance: # 列出效能指標或"無可用指標"
-      - metric: # 指標名稱（例如：p95_latency_ms）
-        value: # 當前值
-        baseline: # 基線值
-        delta: # +/- 變化
-        
-    security_scans: # 列出安全掃描結果或"未implement掃描"
-      - tool: # 掃描工具名稱
-        result: # pass|issues
-        notes: # 發現摘要
+source_references:
+  plan_path: ""
+  dev_notes_path: ""
+  code_paths: []

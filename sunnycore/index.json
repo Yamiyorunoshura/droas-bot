@@ -24,7 +24,8 @@
     { "id": "project-knowledge-tmpl", "path": "claude code/templates/project-knowledge-tmpl.yaml" },
     { "id": "requirement-tmpl", "path": "claude code/templates/requirement-tmpl.yaml" },
     { "id": "review-tmpl", "path": "claude code/templates/review-tmpl.yaml" },
-    { "id": "tasks-tmpl", "path": "claude code/templates/tasks-tmpl.yaml" }
+    { "id": "tasks-tmpl", "path": "claude code/templates/tasks-tmpl.yaml" },
+    { "id": "concluded-architecture-tmpl", "path": "claude code/templates/concluded-architecture-tmpl.yaml" }
   ],
   "tasks": [
     { "id": "brownfield-tasks", "path": "claude code/tasks/brownfield-tasks.md" },
@@ -50,7 +51,7 @@
       "plan-tasks": ["tasks-tmpl"],
       "develop-tasks": ["dev-notes-tmpl"],
       "review": ["review-tmpl"],
-      "document-project": [],
+      "document-project": ["concluded-architecture-tmpl"],
       "conclude": ["completion-report-tmpl"],
       "curate-knowledge": ["project-knowledge-tmpl"],
       "create-tasks": ["tasks-tmpl"],

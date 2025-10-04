@@ -1,116 +1,72 @@
-<input>
-  <context>
-  1. {root}/docs/dev-notes/{task_id}-dev-notes.md
-  2. {root}/docs/implementation-plan/{task_id}-plan.md
-  3. {root}/sunnycore/templates/review-tmpl.yaml
-  4. {root}/sunnycore/CLAUDE.md
-    - QA rules
-  </context>
-  <templates>
-  1. review-tmpl.yaml
-  2. dev-notes-tmpl.yaml
-  </templates>
-</input>
+[輸入]
+  1. {root}/docs/dev-notes/{task_id}-dev-notes.md --開發筆記
+  2. {root}/docs/implementation-plan/{task_id}-plan.md --實作計畫
+  3. {root}/sunnycore/templates/review-tmpl.yaml --審查模板
 
-<output>
-1. {root}/docs/review-results/{task_id}-review.md
-2. {root}/docs/tasks.md
-</output>
+[輸出]
+  1. {root}/docs/review-results/{task_id}-review.md
+  2. {root}/docs/tasks.md
 
-<constraints, importance = "Important">
-- Must produce machine-checkable Markdown with sections: Overview, Findings, Risks, Action Items.
-- Must cross-reference plan/code/notes with file paths, line ranges, or anchors when available.
-- Must prioritize requirement mismatches and critical defects over style issues.
-- Should keep each finding concise (<= 120 words) and one issue per bullet.
-- Must record an acceptance decision with rationale: Accept / Accept with changes / Reject.
-</constraints>
+[約束]
+  1. 必須執行 develop-tasks 任務階段創建的所有測試，並驗證測試結果與實作計畫對齊
+  2. 必須驗證所有正式程式碼嚴格遵循實作計畫規格與驗收標準；任何偏離處需明確記錄並說明理由
+  3. 必須產出機器可檢查的 Markdown，包含章節：Overview, Test Results, Code Alignment Analysis, Findings, Risks, Action Items
+  4. 必須使用檔案路徑、行範圍或錨點（若可用）交叉參照計畫/程式碼/筆記
+  5. 必須記錄驗收決策與理由：Accept / Accept with changes / Reject
 
-<example>
-Minimal review result outline:
+[工具]
+  1. **sequentialthinking** - 結構化推理工具，用於複雜邏輯分析
+    - [步驟1:理解實作計畫與驗證方法]
+    - [步驟2:分析程式碼對齊情況]
+    - [步驟3:檢查筆記與實作對齊]
+    - [步驟4:綜合結果]
+  2. **todo_write** - 任務追蹤工具，用於管理待辦清單
+    - [所有階段:執行追蹤]
+  3. **claude-context** - 程式碼庫語義搜尋工具，用於大型文件分段處理
+    - [步驟1:分段處理大型計畫文件]
+    - [步驟2:分段處理大型程式碼文件]
 
-# Overview
-- Scope: ...
-- Decision: Accept with changes — rationale: ...
+[工具指引]
+  1. **sequentialthinking**
+    - 簡單任務推理：1-3 totalThoughts
+    - 中等任務推理：3-5 totalThoughts
+    - 複雜任務推理：5-8 totalThoughts
+    - 完成原本推理步數後依然有疑問：nextThoughtNeeded = true
+    - 你必須完成所有設定的推理步數
+  2. **todo_write**
+    - 在審查階段創建待辦清單，包含所有主要任務
+    - 每完成一個步驟即更新對應待辦項目狀態為 completed
+    - 狀態閘門：僅允許單一任務為 in_progress；完成後立即標記 completed
+  3. **claude-context**
+    - 使用場景：當計畫文件過大需要分段處理時
+    - 可用於分段讀取與理解複雜的計畫文件
 
-# Findings
-- Issue: ...
-- Evidence: ...
-- Impact: ...
-- Recommendation: ...
+[步驟]
+  1. 審查計劃階段
+    - 閱讀並理解實作計畫
+    - 識別驗證方法與成功標準
+    - 創建 todo list 以追蹤後續審查任務
 
-# Risks
-- ...
+  2. 審查程式碼階段
+    - 閱讀並理解所有正式程式碼
+    - 執行所有測試並記錄通過/失敗狀態與計畫對齊情況
+    - 驗證測試覆蓋率
+    - 驗證程式碼嚴格對齊架構/設計及驗收標準 
 
-# Action Items
-- [P1] ...
-</example>
+  3. 審查開發筆記階段
+    - 閱讀並理解開發筆記
+    - 檢查筆記與實作之間的對齊情況
 
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
+  4. 產出結果階段
+    - 使用模板創建審查結果，包含測試執行摘要
+    - 記錄測試結果與通過/失敗狀態及計畫對齊情況；分析程式碼對齊情況與特定參照
+    - 儲存至 {root}/docs/review-results/{task_id}-review.md；若檔案存在則更新
 
-<example>
-todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Review the plan
-- [ ] stage 2: Review the code
-- [ ] stage 3: Review the dev notes
-- [ ] stage 4: Produce the results
-</example>
-
-<workflow, importance = "Important">
-  <stage id="0: plan-todos">
-  <tools: todo-list>
-  - Read all working steps
-  - Take reference from the example and create a todo item 
-  </tools: todo-list, sequential-thinking>
-  </stage>
-
-  <stage id="1: review-plan">
-  <tools: sequential-thinking>
-  - Read and understand the implementation plan
-  - Identify verification approach and success criteria
-  </tools: sequential-thinking>
-
-  <questions>
-  - Are acceptance criteria complete, testable, and measurable?
-  - Are assumptions, risks, and rollback strategies explicitly stated?
-  </questions>
-  </stage>
-
-  <stage id="2: review-code">
-  <tools: sequential-thinking>
-  - Read and understand the code
-  - Check alignment with the plan and the requirements
-  - Run tests to verify the code
-  </tools: sequential-thinking>
-  
-  <questions>
-  - Do tests cover critical paths, edge cases, and regressions?
-  - Are security, performance, and observability concerns addressed?
-  </questions>
-  </stage>
-
-  <stage id="3: review-dev-notes">
-  <tools: sequential-thinking>
-  - Read and understand the development notes
-  - Check alignment between notes and implementation
-  </tools: sequential-thinking>
-  </stage>
-
-  <stage id="4: produce-results">
-  - Use the template to create the markdown formatted review results
-  - Save to {root}/docs/review-results/{task_id}-review.md
-  - If there is already an existing review results, update the review results with the new information
-  <checks>
-  - [ ] All required sections present and consistent
-  - [ ] Findings reference plan/code/notes with links or anchors
-  - [ ] Acceptance decision recorded with rationale
-  - [ ] Action items prioritized and assignable
-  </checks>
-  </stage>
-</workflow>
+[DoD]
+  - [ ] 已執行所有測試並記錄結果
+  - [ ] 已驗證測試結果與計畫對齊
+  - [ ] 程式碼對齊分析已完成，包含對計畫偏離的特定參照
+  - [ ] 所有必要章節已呈現：Overview, Test Results, Code Alignment Analysis, Findings, Risks, Action Items
+  - [ ] 測試失敗與計畫不對齊情況已清楚識別並優先化
+  - [ ] 已記錄驗收決策與基於測試結果及計畫遵循的理由
+  - [ ] 所有待辦項目已完成

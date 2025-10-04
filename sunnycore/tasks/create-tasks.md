@@ -1,78 +1,64 @@
-<input>
-  <context>
-    1. {root}/docs/requirements/*.md - Project functional and non-functional requirements
-    2. {root}/docs/architecture/*.md - Architecture design and technical specifications
-    3. {root}/sunnycore/templates/tasks-tmpl.yaml - Task template format
-  </context>
-  <templates>
-    1. sunnycore/templates/tasks-tmpl.yaml - Standard task structure template
-  </templates>
-</input>
+[輸入]
+  1. {root}/docs/requirements/*.md --專案功能性與非功能性需求
+  2. {root}/docs/architecture/*.md --架構設計與技術規格
+  3. {root}/sunnycore/templates/tasks-tmpl.yaml --任務模板格式
 
-<output>
-  1. {root}/docs/tasks.md - Comprehensive task breakdown with atomized sub-tasks
-</output>
+[輸出]
+  1. {root}/docs/tasks.md --任務清單（Markdown 格式）
 
-<constraints, importance = "Important">
-- Use 2-space indentation and kebab-case keys in YAML.
-- Create atomic, verifiable tasks (≤14 words, clear outcome).
-- Exclude operational actions unless explicitly requested by the user.
-- Ensure no filenames/paths use spaces; prefer kebab-case.
-</constraints>
+[約束]
+  1. 必須創建原子化、可驗證的任務（≤14 字，結果明確）
+  2. 必須排除操作性動作，除非用戶明確要求
+    - 操作性動作指執行層級指令如 git commit、npm install 等，但設計、實作、測試等開發任務不屬於此類
+  3. 必須確保所有檔案名稱/路徑不使用空格；優先使用 kebab-case
 
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
+[工具]
+  1. **todo_write**
+    - [步驟1:創建任務清單]
+    - [步驟2:追蹤任務進度]
+  2. **sequentialthinking**
+    - [步驟1:分析需求複雜度與任務依賴關係]
+    - [步驟2:設計原子任務與邏輯分組]
 
-<example>
-todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Research
-- [ ] stage 2: Draft
-- [ ] stage 3: Review
-- [ ] stage 4: Finalize
-</example>
+[工具指引]
+  1. **todo_write**
+    - 在研究階段創建待辦清單，包含所有主要任務
+    - 每完成一個步驟即更新對應待辦項目狀態為 completed
+  2. **sequentialthinking**
+    - 簡單任務推理：1-3 totalThoughts
+    - 中等任務推理：3-5 totalThoughts
+    - 複雜任務推理：5-8 totalThoughts
+    - 完成原本推理步數後依然有疑問：nextThoughtNeeded = true
+    - 你必須完成所有設定的推理步數
 
-<workflow importance="Important">
-  <stage id="1: research">
-  <tools: sequential-thinking>
-  - Read requirements and architecture sources.
-  - Identify scope, success criteria, and constraints to drive task design.
-  - Map non-functional requirements to cross-cutting tasks.
-  </tools: sequential-thinking>
-  
-  <questions>
-  - Are all FRs and NFRs discoverable and current?
-  - What dependencies or sequencing constraints exist between tasks?
-  - What are acceptance signals for each task?
-  </questions>
-  </stage>
+[步驟]
+  1. 研究階段
+    - 驗證所有必要輸入檔案（包含模板）存在且可讀取，若讀取失敗則停止回應並明確通知用戶缺失的檔案路徑
+    - 閱讀需求與架構來源文件
+    - 識別範圍、成功標準與約束條件以驅動任務設計
+    - 將非功能性需求對應至跨領域任務
+    - 創建todo list追蹤後續任務設計工作
 
-  <stage id="2: draft">
-  - Use the template to generate atomic tasks.
-  - Include brief acceptance hints for verifiability.
-  - Group tasks logically while avoiding overlaps.
-  </stage>
+  2. 草擬階段
+    - 使用模板生成原子化任務
+    - 包含簡要的驗收提示以確保可驗證性
+    - 邏輯分組任務，避免重疊
+    - 交付物：Markdown 格式的任務草稿
 
-  <stage id="3: review">
-  - De-duplicate and prune non-actionable items.
-  - Ensure traceability from each task to requirement(s).
-  - Validate formatting against the template.
-  </stage>
+  3. 審查階段
+    - 去重與刪除不可執行的項目
+    - 確保每個任務都可追溯至需求
+    - 驗證格式是否符合模板要求
 
-  <stage id="4: finalize">
-  - Write markdown format tasks to {root}/docs/tasks.md.
-  - Include a short introduction explaining grouping and scope.
+  4. 最終化階段
+    - 將任務寫入 {root}/docs/tasks.md（Markdown 格式）
+    - 包含簡短介紹說明分組與範圍
 
-  <checks>
-  - [ ] File {root}/docs/tasks.md exists and is valid Markdown.
-  - [ ] Tasks conform to template fields and 2-space indentation.
-  - [ ] Each task is atomic, outcome-oriented, and verifiable.
-  - [ ] No filenames or keys use spaces; kebab-case enforced.
-  </checks>
-  </stage>
-</workflow>
+[DoD]
+  - [ ] 已閱讀所有需求與架構文件
+  - [ ] 研究筆記已完成，包含功能性需求/非功能性需求至任務的對應關係
+  - [ ] 檔案 {root}/docs/tasks.md 存在且為有效 Markdown
+  - [ ] 所有任務符合模板欄位
+  - [ ] 每個任務為原子化、結果導向且可驗證
+  - [ ] 無檔案名稱或鍵名使用空格；已強制使用 kebab-case
+  - [ ] 所有待辦項目已完成

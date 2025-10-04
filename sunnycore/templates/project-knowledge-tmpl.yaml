@@ -1,113 +1,25 @@
-# Project Knowledge Base Template
+---
+# Project Knowledge Base Template - Simplified
+# 專案知識庫模板 - 精簡版
 
-project_knowledge:
-  metadata:
-    title: "Project Knowledge Base"
-    version: "1.0"
-    last_updated: "YYYY-MM-DD"
-    maintainer: "Knowledge Management Expert"
-    
-  error_cases:
-    - id: "error_001"
-      category: "compilation_error"
-      title: "錯誤標題"
-      description: "錯誤描述"
-      root_cause: "根本原因分析"
-      solution:
-        steps:
-          - "解決步驟1"
-          - "解決步驟2"
-        code_example: |
-          # 修復後的代碼示例
-        prevention: "預防措施"
-      severity: "high|medium|low"
-      tags: ["tag1", "tag2"]
-      
-    - id: "error_002"
-      category: "runtime_error"
-      title: "錯誤標題"
-      description: "錯誤描述"
-      root_cause: "根本原因分析"
-      solution:
-        steps:
-          - "解決步驟1"
-          - "解決步驟2"
-        code_example: |
-          # 修復後的代碼示例
-        prevention: "預防措施"
-      severity: "high|medium|low"
-      tags: ["tag1", "tag2"]
-      
-  best_practices:
-    - id: "practice_001"
-      category: "code_quality"
-      title: "實踐標題"
-      description: "實踐描述"
-      practice_level: "platinum"
-      implementation:
-        guidelines:
-          - "實施指導1"
-          - "實施指導2"
-        code_example: |
-          # 最佳實踐代碼示例
-        tools_required: ["tool1", "tool2"]
-      benefits:
-        - "效益1"
-        - "效益2"
-      applicable_scenarios:
-        - "適用場景1"
-        - "適用場景2"
-      limitations:
-        - "限制條件1"
-        - "限制條件2"
-      tags: ["tag1", "tag2"]
-      
-    - id: "practice_002"
-      category: "performance"
-      title: "實踐標題"
-      description: "實踐描述"
-      practice_level: "platinum"
-      implementation:
-        guidelines:
-          - "實施指導1"
-          - "實施指導2"
-        code_example: |
-          # 最佳實踐代碼示例
-        tools_required: ["tool1", "tool2"]
-      benefits:
-        - "效益1"
-        - "效益2"
-      applicable_scenarios:
-        - "適用場景1"
-        - "適用場景2"
-      limitations:
-        - "限制條件1"
-        - "限制條件2"
-      tags: ["tag1", "tag2"]
-      
-  knowledge_categories:
-    error_types:
-      - "compilation_error"
-      - "runtime_error"
-      - "logic_error"
-      - "integration_error"
-      - "performance_error"
-      
-    practice_categories:
-      - "code_quality"
-      - "performance"
-      - "security"
-      - "maintainability"
-      - "testing"
-      - "architecture"
-      
-    severity_levels:
-      - "high"
-      - "medium"
-      - "low"
-      
-    practice_levels:
-      - "platinum"
-      - "gold"
-      - "silver"
-      - "bronze"
+metadata:
+  title: "Project Knowledge Base"
+  last_updated: ""
+
+best_practices:
+  - id: "BP-001"
+    title: ""
+    description: ""
+    practice_level: "platinum|gold|silver|bronze"  # Required for tracking
+    applicable_scenarios: []
+    evidence_source: ""  # File path + line numbers
+
+error_cases:
+  - id: "ERR-001"
+    title: ""
+    problem: ""
+    root_cause: ""
+    solution: ""
+    prevention: ""
+    severity: "high|medium|low"
+    evidence_source: ""  # File path + section reference

@@ -1,99 +1,82 @@
-<input>
-  <context>
-  1. Transform initial ideas into complete, testable requirements through a structured, interactive workflow.
-  2. Use the canonical requirement template to ensure consistency and verifiability.
-  3. Maintain English-only prompt content; user communications may be multilingual.
-  </context>
-  <templates>
-  1. {root}/sunnycore/templates/requirement-tmpl.yaml - Standard requirement template
-  </templates>
-</input>
+[輸入]
+  1. {root}/sunnycore/templates/requirement-tmpl.yaml --需求模板
+  2. 用戶提供的初始想法與需求描述
 
-<output>
-1. {root}/docs/requirements/*.md - Complete requirement specifications including functional, non-functional, and acceptance criteria.
-</output>
+[輸出]
+  1. {root}/docs/requirements/*.md --完整需求規格（包含功能性需求、非功能性需求與驗收標準）
 
-<constraints importance="Important">
-- Each requirement must be verifiable and measurable; avoid ambiguous or subjective phrasing.
-- Use numbered lists and concise sentences (average < 20 words) for scanability.
-- Align sections and field names exactly with the requirement template.
-- Do not include sensitive or personal data in examples.
-- Clarify the requirements and the acceptance criteria with the user.
-</constraints>
+[約束]
+  1. 每個需求必須可驗證且可衡量；不得使用模糊或主觀的措辭
+  2. 章節與欄位名稱必須與需求模板完全對齊
+  3. 範例中不得包含敏感或個人資料
+  4. 本工作流程透過結構化互動將初始想法轉換為完整、可測試的需求
+  5. 使用規範的需求模板確保一致性與可驗證性
 
-<example>
-markdown文件輸出方式：
-	•	YAML 第一層 key 轉換為 Markdown 一級標題 (#)
-	•	YAML 第二層 key 轉換為 Markdown 二級標題 (##)
-	•	YAML 第三層 key 轉換為 Markdown 三級標題 (###)
-	•	YAML value（字串或數字） 轉換為 Markdown 正文文字
-</example>
+[工具]
+  1. **todo_write**
+    - [初始化階段:創建任務清單]
+    - [功能性需求階段:追蹤功能性需求分析任務與決策]
+    - [非功能性需求階段:追蹤非功能性需求分析任務]
+    - [驗收標準階段:追蹤驗收標準撰寫與驗證]
+  2. **sequentialthinking**
+    - [初始化階段:結構化分解與反思性推理]
+    - [功能性需求階段:系統化分解複雜功能性需求]
+    - [非功能性需求階段:跨領域系統化非功能性需求分析]
+    - [驗收標準階段:結構化Given-When-Then與驗證邏輯]
+  3. **playwright_browser**
+    - [功能性需求階段:於需要時執行網頁研究以獲取需求範例]
+  4. **claude-context**
+    - [非功能性需求階段:分段處理大型需求文件]
 
-<example>
-todo list example:
-- [ ] stage 0: Create a todo list
-- [ ] stage 1: Functional
-- [ ] stage 2: Nonfunctional
-- [ ] stage 3: Acceptance
-- [ ] stage 4: Finalize
-</example>
+[工具指引]
+  1. **todo_write**
+    - 在初始階段創建待辦清單，包含所有主要任務
+    - 每完成一個步驟即更新對應待辦項目狀態為 completed
+  2. **sequentialthinking**
+    - 簡單任務推理：1-3 totalThoughts
+    - 中等任務推理：3-5 totalThoughts
+    - 複雜任務推理：5-8 totalThoughts
+    - 完成原本推理步數後依然有疑問：nextThoughtNeeded = true
+    - 你必須完成所有設定的推理步數
+  3. **playwright_browser**
+    - 使用場景：需要參考業界標準或範例需求時
+    - 避免包含敏感或專有資訊
+  4. **claude-context**
+    - 使用場景：當需求文件輸入超過 5000 tokens 或包含大量複雜內容需分段處理時
+    - 避免在內容已在記憶體且在 token 限制內時使用
 
-<workflow importance="Important">
-  <stage id="1, init">
-  <tools: todo-list>
-  - Read all working steps to understand the expected deliverables.
-  - Take reference from the example and create a todo item 
-  </tools: todo-list, sequential-thinking>
-  </stage>
+[步驟]
+  1. 初始化階段
+    - 閱讀所有工作步驟以理解預期工作
+    - 創建todo list追蹤後續需求提取與撰寫任務
 
-  <stage id="2, functional">
-  <tools: sequential-thinking>
-  - Derive functional requirements from the user's input and context.
-  - Consolidate duplicates and remove ambiguity; keep each statement atomic.
-  - Organize by user stories or system capabilities as appropriate.
-  </tools: sequential-thinking>
+  2. 功能性需求階段
+    - 從用戶輸入與上下文中提取功能性需求
+    - 去重與原子化陳述（單一可測試條件）
+    - 依照用戶故事或系統能力組織
 
-  <questions>
-  - What are the core user goals and success criteria for each scenario?
-  - Which preconditions, data contracts, and error states must be explicit?
-  - Are there external integrations or upstream/downstream dependencies?
-  </questions>
-  </stage>
+  3. 非功能性需求階段
+    - 識別跨效能、可靠性、安全性、合規性與可操作性的非功能性需求
+    - 量化目標（例如：P95 延遲、正常運行時間 SLO、RTO/RPO）與約束條件
+    - 將非功能性需求對應至監控/可觀測性信號（若相關）
 
-  <stage id="3, nonfunctional">
-  <tools: sequential-thinking>
-  - Identify non-functional requirements across performance, reliability, security, compliance, and operability.
-  - Quantify targets (e.g., P95 latency, uptime SLO, RTO/RPO) and constraints.
-  - Map NFRs to monitoring/observability signals when relevant.
-  </tools: sequential-thinking>
-  
-  <questions>
-  - What performance baselines and environment assumptions are in scope?
-  - What threat model, data classification, or compliance scope applies?
-  - How will we validate and observe these NFRs post-deployment?
-  </questions>
-  </stage>
+  4. 驗收標準階段
+    - 為每個需求定義驗收標準；確保具有確定性且可測試
+    - 使用 Given-When-Then 結構，包含輸入、前置條件與通過/失敗結果
+    - 驗證每個標準可以自動化或人工驗證，具有二元結果
 
-  <stage id="4, acceptance">
-  <tools: sequential-thinking>
-  - Define acceptance criteria per requirement; ensure they are deterministic and testable.
-  - Reference inputs, preconditions, and explicit pass/fail outcomes.
-  - Use clear structure; Gherkin-style is acceptable if helpful.
-  </tools: sequential-thinking>
-  </stage>
+  5. 最終化階段
+    - 交叉檢查功能性需求、非功能性需求與驗收標準；請求用戶確認
+    - 填充需求模板並將輸出寫入 {root}/docs/requirements/
+    - 執行 "uv run {root}/sunnycore/scripts/shard-requirements.py"；若失敗則記錄錯誤於 {root}/logs/errors.log（包含時間戳、錯誤類型、失敗原因、影響範圍）並通知用戶
 
-  <stage id="5, finalize">
-  - Cross-check consistency across FRs, NFRs, and acceptance criteria and ask for user's confirmation.
-  - Populate the requirement template and place markdown formatted outputs under {root}/docs/requirements/.
-  - Run the {root}/sunnycore/scripts/shard-requirements.py script by using uv run to shard the requirements
-
-  <checks>
-  - [ ] Outputs include FRs, NFRs, and acceptance criteria per template
-  - [ ] All content is written in English and uses numbered lists where applicable
-  - [ ] Each requirement is measurable and verifiable (no ambiguity)
-  - [ ] File paths and names match {root}/docs/requirements/*.md
-  - [ ] Sensitive data has not been introduced in examples
-  - [ ] The requirements are sharded into {root}/docs/requirements/*.md
-  </checks>
-  </stage>
-</workflow>
+[DoD]
+  - [ ] 已閱讀並理解所有工作步驟
+  - [ ] 功能性需求已提取、去重與原子化
+  - [ ] 非功能性需求已識別並量化（包含效能、安全性、可靠性等）
+  - [ ] 每個需求都有對應的驗收標準（使用 Given-When-Then 結構）
+  - [ ] 內容為英文且使用編號清單
+  - [ ] 每個需求可衡量且可驗證
+  - [ ] 已執行 shard-requirements.py 或已記錄錯誤於 {root}/logs/errors.log 並通知用戶
+  - [ ] 已取得用戶對最終需求集的確認
+  - [ ] 所有待辦項目已完成
