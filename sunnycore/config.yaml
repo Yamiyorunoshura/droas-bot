@@ -1,0 +1,29 @@
+orchestrator-subagent-list:
+  - all
+
+dev-subagent-list:
+  - dev_backend-developer_api
+  - dev_backend-developer_database
+  - dev_backend-developer_security
+  - dev_backend-developer_performance
+  - dev_backend-developer_testing
+  - dev_backend-developer_infrastructure
+  - dev_frontend-developer_ui-ux
+  - dev_frontend-developer_framework
+  - dev_frontend-developer_performance
+  - dev_frontend-developer_accessibility
+  - dev_frontend-developer_testing
+  - dev_fullstack-developer_architecture
+  - dev_fullstack-developer_integration
+  - dev_fullstack-developer_performance
+  - dev_fullstack-developer_devops
+  - dev_refactor-developer_code-quality
+  - dev_refactor-developer_performance
+
+qa-subagent-list:
+  - qa_task-reviewer_security
+  - qa_task-reviewer_performance
+  - qa_task-reviewer_documentation
+  - qa_task-reviewer_integration
+  - qa_task-reviewer_code-quality
+  - qa_task-reviewer_testing

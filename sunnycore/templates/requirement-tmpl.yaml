@@ -1,0 +1,34 @@
+---
+# Requirements Template - Optimized for minimal token usage
+# 需求模板 - 優化版本
+
+project-info:
+  name: ""
+  description: ""
+
+functional-requirements:
+  - id: "F-001"
+    title: ""
+    description: ""
+    priority: "High|Medium|Low"
+    acceptance-criteria: []
+
+non-functional-requirements:
+  - id: "NFR-P-001"
+    type: "performance|security|usability|scalability|reliability"
+    description: ""
+    target-value: ""
+    test-method: ""
+
+constraints:
+  technical: []
+  business: []
+  regulatory: []
+
+assumptions-and-risks:
+  assumptions: []
+  risks:
+    - id: "R-001"
+      description: ""
+      impact: "High|Medium|Low"
+      mitigation: ""

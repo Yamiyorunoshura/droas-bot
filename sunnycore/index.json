@@ -1,0 +1,195 @@
+{
+  "meta": {
+    "name": "sunnycore-claude-index",
+    "version": "2.0.0",
+    "schemaVersion": "1.0",
+    "generatedAt": "2025-09-12",
+    "root": "claude code"
+  },
+  "agents": [
+    { "id": "architect", "title": "Technical Architect Agent", "path": "claude code/commands/sunnycore_architect.md" },
+    { "id": "assistant", "title": "Technical Assistant Agent", "path": "claude code/commands/sunnycore_assistant.md" },
+    { "id": "dev", "title": "Developer Agent", "path": "claude code/agents/dev.md" },
+    { "id": "pm", "title": "Project Manager Agent", "path": "claude code/agents/pm.md" },
+    { "id": "po", "title": "Product Owner Agent", "path": "claude code/commands/sunnycore_po.md" },
+    { "id": "progress-manager", "title": "Progress Manager Agent", "path": "claude code/agents/progress-manager.md" },
+    { "id": "qa", "title": "QA Agent", "path": "claude code/agents/qa.md" }
+  ],
+  "scripts": [
+    { "id": "shard-architecture", "path": "claude code/scripts/shard-architecture.py" },
+    { "id": "shard-requirements", "path": "claude code/scripts/shard-requirements.py" }
+  ],
+  "templates": [
+    { "id": "architecture-tmpl", "path": "claude code/templates/architecture-tmpl.yaml" },
+    { "id": "completion-report-tmpl", "path": "claude code/templates/completion-report-tmpl.yaml" },
+    { "id": "concluded-architecture-tmpl", "path": "claude code/templates/concluded-architecture-tmpl.yaml" },
+    { "id": "cutover-report-tmpl", "path": "claude code/templates/cutover-report-tmpl.yaml" },
+    { "id": "dev-notes-tmpl", "path": "claude code/templates/dev-notes-tmpl.yaml" },
+    { "id": "implementation-plan-tmpl", "path": "claude code/templates/implementation-plan-tmpl.yaml" },
+    { "id": "prd-tmpl", "path": "claude code/templates/prd-tmpl.yaml" },
+    { "id": "project-knowledge-tmpl", "path": "claude code/templates/project-knowledge-tmpl.yaml" },
+    { "id": "requirement-tmpl", "path": "claude code/templates/requirement-tmpl.yaml" },
+    { "id": "review-tmpl", "path": "claude code/templates/review-tmpl.yaml" },
+    { "id": "tasks-tmpl", "path": "claude code/templates/tasks-tmpl.yaml" }
+  ],
+  "tasks": [
+    { "id": "brownfield-tasks", "path": "claude code/tasks/brownfield-tasks.md" },
+    { "id": "conclude", "path": "claude code/tasks/conclude.md" },
+    { "id": "create-architecture", "path": "claude code/tasks/create-architecture.md" },
+    { "id": "create-brownfield-architecture", "path": "claude code/tasks/create-brownfield-architecture.md" },
+    { "id": "create-brownfield-requirements", "path": "claude code/tasks/create-brownfield-requirements.md" },
+    { "id": "create-epic", "path": "claude code/tasks/create-epic.md" },
+    { "id": "create-prd", "path": "claude code/tasks/create-prd.md" },
+    { "id": "create-requirements", "path": "claude code/tasks/create-requirements.md" },
+    { "id": "curate-knowledge", "path": "claude code/tasks/curate-knowledge.md" },
+    { "id": "cutover", "path": "claude code/tasks/cutover.md" },
+    { "id": "develop-prd", "path": "claude code/tasks/develop-prd.md" },
+    { "id": "develop-tasks", "path": "claude code/tasks/develop-tasks.md" },
+    { "id": "document-project", "path": "claude code/tasks/document-project.md" },
+    { "id": "fix-acceptance-issues", "path": "claude code/tasks/fix-acceptance-issues.md" },
+    { "id": "help", "path": "claude code/tasks/help.md" },
+    { "id": "init", "path": "claude code/tasks/init.md" },
+    { "id": "plan-tasks", "path": "claude code/tasks/plan-tasks.md" },
+    { "id": "review", "path": "claude code/tasks/review.md" }
+  ],
+  "relations": {
+    "taskToTemplates": {
+      "brownfield-tasks": ["tasks-tmpl"],
+      "conclude": ["completion-report-tmpl"],
+      "create-architecture": ["architecture-tmpl"],
+      "create-brownfield-architecture": ["architecture-tmpl"],
+      "create-brownfield-requirements": ["requirement-tmpl"],
+      "create-epic": ["tasks-tmpl"],
+      "create-prd": ["prd-tmpl"],
+      "create-requirements": ["requirement-tmpl"],
+      "curate-knowledge": ["project-knowledge-tmpl"],
+      "cutover": ["cutover-report-tmpl"],
+      "develop-prd": ["dev-notes-tmpl"],
+      "develop-tasks": ["dev-notes-tmpl"],
+      "document-project": ["concluded-architecture-tmpl"],
+      "fix-acceptance-issues": ["dev-notes-tmpl"],
+      "help": [],
+      "init": [],
+      "plan-tasks": ["tasks-tmpl"],
+      "review": ["review-tmpl"]
+    },
+    "taskToScripts": {
+      "create-architecture": ["shard-architecture"],
+      "create-brownfield-architecture": ["shard-architecture"],
+      "create-brownfield-requirements": ["shard-requirements"],
+      "create-requirements": ["shard-requirements"]
+    },
+    "taskToAgents": {
+      "brownfield-tasks": ["pm", "dev"],
+      "conclude": ["po"],
+      "create-architecture": ["architect"],
+      "create-brownfield-architecture": ["architect"],
+      "create-brownfield-requirements": ["po", "pm"],
+      "create-epic": ["pm"],
+      "create-prd": ["pm"],
+      "create-requirements": ["po", "pm"],
+      "curate-knowledge": ["architect"],
+      "cutover": ["po"],
+      "develop-prd": ["dev"],
+      "develop-tasks": ["dev"],
+      "document-project": ["architect"],
+      "fix-acceptance-issues": ["dev"],
+      "help": ["architect", "dev", "pm", "po", "qa"],
+      "init": ["dev"],
+      "plan-tasks": ["pm", "dev"],
+      "review": ["qa", "pm"]
+    },
+    "agentToTasks": {
+      "architect": [
+        "create-architecture",
+        "create-brownfield-architecture",
+        "curate-knowledge",
+        "document-project",
+        "help"
+      ],
+      "assistant": [],
+      "dev": [
+        "brownfield-tasks",
+        "develop-prd",
+        "develop-tasks",
+        "fix-acceptance-issues",
+        "init",
+        "plan-tasks"
+      ],
+      "pm": [
+        "brownfield-tasks",
+        "create-brownfield-requirements",
+        "create-epic",
+        "create-prd",
+        "create-requirements",
+        "help",
+        "plan-tasks",
+        "review"
+      ],
+      "po": [
+        "conclude",
+        "create-brownfield-requirements",
+        "create-requirements",
+        "cutover",
+        "help"
+      ],
+      "progress-manager": [],
+      "qa": [
+        "help",
+        "review"
+      ]
+    },
+    "scriptToTasks": {
+      "shard-architecture": [
+        "create-architecture",
+        "create-brownfield-architecture"
+      ],
+      "shard-requirements": [
+        "create-requirements",
+        "create-brownfield-requirements"
+      ]
+    },
+    "templateToTasks": {
+      "architecture-tmpl": [
+        "create-architecture",
+        "create-brownfield-architecture"
+      ],
+      "completion-report-tmpl": [
+        "conclude"
+      ],
+      "concluded-architecture-tmpl": [
+        "document-project"
+      ],
+      "cutover-report-tmpl": [
+        "cutover"
+      ],
+      "dev-notes-tmpl": [
+        "brownfield-tasks",
+        "develop-prd",
+        "develop-tasks",
+        "fix-acceptance-issues"
+      ],
+      "implementation-plan-tmpl": [
+        "plan-tasks"
+      ],
+      "prd-tmpl": [
+        "create-prd"
+      ],
+      "project-knowledge-tmpl": [
+        "curate-knowledge"
+      ],
+      "requirement-tmpl": [
+        "create-brownfield-requirements",
+        "create-requirements"
+      ],
+      "review-tmpl": [
+        "review"
+      ],
+      "tasks-tmpl": [
+        "brownfield-tasks",
+        "create-epic",
+        "plan-tasks"
+      ]
+    }
+  }
+}

@@ -1,0 +1,25 @@
+---
+# Project Knowledge Base Template - Simplified
+# 專案知識庫模板 - 精簡版
+
+metadata:
+  title: "Project Knowledge Base"
+  last_updated: ""
+
+best_practices:
+  - id: "BP-001"
+    title: ""
+    description: ""
+    practice_level: "platinum|gold|silver|bronze"  # Required for tracking
+    applicable_scenarios: []
+    evidence_source: ""  # File path + line numbers
+
+error_cases:
+  - id: "ERR-001"
+    title: ""
+    problem: ""
+    root_cause: ""
+    solution: ""
+    prevention: ""
+    severity: "high|medium|low"
+    evidence_source: ""  # File path + section reference

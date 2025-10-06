@@ -1,0 +1,49 @@
+---
+# Review Report Template - Simplified
+# 審查報告模板 - 精簡版
+
+task_id: ""
+reviewer: ""
+date: ""
+review_type: "initial|follow_up"
+
+acceptance_decision: "Accept|Accept with changes|Reject"
+rationale: |
+  # Decision rationale with key evidence
+
+quality_scores:
+  # Score 1-5 for each dimension
+  functional_compliance: 0
+  code_quality: 0
+  security_performance: 0
+  test_coverage: 0
+  architecture_alignment: 0
+  documentation: 0
+  deployment_readiness: 0
+  
+  # Calculated scores
+  overall_score: 0.0  # Average of 7 dimensions (1.0-5.0)
+  maturity_level: "bronze|silver|gold|platinum"  # Required for curate-knowledge
+
+scoring_guide: |
+  # Platinum (4.0): All criteria fully met, no issues
+  # Gold (3.0): Most criteria met, 1-2 minor issues
+  # Silver (2.0): Minimum standards met, 3-4 issues
+  # Bronze (1.0): Below minimum standards, multiple critical issues
+
+findings:
+  - severity: "blocker|high|medium|low"
+    area: "security|performance|correctness|testing|documentation|other"
+    description: ""
+    evidence: ""
+    recommendation: ""
+
+test_summary:
+  coverage_percentage: ""
+  all_passed: true|false
+  test_output: ""
+
+source_references:
+  plan_path: ""
+  dev_notes_path: ""
+  code_paths: []
