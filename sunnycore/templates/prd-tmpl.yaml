@@ -1,0 +1,60 @@
+---
+# PRD Template - Product Requirements Document
+# PRD 模板 - 產品需求文檔
+
+project-info:
+  name: ""
+  description: ""
+  type: "greenfield|brownfield"
+
+requirements:
+  functional:
+    - id: "F-001"
+      title: ""
+      description: ""
+      priority: "High|Medium|Low"
+      acceptance-criteria: []
+  
+  non-functional:
+    - id: "NFR-P-001"
+      type: "performance|security|usability|scalability|reliability"
+      description: ""
+      target-value: ""
+      test-method: ""
+
+architecture:
+  components:
+    - name: ""
+      responsibility: ""
+      interfaces: []
+      dependencies: []
+  
+  technical-stack:
+    frontend: ""
+    backend: ""
+    database: ""
+    infrastructure: ""
+  
+  data-flow: |
+    # Describe how data flows through the system
+
+tasks:
+  - id: "Task-1"
+    name: ""
+    requirements: []  # F-001, NFR-P-001
+    architecture-refs: []  # component names
+    acceptance-hint: ""
+    dependencies: []
+
+constraints:
+  technical: []
+  business: []
+
+assumptions-and-risks:
+  assumptions: []
+  risks:
+    - id: "R-001"
+      description: ""
+      impact: "High|Medium|Low"
+      mitigation: ""
+

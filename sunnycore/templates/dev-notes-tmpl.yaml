@@ -1,90 +1,39 @@
 ---
-description: 統一架構系統templates文檔
-last_updated: '2025-09-03'
-name: dev-notes-tmpl
-template_type: yaml
-version: '1.0'
----
+# Development Notes Template - Simplified
+# 開發筆記模板 - 精簡版
 
----
-template: dev-notes
-version: 1
+task_id: ""
+plan_reference: ""
+timestamp: ""
 
-# Developer Implementation Record Template
-# This file is created and maintained by developers during implementation
-# Location: docs/dev-notes/{task_id}`(e.g.`1`, `2`, `3`...)-dev-notes.md
+requirements_covered:
+  F-IDs: []
+  N-IDs: []
+  UI-IDs: []
 
-metadata:
-  task_id: "Required - Actual task identifier"
-  plan_reference: "Required - Corresponding implementation plan path"
-  root: "Required - Project root directory path"
+implementation_summary: |
+  # Brief summary of what was implemented
 
-# Development Record Entries - Add one entry per development phase
-dev_entries:
-  - entry_id: "Required - Unique identifier (e.g.: entry-1)"
-    developer_type: "Required - frontend|backend|fullstack|refactor"
-    timestamp: "Required - YYYY-MM-DDTHH:MM:SSZ format"
-    task_phase: "Required - Initial implementation|Iterative development|Bug fix|Refactoring"
-    re_dev_iteration: "Required - Development iteration count (number)"
+technical_decisions: |
+  # Key technical decisions and rationale
+  # - Technology selection reasons
+  # - Architecture decision explanations
+  # - Design pattern choices
 
-    changes_summary: "Required - Overall summary of this development work"
+challenges_and_solutions: |
+  # Problems encountered and how they were solved
+  # - Deviations from original plan
+  # - Reasons for changes
+  # - Solutions implemented
 
-    detailed_changes_mapped_to:
-      F-IDs:
-        - "Required - Functional requirement ID list (e.g.: F-1, F-2)"
-      N-IDs:
-        - "Required - Non-functional requirement ID list (e.g.: N-1)"
-      UI-IDs:
-        - "Required for frontend/fullstack - UI component ID list (e.g.: UI-1)"
+test_results:
+  coverage_percentage: ""
+  all_tests_passed: true|false
+  test_command: ""
 
-    implementation_decisions: |
-      Required:
-      - Technology selection decisions and reasoning
-      - Architecture decision explanations
-      - Important design pattern choices
-      - Third-party library/framework selection reasons
-    
-    risk_considerations: |
-      Required:
-      - Identified technical risks
-      - Mitigation measures
-      - Contingency plans
-      - Potential impact assessments
+quality_metrics: |
+  # Performance metrics, security scan results, etc.
 
-    maintenance_notes: |
-      Required:
-      - Subsequent maintenance points
-      - Monitoring recommendations
-      - Configuration notes
-      - Upgrade/migration considerations
-
-    challenges_and_deviations: |
-      Required:
-      - Major technical challenges
-      - Deviations from original plan
-      - Reasons for deviations
-      - Solutions implemented
-
-    quality_metrics_achieved: |
-      Required:
-      - Test coverage rate (actual numbers)
-      - Performance metrics achievement status
-      - Security check results
-      - Other quality indicators
-
-    validation_warnings:
-      - "Record all validation warnings or empty array"
-
-# Integration Summary - Updated by final development session
-integration_summary:
-  total_entries: "Required - Total number of development entries"
-  overall_completion_status: "Required - completed|partial|deferred"
-  key_achievements:
-    - "Required - List of major completed items"
-  remaining_work:
-    - "List remaining work or mark 'none'"
-  handover_notes: |
-    Required - Handover instructions:
-    - Next steps
-    - Important notes
-    - Contact information
+risks_and_maintenance: |
+  # Identified risks and mitigation measures
+  # Maintenance notes and monitoring recommendations

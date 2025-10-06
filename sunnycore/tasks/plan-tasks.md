@@ -1,96 +1,71 @@
-<input>
-  <context>
-  1. {root}/docs/requirements/*.md
-  2. {root}/docs/architecture/*.md
-  3. {root}/docs/tasks.md
-  </context>
-  <templates>
-  4. {root}/sunnycore/templates/implementation-plan-tmpl.yaml
-  </templates>
-</input>
+[Input]
+  1. "{root}/docs/requirements/*.md" --Project requirements
+  2. "{root}/docs/architecture/*.md" --Architecture design
+  3. "{root}/docs/epic.md" --Task list
+  4. "{root}/sunnycore/templates/implementation-plan-tmpl.yaml" --Implementation plan template (including: project information, requirement mapping, architecture reference, RED/GREEN/REFACTOR three phases, etc.)
+  5. "{root}/docs/knowledge/*.md" --Project knowledge (if exist)
 
-<output>
-1. {root}/docs/implementation-plan/{task_id}-plan.md
-</output>
+[Output]
+  1. "{root}/docs/implementation-plan/{task_id}-plan.md" --Implementation plan (Markdown format)
+    - Format: Use ATX headings; numbered lists; explicit requirement/architecture mapping sections
+    - Example: "{root}/docs/implementation-plan/1-plan.md"
 
-<constraints importance="Important">
-- 每個步驟完成後必須更新todo list狀態
-- 必須嚴格遵循模板格式
-- 必須使用指定的工具（Sequential-thinking Tool, Todo-list Tool）
-- 輸出必須轉換為markdown格式
-- 必須採用標準化的技術術語
-</constraints>
+[Constraints]
+  1. Must strictly extract tasks from provided documents; do not fabricate requirements
+  2. Must map each plan item to requirement ID and architecture section
+  3. Must use Markdown format (ATX headings and numbered lists)
+  4. Must produce exactly one file at the specified output path
+  5. The produced implementation plan must ensure logical coherence of TDD three phases: RED phase acceptance criteria must be traceable to requirements; GREEN phase implementation steps must correspond to RED acceptance criteria; REFACTOR phase optimizations must not break acceptance criteria
+  6. If requirement-architecture conflicts, unclear requirements, or missing necessary files are found, must record issues and request user clarification, do not make assumptions or skip
 
-<workflow importance="Important">
-  <stage id="0: 創建todo list", level_of_think="think", cache_read_budget="low">
-  - 閱讀整份workflow
-  - 進一步閱讀所有步驟
-  - 閱讀所有步驟下的無序列表項
-  - 使用todo list tool為每一個無序列表項創建todo items
+[Tools]
+  1. **todo_write**
+    - [Step 1 (Setup Phase): Create todo list; Steps 2-4: Track task progress]
+  2. **sequentialthinking (MCP)**
+    - [Step 1: Analyze requirement and task complexity; Step 2: Plan RED phase content (test and acceptance criteria design); Step 3: Plan GREEN phase content (minimal implementation step design); Step 4: Plan REFACTOR phase content (refactoring and optimization work identification)]
+  3. **claude-context (MCP)**
+    - [Step 1: Process large files in segments if needed]
 
-  <questions>
-  - 是否已完整理解整個workflow的結構和要求？
-  - 每個步驟的無序列表項是否都已正確識別？
-  - 計劃的粒度是否適當，既不過於細化也不過於粗糙？
-  </questions>
+[Steps]
+  1. Setup Phase
+    - Read all workflow steps and requirement documents
+    - Understand the scope and complexity of the target task
+      * Identify the number of requirements, number of architecture components, and cross-system dependencies involved in the task
+      * Count the number of requirements, architecture components, and cross-system dependencies to assess complexity (simple/medium/complex)
+      * Determine the depth of subsequent planning based on complexity
+    - Create todo list to track execution progress of Steps 2-5
 
-  <checks>
-  - [ ] 已完整閱讀整份workflow
-  - [ ] 已識別所有步驟及其無序列表項
-  - [ ] 已為每個無序列表項創建對應的todo item
-  - [ ] todo list結構清晰且具有可執行性
-  </checks>
-  </stage>
+  2. Planning RED Phase Content: Define Tests and Acceptance
+    - Write the "RED Phase" section for the plan: list acceptance criteria and test conditions corresponding to each requirement
+    - Map requirements to testable outcomes and verification methods
+    - Define measurable success metrics, failure conditions, and edge cases
 
-  <stage id="1: 構建計劃上下文", level_of_think="think hard">
-  - 閱讀requirements/*.md
-  - 使用Sequential-thinking Tool深度分析requirements.md
-  - 識別第一個Functional Requirements
-  - 閱讀architecture/*.md
-  - 識別第一個Functional Requirements對應的Architecture Design
-  - 識別第一個Functional Requirements對應的Task之中的Atomic Tasks
-  - 若該Functional Requirements對應的tasks已經完成，則識別下一個Functional Requirements
-  - 若所有Functional Requirements都已經識別完成，則以同樣方式識別下一個Non-functional Requirements
+  3. Planning GREEN Phase Content: Minimal Implementation Steps
+    - Write the "GREEN Phase" section for the plan: design minimal implementation steps that satisfy RED phase acceptance criteria
+    - Map each acceptance criterion to specific architecture components, files, and concrete development tasks
+    - Each implementation step should clearly point to at least one test condition; prioritize the simplest implementation approach
 
-  <questions>
-  - Requirements分析是否完整準確，有無遺漏重要需求？
-  - 所識別的Functional Requirements是否與Architecture Design正確對應？
-  - Architecture Design是否能夠滿足所有Functional Requirements？
-  - Tasks的原子化程度是否足夠，能否獨立執行？
-  - 需求、設計、任務之間的Dependencies是否清晰？
-  </questions>
+  4. Planning REFACTOR Phase Content: Refactoring and Optimization Steps
+    - Write the "REFACTOR Phase" section for the plan: list refactoring and optimization work after GREEN phase completion
+    - Identify and integrate duplicate code, cross-cutting concerns (authentication, logging, error handling, etc.)
+    - Plan performance optimizations, code quality improvements, and architecture enhancement steps
+    - Ensure refactoring steps do not break acceptance criteria defined in RED phase
 
-  <checks>
-  - [ ] 已完整閱讀並分析requirements.md
-  - [ ] 已正確識別第一個Functional Requirements
-  - [ ] 已完整閱讀design.md
-  - [ ] 已找到對應的Architecture Design
-  - [ ] 已識別相關的Atomic Tasks
-  - [ ] 需求、設計、任務之間的對應關係清晰
-  </checks>
-  </stage>
+  5. Finalization Phase
+    - Integrate content from Steps 2-4 into a complete implementation plan document
+    - Format the plan using the template: reference template structure to organize content ensuring all necessary sections are included (requirement mapping, architecture reference, RED/GREEN/REFACTOR three phases, etc.)
+    - Verify completeness and executability of the plan
+    - Check all DoD items one by one to ensure they are met (check each acceptance criterion item by item according to DoD; if any item is not met, return to the corresponding step to supplement or adjust until all are met)
+    - Generate Markdown plan to "{root}/docs/implementation-plan/{task_id}-plan.md"
+    - Confirm all todo items are completed
 
-  <stage id="2: 構建計劃", level_of_think="think harder">
-  - 根據模板文件構建Implementation Plan
-  - 將計劃文件轉換為markdown格式
-  - 輸出Implementation Plan至指定位置
-
-  <questions>
-  - Implementation Plan是否包含所有必要的sections和信息？
-  - 計劃的可執行性如何，每個步驟是否具體可行？
-  - 模板轉換為markdown格式時是否保持了所有必要信息？
-  - 計劃是否符合專案的實際約束條件？
-  - 驗收標準是否明確且可測量？
-  </questions>
-
-  <checks>
-  - [ ] 已根據模板完整構建Implementation Plan
-  - [ ] 計劃包含所有必要的sections（任務簡介、需要閱讀的檔案、詳細計劃等）
-  - [ ] 已成功轉換為markdown格式
-  - [ ] 輸出檔案已保存至正確位置
-  - [ ] Implementation Plan具有清晰的可執行性
-  - [ ] 每個任務都包含明確的驗收標準
-  - [ ] 所有Dependencies和相關架構都已標明
-  </checks>
-  </stage>
-</workflow>
+[DoD]
+  - [ ] All requirement, architecture, and task documents have been read
+  - [ ] Plan document includes TDD three-phase structure (RED/GREEN/REFACTOR sections)
+  - [ ] RED section: Each requirement has corresponding acceptance criteria and test conditions
+  - [ ] GREEN section: All implementation steps correspond to specific acceptance criteria and include architecture/file references
+  - [ ] REFACTOR section: Refactoring and optimization work has been planned, including cross-cutting concerns integration
+  - [ ] Plan follows TDD cycle structure: test-first (RED), minimal implementation (GREEN), refactoring optimization (REFACTOR)
+  - [ ] Output path and file naming follow specified pattern
+  - [ ] "{root}/docs/implementation-plan/{task_id}-plan.md" has been created
+  - [ ] All todo items are completed

@@ -1,0 +1,45 @@
+---
+# Concluded Architecture Template - Final implementation state
+# 總結架構模板 - 最終實作狀態
+
+project-name: ""
+status: "approved|approved_with_risks"
+completion_date: ""
+
+conclusion_overview: |
+  # Summary of final architecture
+  # Key tradeoffs and decisions made during implementation
+
+implemented_components:
+  - name: ""
+    actual_tech: ""
+    original_design: ""
+    deviations_from_design: ""
+    rationale_for_changes: ""
+
+actual_technical_stack:
+  frontend: ""
+  backend: ""
+  database: ""
+  infrastructure: ""
+  external-services: []
+
+key_decisions_made:
+  - id: "ADR-XXX"
+    decision: ""
+    rationale: ""
+    outcome: ""
+    lessons_learned: ""
+
+architecture_quality:
+  strengths: []
+  known_limitations: []
+  technical_debt: []
+
+architecture_diagram: |
+  # Final architecture diagram (Mermaid or reference)
+
+source_references:
+  design_docs: []  # Original architecture docs
+  dev_notes: []  # Implementation notes
+  review_reports: []  # QA reports

@@ -1,191 +1,49 @@
-# Implementation Plan Template
-# 實施計劃模板 - 標準化YAML格式
+---
+# Implementation Plan Template - TDD-aligned
+# 實作計畫模板 - 對齊 TDD 流程
 
-plan_overview:
-  task_id: "{task_id}"
-  task_name: "{task_name}"
-  created_date: "{created_date}"
-  version: "1.0"
-  status: "draft"  # draft | approved | in_progress | completed
+task_id: ""
+task_name: ""
+created_date: ""
 
-task_overview:
-  description: "{task_description}"
-  scope: "{scope_description}"
-  objectives:
-    - "{objective_1}"
-    - "{objective_2}"
-    - "{objective_3}"
+requirements_mapping:
+  functional_ids: []  # F-001, F-002
+  nonfunctional_ids: []  # NFR-P-001
+  architecture_refs: []  # components/services referenced
 
-required_files:
-  # 需要閱讀的檔案清單
-  context_files:
-    - file_path: "{file_path}"
-      line_numbers: "{line_range}"  # 例如: "1-50" 或 "specific_lines"
-      purpose: "{reading_purpose}"
+tdd_phases:
+  red_phase:
+    acceptance_criteria:
+      - criterion: ""
+        test_condition: ""
+    
+    test_cases:
+      - test_name: ""
+        scenario: ""
+        expected_result: ""
   
-stakeholders:
-  # 利害關係人管理
-  - role: "Product Owner"
-    name: "{po_name}"
-    responsibilities: ["requirements_validation", "acceptance_criteria_approval"]
-  - role: "Development Team Leader" 
-    name: "{dev_lead_name}"
-    responsibilities: ["technical_implementation", "code_review"]
-  - role: "QA Team Leader"
-    name: "{qa_lead_name}"
-    responsibilities: ["quality_assurance", "testing_strategy"]
-
-detailed_plan:
-  tasks:
-    - task_id: "task_001"
-      name: "{task_name_1}"
-      priority: "high"  # high | medium | low
-      complexity_level: "medium"  # low | medium | high | critical
-      estimated_effort: 
-        hours: 8
-        story_points: 5
-      
-      requirements:
-        functional_requirements:
-          - "{functional_req_1}"
-          - "{functional_req_2}"
-        non_functional_requirements:
-          - "{non_functional_req_1}"
-          - "{non_functional_req_2}"
-      
-      implementation_plan:
-        steps:
-          - step_id: 1
-            description: "{step_description_1}"
-            estimated_time: "2h"
-          - step_id: 2  
-            description: "{step_description_2}"
-            estimated_time: "3h"
-        technical_approach: "{technical_approach_description}"
-      
-      related_architecture:
-        components:
-          - component_name: "{component_1}"
-            layer: "presentation"  # presentation | business | data | infrastructure
-            impact: "modification"  # new | modification | integration
-          - component_name: "{component_2}"
-            layer: "business"
-            impact: "new"
-        
-        design_patterns:
-          - pattern_name: "{pattern_name}"
-            purpose: "{pattern_purpose}"
-      
-      files_to_modify:
-        - file_path: "{file_path_1}"
-          type: "source"  # source | test | config | documentation
-          modification_type: "update"  # create | update | delete | refactor
-          estimated_lines: 50
-        - file_path: "{file_path_2}"
-          type: "test"
-          modification_type: "create"
-          estimated_lines: 30
-      
-      dependencies:
-        prerequisite_tasks: []  # 前置任務ID列表
-        parallel_tasks: []      # 可並行執行的任務ID列表
-        external_dependencies:
-          - dependency_name: "{external_dep_1}"
-            type: "api"  # api | database | service | library
-            availability: "confirmed"  # confirmed | pending | blocked
-      
-      risks:
-        - risk_id: "risk_001"
-          description: "{risk_description}"
-          probability: "medium"  # low | medium | high
-          impact: "high"        # low | medium | high
-          mitigation_strategy: "{mitigation_description}"
-          contingency_plan: "{contingency_description}"
-      
-      acceptance_criteria:
-        functional_criteria:
-          - criterion: "{functional_criterion_1}"
-            test_method: "unit_test"
-            success_metric: "{success_metric_1}"
-          - criterion: "{functional_criterion_2}"
-            test_method: "integration_test"  
-            success_metric: "{success_metric_2}"
-        
-        non_functional_criteria:
-          - criterion: "Performance"
-            target: "Response time < 200ms"
-            test_method: "load_test"
-          - criterion: "Security"
-            target: "No critical vulnerabilities"
-            test_method: "security_scan"
-      
-      testing_criteria:
-        unit_tests:
-          coverage_target: "90%"
-          test_cases_count: 15
-        integration_tests:
-          scenarios: 
-            - "{integration_scenario_1}"
-            - "{integration_scenario_2}"
-        end_to_end_tests:
-          user_journeys:
-            - "{user_journey_1}"
-            - "{user_journey_2}"
-      
-      review_checkpoints:
-        - checkpoint_name: "Design Review"
-          reviewer_role: "Technical Lead"
-          criteria: ["architecture_compliance", "performance_considerations"]
-        - checkpoint_name: "Code Review"
-          reviewer_role: "Senior Developer"
-          criteria: ["code_quality", "test_coverage", "documentation"]
-        - checkpoint_name: "QA Review"
-          reviewer_role: "QA Lead"
-          criteria: ["test_completeness", "acceptance_criteria_validation"]
-
-# 計劃執行追蹤
-execution_tracking:
-  milestones:
-    - milestone_name: "Design Phase Complete"
-      target_date: "{target_date_1}"
-      deliverables: ["architecture_design", "detailed_specifications"]
-    - milestone_name: "Implementation Phase Complete"
-      target_date: "{target_date_2}"
-      deliverables: ["working_code", "unit_tests", "integration_tests"]
-    - milestone_name: "Testing Phase Complete"
-      target_date: "{target_date_3}"
-      deliverables: ["test_results", "quality_report", "deployment_package"]
-
-  success_metrics:
-    - metric_name: "Code Quality"
-      target_value: "Grade A"
-      measurement_method: "static_analysis_tool"
-    - metric_name: "Test Coverage"
-      target_value: "90%"
-      measurement_method: "coverage_report"
-    - metric_name: "Performance"
-      target_value: "< 200ms response time"
-      measurement_method: "performance_testing"
-
-# 後續行動和維護
-post_implementation:
-  documentation_updates:
-    - document_type: "API Documentation"
-      update_required: true
-      responsible_person: "{developer_name}"
-    - document_type: "User Manual"
-      update_required: false
-      responsible_person: "{technical_writer_name}"
+  green_phase:
+    implementation_steps:
+      - step: ""
+        files: []
+        architecture_component: ""
+    
+    files_to_modify:
+      - path: ""
+        type: "source|test|config"
+        modification: "create|update"
   
-  monitoring_setup:
-    - metric_name: "System Performance"
-      monitoring_tool: "{monitoring_tool_name}"
-      alert_threshold: "{threshold_value}"
-    - metric_name: "Error Rate"
-      monitoring_tool: "{monitoring_tool_name}"
-      alert_threshold: "< 1%"
-  
-  maintenance_plan:
-    review_frequency: "monthly"
-    responsible_team: "Development Team"
-    update_triggers: ["performance_degradation", "security_vulnerabilities", "feature_requests"]
+  refactor_phase:
+    optimization_targets:
+      - target: ""
+        quality_improvement: ""
+    
+    quality_improvements:
+      - improvement: ""
+        rationale: ""
+
+risks:
+  - description: ""
+    probability: "High|Medium|Low"
+    impact: "High|Medium|Low"
+    mitigation: ""

@@ -1,0 +1,97 @@
+---
+# Cutover Report Template
+# 專案驗收報告模板
+
+project_info:
+  project_name: ""
+  cutover_date: ""
+  tested_by: ""
+  project_type: ""  # web app / API / CLI tool / library / etc.
+
+cutover_status: ""  # Success / Partial Success / Failed
+
+executive_summary:
+  overall_assessment: ""
+  critical_issues_count: 0
+  major_issues_count: 0
+  minor_issues_count: 0
+  requirements_tested: 0
+  requirements_passed: 0
+
+configuration_required:
+  - item: ""
+    description: ""
+    type: "Required|Optional"
+    default_value: ""
+    documentation_reference: ""
+
+environment_setup:
+  setup_steps_documented: true
+  setup_successful: true
+  dependencies_installed: true
+  issues_encountered:
+    - description: ""
+      resolution: ""
+
+project_execution:
+  execution_successful: true
+  startup_method: ""
+  access_information: ""
+  errors_encountered:
+    - error_message: ""
+      reproduction_steps: []
+      logs: ""
+
+acceptance_test_results:
+  - requirement_id: ""
+    requirement_description: ""
+    test_scenario: ""
+    test_steps: []
+    expected_result: ""
+    actual_result: ""
+    status: "Pass|Fail"
+    evidence: ""  # file path or screenshot reference
+    notes: ""
+
+user_experience_assessment:
+  ease_of_use: ""  # Excellent / Good / Fair / Poor
+  interface_clarity: ""
+  error_messaging: ""
+  documentation_quality: ""
+  overall_comments: ""
+
+issues_found:
+  - issue_id: ""
+    severity: "Critical|Major|Minor"
+    category: ""  # Configuration / Functionality / Performance / Usability / Documentation
+    description: ""
+    reproduction_steps: []
+    expected_behavior: ""
+    actual_behavior: ""
+    business_impact: ""
+    screenshots_or_logs: ""
+    related_requirement: ""
+
+recommendations:
+  immediate_actions:
+    - priority: "High|Medium|Low"
+      description: ""
+      rationale: ""
+  
+  future_improvements:
+    - priority: "High|Medium|Low"
+      description: ""
+      estimated_effort: ""
+
+deployment_readiness:
+  ready_for_production: true
+  blockers: []
+  prerequisites: []
+  rollback_plan_documented: true
+
+sign_off:
+  product_owner_approval: ""  # Approved / Approved with conditions / Rejected
+  conditions_for_approval: []
+  sign_off_date: ""
+  next_steps: []
+

@@ -1,310 +1,60 @@
 ---
-project_metadata:
-  project_name: "[Project Name]"
-  version: "[Version Number]"
-  author: "[Architecture Designer Name]"
-  date_created: "[YYYY-MM-DD]"
-  last_updated: "[YYYY-MM-DD]"
-  status: "[Draft/Review/Approved]"
----
+# Architecture Template - Requirements-driven design
+# 架構模板 - 需求導向設計
 
-Executive Summary:
-[Provide a high-level overview of the system architecture, including key design decisions and architectural principles]
+project-name: ""
+version: ""
+date-created: ""
+status: "Draft|Approved"
 
-System Overview:
-  Project Context
-  - **Business Domain**: [Domain Description]
-  - **Target Users**: [User Groups]
-  - **Key Business Goals**: [Business Objectives]
+execution_summary: |
+  # High-level architecture overview
+  # Key design decisions and principles
 
-  Architecture Principles
-  - **Scalability**: [Horizontal/Vertical scaling approach]
-  - **Maintainability**: [Code organization and maintenance strategy]
-  - **Security**: [Security-first design principles]
-  - **Performance**: [Performance optimization strategy]
+technical-stack:
+  frontend: ""
+  backend: ""
+  database: ""
+  infrastructure: ""
+  external-services: []
 
-Technical Stack:
-  technical_stack:
-    frontend:
-      framework: "[React/Vue/Angular/etc.]"
-      language: "[TypeScript/JavaScript]"
-      styling: "[CSS/SCSS/Tailwind/etc.]"
-      
-    backend:
-      framework: "[Express/Spring/Django/etc.]"
-      language: "[Node.js/Java/Python/etc.]"
-      runtime: "[Runtime Environment]"
-      
-    database:
-      primary: "[PostgreSQL/MySQL/MongoDB/etc.]"
-      cache: "[Redis/Memcached/etc.]"
-      search: "[Elasticsearch/Solr/etc.]"
-      
-    infrastructure:
-      cloud_provider: "[AWS/Azure/GCP/etc.]"
-      container: "[Docker/Kubernetes]"
-      ci_cd: "[GitHub Actions/Jenkins/etc.]"
-      monitoring: "[Prometheus/DataDog/etc.]"
-      
-    external_services:
-      authentication: "[Auth0/Firebase Auth/etc.]"
-      payment: "[Stripe/PayPal/etc.]"
-      notifications: "[SendGrid/Twilio/etc.]"
+system-architecture:
+  components:
+    - name: ""
+      responsibility: ""
+      interfaces: []
+      dependencies: []
+  
+  data-flow: |
+    # Describe how data flows through the system
 
+requirements-traceability:
+  - req_id: ""  # F-001 or NFR-P-001
+    component: ""
+    design_pattern: ""
+    rationale: ""
 
-System Architecture:
-  Architecture Diagram
-  ```mermaid
-  graph TB
-      subgraph "Client Layer"
-          A[Web Browser]
-          B[Mobile App]
-      end
-      
-      subgraph "API Gateway"
-          C[Load Balancer]
-          D[API Gateway]
-      end
-      
-      subgraph "Application Layer"
-          E[Authentication Service]
-          F[Business Logic Service]
-          G[Data Processing Service]
-      end
-      
-      subgraph "Data Layer"
-          H[Primary Database]
-          I[Cache Layer]
-          J[Message Queue]
-      end
-      
-      A --> C
-      B --> C
-      C --> D
-      D --> E
-      D --> F
-      D --> G
-      F --> H
-      F --> I
-      G --> J
-  ```
+architecture-decisions:
+  - id: "ADR-001"
+    title: ""
+    decision: ""
+    rationale: ""
+    alternatives: ""
+    consequences: ""
 
-Functional Requirements Architecture:
-  Core Features Architecture:
-    [Feature 1: Authentication System]:
-      authentication_architecture:
-        components:
-          - JWT Service
-          - User Database
-          - Session Management
-        design_pattern: "OAuth 2.0"
-        security_measures:
-          - Password encryption
-          - Multi-factor authentication
-          - Session timeout
-        data_flow:
-          - User login request
-          - Credential validation
-          - Token generation
-          - Secure session establishment
+cross-cutting-concerns:
+  security:
+    authentication: ""
+    authorization: ""
+    data-protection: ""
+  
+  performance:
+    caching-strategy: ""
+    optimization-approach: ""
+  
+  reliability:
+    error-handling: ""
+    monitoring: ""
 
-    [Feature 2: Data Processing Pipeline]:
-      data_processing_architecture:
-        components:
-          - Data Ingestion Service
-          - Processing Engine
-          - Data Validation
-          - Output Generation
-        design_pattern: "Event-driven Architecture"
-        scalability_approach:
-          - Horizontal scaling
-          - Queue-based processing
-          - Batch processing optimization
-
-    Feature 3: API Endpoints:
-      api_architecture:
-        design_pattern: "RESTful API"
-        endpoints:
-          - CRUD operations
-          - Search functionality
-          - Bulk operations
-        documentation: "OpenAPI/Swagger"
-        versioning_strategy: "URL versioning"
-
-Non-functional Requirements Architecture:
-  Performance Architecture:
-    performance_requirements:
-      response_time: "< 200ms for 95% of requests"
-      throughput: "10,000 concurrent users"
-      scalability_strategy:
-        load_balancer: "NGINX"
-        auto_scaling: "Kubernetes HPA"
-        caching_strategy: "Multi-level caching"
-      optimization_techniques:
-        - Database indexing
-        - Query optimization
-        - CDN implementation
-        - Asset compression
-
-  Security Architecture:
-    security_design:
-      authentication:
-        method: "JWT with refresh tokens"
-        password_policy: "Strong password requirements"
-        session_management: "Secure session handling"
-        
-      authorization:
-        model: "Role-based Access Control (RBAC)"
-        permissions: "Granular permission system"
-        
-      data_protection:
-        encryption_at_rest: "AES-256"
-        encryption_in_transit: "TLS 1.3"
-        data_anonymization: "PII masking"
-        
-      vulnerability_protection:
-        input_validation: "Comprehensive input sanitization"
-        sql_injection: "Parameterized queries"
-        xss_protection: "Content Security Policy"
-        csrf_protection: "CSRF tokens"
-
-  Availability Architecture:
-    availability_design:
-      uptime_target: "99.9%"
-      disaster_recovery:
-        backup_strategy: "Automated daily backups"
-        recovery_time_objective: "< 4 hours"
-        recovery_point_objective: "< 1 hour"
-        
-      monitoring:
-        health_checks: "Automated health monitoring"
-        alerting: "Real-time alert system"
-        logging: "Centralized logging with ELK stack"
-        
-      fault_tolerance:
-        redundancy: "Multi-AZ deployment"
-        failover: "Automatic failover mechanism"
-        circuit_breaker: "Circuit breaker pattern"
-
-Data Architecture:
-  Data Model:
-    data_model:
-      entities:
-        - User
-        - Product
-        - Order
-        - Payment
-        
-      relationships:
-        - User (1) -> Orders (N)
-        - Order (1) -> OrderItems (N)
-        - Product (1) -> OrderItems (N)
-        
-      data_flow:
-        ingestion: "[Data source] -> [Processing] -> [Storage]"
-        processing: "[Validation] -> [Transformation] -> [Enrichment]"
-        output: "[Storage] -> [API] -> [Presentation]"
-
-Database Design:
-  database_architecture:
-    primary_database:
-      type: "[Relational/NoSQL]"
-      justification: "[Reason for choice]"
-      
-    caching_strategy:
-      levels: "[Application/Database/CDN]"
-      ttl_policies: "[Cache expiration policies]"
-      
-    data_partitioning:
-      strategy: "[Horizontal/Vertical]"
-      criteria: "[Partitioning logic]"
-
-Deployment Architecture:
-  Infrastructure Design:
-    deployment_architecture:
-      environment_strategy:
-        development: "Local development environment"
-        staging: "Pre-production testing"
-        production: "High-availability production"
-        
-      containerization:
-        strategy: "Docker containers with Kubernetes orchestration"
-        scaling: "Horizontal pod autoscaling"
-        
-      ci_cd_pipeline:
-        version_control: "Git with feature branch workflow"
-        testing: "Automated testing pipeline"
-        deployment: "Blue-green deployment strategy"
-        
-      monitoring_and_logging:
-        application_monitoring: "APM tools"
-        infrastructure_monitoring: "Infrastructure metrics"
-        log_aggregation: "Centralized logging
-
-Risk Assessment:
-  Technical Risks:
-    technical_risks:
-      high_risk:
-        - risk: "[Specific technical risk]"
-          impact: "[Impact description]"
-          mitigation: "[Mitigation strategy]"
-          
-      medium_risk:
-        - risk: "[Specific technical risk]"
-          impact: "[Impact description]"
-          mitigation: "[Mitigation strategy]"
-          
-      low_risk:
-        - risk: "[Specific technical risk]"
-          impact: "[Impact description]"
-          mitigation: "[Mitigation strategy]"
-
-  Operational Risks:
-    operational_risks:
-      dependencies:
-        - external_service: "[Service name]"
-          risk_level: "[High/Medium/Low]"
-          contingency_plan: "[Backup plan]"
-          
-      scalability_concerns:
-        - bottleneck: "[Potential bottleneck]"
-          threshold: "[Performance threshold]"
-          scaling_plan: "[Scaling strategy]"
-
-Implementation Roadmap:
-  Phase 1: Foundation:
-    - [ ] Infrastructure setup
-    - [ ] Core authentication system
-    - [ ] Basic API framework
-    - [ ] Database schema implementation
-
-  Phase 2: Core Features:
-    - [ ] [Feature 1] implementation
-    - [ ] [Feature 2] implementation
-    - [ ] Integration testing
-    - [ ] Performance optimization
-
-  Phase 3: Advanced Features:
-    - [ ] [Advanced feature 1]
-    - [ ] [Advanced feature 2]
-    - [ ] Security hardening
-    - [ ] Monitoring implementation
-
-  Phase 4: Production Readiness:
-    - [ ] Load testing
-    - [ ] Security audit
-    - [ ] Documentation completion
-    - [ ] Production deployment
-
-Appendices:
-  Glossary:
-    - **[Term 1]**: [Definition]
-    - **[Term 2]**: [Definition]
-
-  References:
-    - [Architecture Pattern References]
-    - [Technology Documentation Links]
-    - [Industry Best Practices]
-
----
-*This architecture document should be reviewed and updated regularly to reflect system evolution and changing requirements.*
+architecture-diagram: |
+  # Include Mermaid diagram or reference to diagram file
