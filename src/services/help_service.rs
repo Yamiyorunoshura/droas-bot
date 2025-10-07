@@ -123,8 +123,8 @@ impl HelpService {
 
         let mut content = String::new();
 
-        // 添加標題
-        content.push_str("## 🤖 DROAS 經濟機器人幫助\n\n");
+        // 添加標題（移除 Markdown 格式，因為會在 Discord embed 中顯示異常）
+        content.push_str("🤖 DROAS 經濟機器人幫助\n\n");
 
         // 按分類組織指令
         let mut categories = HashMap::new();
@@ -156,10 +156,7 @@ impl HelpService {
             }
         }
 
-        // 添加底部信息
-        content.push_str("---\n");
-        content.push_str("*提示: 使用 `!help <指令名稱>` 獲取特定指令的詳細幫助*\n");
-
+    
         debug!("幫助內容生成完成，長度: {}", content.len());
         content
     }
