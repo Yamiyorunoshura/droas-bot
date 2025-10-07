@@ -103,6 +103,21 @@ pub enum DiscordError {
     #[error("Unauthorized access attempt by user {user_id}: {message}")]
     UnauthorizedAccess { user_id: i64, message: String },
 
+    #[error("Permission denied: {0}")]
+    PermissionDenied(String),
+
+    #[error("Confirmation required: {0}")]
+    ConfirmationRequired(String),
+
+    #[error("Additional verification required: {0}")]
+    AdditionalVerificationRequired(String),
+
+    #[error("Security violation: {0}")]
+    SecurityViolation(String),
+
+    #[error("Rate limited: {0}")]
+    RateLimited(String),
+
     #[error("Network error: {message}")]
     NetworkError { message: String },
 }
@@ -132,6 +147,11 @@ impl DiscordError {
             DiscordError::ConfigError(_) => ErrorCategory::UserInput,
 
             DiscordError::UnauthorizedAccess { .. } |
+            DiscordError::PermissionDenied(_) |
+            DiscordError::ConfirmationRequired(_) |
+            DiscordError::AdditionalVerificationRequired(_) |
+            DiscordError::SecurityViolation(_) |
+            DiscordError::RateLimited(_) |
             DiscordError::EventError(_) => ErrorCategory::Security,
 
             DiscordError::CommandError(_) |
@@ -155,7 +175,9 @@ impl DiscordError {
             DiscordError::ConfigError(_) |
             DiscordError::CommandError(_) |
             DiscordError::EventError(_) |
-            DiscordError::NetworkError { .. } => ErrorSeverity::Error,
+            DiscordError::NetworkError { .. } |
+            DiscordError::ConfirmationRequired(_) |
+            DiscordError::AdditionalVerificationRequired(_) => ErrorSeverity::Error,
 
             DiscordError::DatabaseConnectionError(_) |
             DiscordError::DatabaseQueryError(_) |
@@ -164,7 +186,10 @@ impl DiscordError {
             DiscordError::MigrationError(_) |
             DiscordError::ConnectionError(_) |
             DiscordError::InvalidToken |
-            DiscordError::UnauthorizedAccess { .. } => ErrorSeverity::Critical,
+            DiscordError::UnauthorizedAccess { .. } |
+            DiscordError::PermissionDenied(_) |
+            DiscordError::SecurityViolation(_) |
+            DiscordError::RateLimited(_) => ErrorSeverity::Critical,
         }
     }
 
@@ -191,6 +216,11 @@ impl DiscordError {
             DiscordError::AccountAlreadyExists(_) => Some("您的帳戶已經存在，可以直接開始使用！"),
             DiscordError::InvalidToken => Some("系統認證有問題，請聯繫管理員。"),
             DiscordError::UnauthorizedAccess { .. } => Some("您沒有權限執行此操作，請聯繫管理員獲取幫助。"),
+            DiscordError::PermissionDenied(_) => Some("您沒有權限執行此操作，請聯繫管理員獲取幫助。"),
+            DiscordError::ConfirmationRequired(_) => Some("此操作需要確認，請重新執行並確認操作。"),
+            DiscordError::AdditionalVerificationRequired(_) => Some("此操作需要額外驗證，請按照指示完成驗證。"),
+            DiscordError::SecurityViolation(_) => Some("檢測到安全問題，操作被拒絕。如誤判，請聯繫管理員。"),
+            DiscordError::RateLimited(_) => Some("操作過於頻繁，請稍後再試。"),
             DiscordError::NetworkError { .. } => Some("網路連接有問題，請檢查網路後再試。"),
         }
     }

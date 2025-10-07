@@ -7,6 +7,9 @@ use crate::database::BalanceRepository;
 use crate::cache::BalanceCache;
 use crate::error::{DiscordError, Result};
 use crate::services::message_service::MessageService;
+use crate::services::security_service::SecurityService;
+use crate::services::admin_audit_service::AdminAuditService;
+use std::sync::Arc;
 use serenity::builder::CreateMessage;
 use serenity::model::id::UserId;
 use tracing::{info, error, debug, warn, instrument};
@@ -25,6 +28,8 @@ pub struct BalanceService {
     balance_repository: BalanceRepository,
     balance_cache: BalanceCache,
     message_service: MessageService,
+    security_service: Option<Arc<SecurityService>>,
+    admin_audit_service: Option<Arc<AdminAuditService>>,
 }
 
 impl BalanceService {
@@ -35,6 +40,8 @@ impl BalanceService {
             balance_repository,
             balance_cache: BalanceCache::new(),
             message_service: MessageService::new(),
+            security_service: None,
+            admin_audit_service: None,
         }
     }
 
@@ -45,7 +52,37 @@ impl BalanceService {
             balance_repository,
             balance_cache,
             message_service: MessageService::new(),
+            security_service: None,
+            admin_audit_service: None,
         }
+    }
+
+    /// 創建帶安全服務的 BalanceService 實例（用於管理員功能）
+    pub fn new_with_admin_services(
+        balance_repository: BalanceRepository,
+        security_service: Arc<SecurityService>,
+        admin_audit_service: Arc<AdminAuditService>
+    ) -> Self {
+        info!("Creating BalanceService with admin services");
+        Self {
+            balance_repository,
+            balance_cache: BalanceCache::new(),
+            message_service: MessageService::new(),
+            security_service: Some(security_service),
+            admin_audit_service: Some(admin_audit_service),
+        }
+    }
+
+    /// 設置安全服務（用於現有實例）
+    pub fn with_security_service(mut self, security_service: Arc<SecurityService>) -> Self {
+        self.security_service = Some(security_service);
+        self
+    }
+
+    /// 設置審計服務（用於現有實例）
+    pub fn with_admin_audit_service(mut self, admin_audit_service: Arc<AdminAuditService>) -> Self {
+        self.admin_audit_service = Some(admin_audit_service);
+        self
     }
 
     /// 查詢用戶餘額
@@ -282,6 +319,216 @@ impl BalanceService {
     pub async fn get_cache_stats(&self) -> crate::cache::CacheStats {
         debug!("Getting cache statistics");
         self.balance_cache.stats().await
+    }
+
+    /// 管理員調整用戶餘額（GREEN 階段實現）
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 執行調整的管理員 Discord 用戶 ID
+    /// * `admin_users` - 授權的管理員用戶 ID 列表
+    /// * `target_user_id` - 目標用戶 Discord 用戶 ID
+    /// * `amount` - 調整金額（正數為增加，負數為減少）
+    /// * `reason` - 調整原因
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<BalanceResponse>，成功時包含調整後的餘額信息
+    #[instrument(skip(self), fields(admin_id = %admin_user_id, target_id = %target_user_id, amount = %amount))]
+    pub async fn adjust_balance_by_admin(
+        &self,
+        admin_user_id: i64,
+        admin_users: &[i64],
+        target_user_id: i64,
+        amount: BigDecimal,
+        reason: String,
+    ) -> Result<BalanceResponse> {
+        info!("管理員 {} 調整用戶 {} 餘額：{}，原因：{}", admin_user_id, target_user_id, amount, reason);
+
+        // 驗證管理員權限
+        let security_service = self.security_service.as_ref()
+            .ok_or_else(|| DiscordError::PermissionDenied("安全服務未初始化".to_string()))?;
+
+        security_service.verify_admin_permission(admin_user_id, admin_users).await
+            .map_err(|e| {
+                warn!("管理員權限驗證失敗：{}", e);
+                e
+            })?;
+
+        // 驗證目標用戶存在
+        let target_user_exists = self.balance_repository.user_exists(target_user_id as u64).await
+            .map_err(|e| {
+                error!("檢查目標用戶 {} 存在性失敗：{}", target_user_id, e);
+                DiscordError::DatabaseQueryError(format!("檢查用戶失敗：{}", e))
+            })?;
+
+        if !target_user_exists {
+            warn!("目標用戶 {} 不存在", target_user_id);
+            return Err(DiscordError::UserNotFound(format!("目標用戶 {} 不存在", target_user_id)));
+        }
+
+        // 獲取當前餘額
+        let current_balance = self.get_balance_amount(target_user_id as u64).await
+            .map_err(|e| {
+                error!("獲取用戶 {} 當前餘額失敗：{}", target_user_id, e);
+                e
+            })?;
+
+        // 計算新餘額
+        let new_balance = current_balance.clone() + amount.clone();
+
+        // 驗證新餘額是否合理
+        if new_balance < BigDecimal::from(-1000000) {
+            warn!("調整後餘額過低：{}", new_balance);
+            return Err(DiscordError::InvalidAmount("調整後餘額不能低於 -1,000,000".to_string()));
+        }
+
+        if new_balance > BigDecimal::from(100000000) {
+            warn!("調整後餘額過高：{}", new_balance);
+            return Err(DiscordError::InvalidAmount("調整後餘額不能高於 100,000,000".to_string()));
+        }
+
+        // 更新資料庫中的餘額
+        self.balance_repository.update_balance(target_user_id as u64, &new_balance).await
+            .map_err(|e| {
+                error!("更新用戶 {} 餘額失敗：{}", target_user_id, e);
+                DiscordError::DatabaseQueryError(format!("更新餘額失敗：{}", e))
+            })?;
+
+        // 更新快取
+        self.balance_cache.set_balance(target_user_id as u64, new_balance.clone()).await;
+
+        // 記錄審計信息
+        if let Some(audit_service) = &self.admin_audit_service {
+            let audit_record = crate::services::admin_audit_service::AdminAuditRecord {
+                id: None,
+                admin_id: admin_user_id,
+                operation_type: if amount > BigDecimal::from(0) {
+                    "ADJUST_BALANCE_ADD".to_string()
+                } else {
+                    "ADJUST_BALANCE_SUBTRACT".to_string()
+                },
+                target_user_id: Some(target_user_id),
+                amount: Some(amount.clone()),
+                reason: reason.clone(),
+                timestamp: Utc::now(),
+                ip_address: None,
+                user_agent: None,
+            };
+
+            if let Err(e) = audit_service.log_admin_operation(audit_record).await {
+                error!("記錄管理員審計失敗：{}", e);
+                // 不影響主要功能，只記錄錯誤
+            }
+        } else {
+            warn!("審計服務未初始化，無法記錄管理員操作");
+        }
+
+        // 獲取用戶名稱以構建響應
+        let balance_data = self.balance_repository.find_by_user_id(target_user_id as u64).await
+            .map_err(|e| {
+                error!("獲取用戶 {} 資訊失敗：{}", target_user_id, e);
+                DiscordError::DatabaseQueryError(format!("獲取用戶資訊失敗：{}", e))
+            })?;
+
+        let user_info = balance_data.ok_or_else(|| {
+            DiscordError::UserNotFound("無法獲取用戶資訊".to_string())
+        })?;
+
+        info!("管理員餘額調整完成：{} -> {} (+{})", current_balance, new_balance, amount);
+
+        Ok(BalanceResponse {
+            user_id: target_user_id as u64,
+            username: user_info.username,
+            balance: new_balance,
+            created_at: Some(user_info.created_at),
+        })
+    }
+
+    /// 管理員設置用戶餘額（覆蓋現有餘額）
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 執行設置的管理員 Discord 用戶 ID
+    /// * `admin_users` - 授權的管理員用戶 ID 列表
+    /// * `target_user_id` - 目標用戶 Discord 用戶 ID
+    /// * `new_balance` - 新的餘額
+    /// * `reason` - 設置原因
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<BalanceResponse>，成功時包含設置後的餘額信息
+    #[instrument(skip(self), fields(admin_id = %admin_user_id, target_id = %target_user_id, new_balance = %new_balance))]
+    pub async fn set_balance_by_admin(
+        &self,
+        admin_user_id: i64,
+        admin_users: &[i64],
+        target_user_id: i64,
+        new_balance: BigDecimal,
+        reason: String,
+    ) -> Result<BalanceResponse> {
+        info!("管理員 {} 設置用戶 {} 餘額為：{}，原因：{}", admin_user_id, target_user_id, new_balance, reason);
+
+        // 驗證管理員權限
+        let security_service = self.security_service.as_ref()
+            .ok_or_else(|| DiscordError::PermissionDenied("安全服務未初始化".to_string()))?;
+
+        security_service.verify_admin_permission(admin_user_id, admin_users).await?;
+
+        // 驗證目標用戶存在
+        let target_user_exists = self.balance_repository.user_exists(target_user_id as u64).await?;
+        if !target_user_exists {
+            return Err(DiscordError::UserNotFound(format!("目標用戶 {} 不存在", target_user_id)));
+        }
+
+        // 驗證新餘額是否合理
+        if new_balance < BigDecimal::from(-1000000) {
+            return Err(DiscordError::InvalidAmount("餘額不能低於 -1,000,000".to_string()));
+        }
+
+        if new_balance > BigDecimal::from(100000000) {
+            return Err(DiscordError::InvalidAmount("餘額不能高於 100,000,000".to_string()));
+        }
+
+        // 更新資料庫中的餘額
+        self.balance_repository.update_balance(target_user_id as u64, &new_balance).await?;
+
+        // 更新快取
+        self.balance_cache.set_balance(target_user_id as u64, new_balance.clone()).await;
+
+        // 記錄審計信息
+        if let Some(audit_service) = &self.admin_audit_service {
+            let audit_record = crate::services::admin_audit_service::AdminAuditRecord {
+                id: None,
+                admin_id: admin_user_id,
+                operation_type: "SET_BALANCE".to_string(),
+                target_user_id: Some(target_user_id),
+                amount: Some(new_balance.clone()),
+                reason: reason.clone(),
+                timestamp: Utc::now(),
+                ip_address: None,
+                user_agent: None,
+            };
+
+            if let Err(e) = audit_service.log_admin_operation(audit_record).await {
+                error!("記錄管理員審計失敗：{}", e);
+            }
+        }
+
+        // 獲取用戶名稱以構建響應
+        let balance_data = self.balance_repository.find_by_user_id(target_user_id as u64).await?;
+        let user_info = balance_data.ok_or_else(|| {
+            DiscordError::UserNotFound("無法獲取用戶資訊".to_string())
+        })?;
+
+        info!("管理員餘額設置完成：用戶 {} 餘額設置為 {}", target_user_id, new_balance);
+
+        Ok(BalanceResponse {
+            user_id: target_user_id as u64,
+            username: user_info.username,
+            balance: new_balance,
+            created_at: Some(user_info.created_at),
+        })
     }
 }
 

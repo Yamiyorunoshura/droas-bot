@@ -209,6 +209,7 @@ impl droas_bot::database::transaction_repository::TransactionRepositoryTrait for
             amount: request.amount,
             transaction_type: request.transaction_type,
             created_at: Utc::now(),
+            metadata: request.metadata,
         };
 
         let mut transactions = self.transactions.lock().unwrap();
@@ -223,6 +224,97 @@ impl droas_bot::database::transaction_repository::TransactionRepositoryTrait for
         let mut filtered: Vec<Transaction> = transactions
             .iter()
             .filter(|tx| tx.from_user_id == Some(user_id) || tx.to_user_id == Some(user_id))
+            .cloned()
+            .collect();
+
+        // 排序（最新的在前）
+        filtered.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+
+        // 應用分頁
+        let offset = offset.unwrap_or(0) as usize;
+        let limit = limit.unwrap_or(10) as usize;
+
+        let end = std::cmp::min(offset + limit, filtered.len());
+
+        if offset < filtered.len() {
+            Ok(filtered[offset..end].to_vec())
+        } else {
+            Ok(Vec::new())
+        }
+    }
+
+    async fn create_admin_audit(&self, request: CreateTransactionRequest) -> Result<Transaction> {
+        let transaction = Transaction {
+            id: unsafe {
+                let id = TRANSACTION_COUNTER;
+                TRANSACTION_COUNTER += 1;
+                id
+            },
+            from_user_id: request.from_user_id,
+            to_user_id: request.to_user_id,
+            amount: request.amount,
+            transaction_type: request.transaction_type,
+            created_at: Utc::now(),
+            metadata: request.metadata,
+        };
+
+        let mut transactions = self.transactions.lock().unwrap();
+        transactions.push(transaction.clone());
+
+        Ok(transaction)
+    }
+
+    async fn query_admin_audit(
+        &self,
+        admin_id: Option<i64>,
+        operation_type: Option<&str>,
+        target_user_id: Option<i64>,
+        start_time: Option<chrono::DateTime<Utc>>,
+        end_time: Option<chrono::DateTime<Utc>>,
+        limit: Option<i64>,
+        offset: Option<i64>
+    ) -> Result<Vec<Transaction>> {
+        let transactions = self.transactions.lock().unwrap();
+
+        let mut filtered: Vec<Transaction> = transactions
+            .iter()
+            .filter(|tx| {
+                // 過濾管理員ID
+                if let Some(admin) = admin_id {
+                    if tx.from_user_id != Some(admin) {
+                        return false;
+                    }
+                }
+
+                // 過濾操作類型
+                if let Some(op_type) = operation_type {
+                    if tx.transaction_type != op_type {
+                        return false;
+                    }
+                }
+
+                // 過濾目標用戶
+                if let Some(target) = target_user_id {
+                    if tx.to_user_id != Some(target) {
+                        return false;
+                    }
+                }
+
+                // 過濾時間範圍
+                if let Some(start) = start_time {
+                    if tx.created_at < start {
+                        return false;
+                    }
+                }
+
+                if let Some(end) = end_time {
+                    if tx.created_at > end {
+                        return false;
+                    }
+                }
+
+                true
+            })
             .cloned()
             .collect();
 
@@ -283,6 +375,7 @@ mod tests {
             to_user_id: Some(456),
             amount: BigDecimal::from_str("100.00").unwrap(),
             transaction_type: "transfer".to_string(),
+            metadata: None,
         };
 
         let transaction = repo.create_transaction(request).await.unwrap();

@@ -9,7 +9,7 @@ use droas_bot::{
     database::{BalanceRepository, TransactionRepository, UserRepository, run_migrations},
     services::{
         MonitoringService, UserAccountService, BalanceService, MessageService,
-        TransferService, TransactionService, HelpService,
+        TransferService, TransactionService, HelpService, AdminService, AdminAuditService,
         create_health_routes
     },
     cache::BalanceCache,
@@ -78,7 +78,8 @@ async fn main() -> Result<()> {
     // 6. 創建服務實例
     let services = create_services(
         database_pool.clone(),
-        _balance_cache.clone()
+        _balance_cache.clone(),
+        &config.admin
     ).await;
 
     // 7. 創建監控服務
@@ -241,6 +242,7 @@ async fn start_monitoring_servers(
 async fn create_services(
     database_pool: sqlx::PgPool,
     balance_cache: Option<Arc<BalanceCache>>,
+    admin_config: &droas_bot::config::AdminConfig,
 ) -> Services {
     info!("正在創建服務實例...");
 
@@ -288,6 +290,22 @@ async fn create_services(
     // 創建幫助服務
     let help_service = Arc::new(HelpService::new());
 
+    // 創建管理員服務
+    let admin_service = Arc::new(
+        AdminService::new_with_repositories(
+            UserRepository::new(database_pool.clone()),
+            Arc::new(BalanceRepository::new(database_pool.clone())),
+            Arc::new(TransactionRepository::new(database_pool.clone())),
+            admin_config.authorized_admins.clone(),
+        ).expect("無法創建管理員服務")
+    );
+
+    // 創建管理員審計服務
+    let admin_audit_service = Arc::new(
+        AdminAuditService::new(TransactionRepository::new(database_pool.clone()))
+            .expect("無法創建管理員審計服務")
+    );
+
     info!("✅ 所有服務實例創建完成");
 
     Services {
@@ -297,6 +315,8 @@ async fn create_services(
         transaction_service,
         message_service,
         help_service,
+        admin_service,
+        admin_audit_service,
     }
 }
 
@@ -316,6 +336,8 @@ async fn create_discord_gateway(
             .with_transaction_service(services.transaction_service)
             .with_message_service(services.message_service)
             .with_help_service(services.help_service)
+            .with_admin_service(services.admin_service)
+            .with_admin_audit_service(services.admin_audit_service)
     });
 
     discord_gateway
@@ -329,4 +351,6 @@ struct Services {
     transaction_service: Arc<TransactionService>,
     message_service: Arc<MessageService>,
     help_service: Arc<HelpService>,
+    admin_service: Arc<AdminService>,
+    admin_audit_service: Arc<AdminAuditService>,
 }

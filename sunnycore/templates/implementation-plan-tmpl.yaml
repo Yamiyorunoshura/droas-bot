@@ -4,46 +4,48 @@
 
 task_id: ""
 task_name: ""
+plan_version: ""
 created_date: ""
+created_by: ""
+estimated_duration: ""
+---
 
-requirements_mapping:
-  functional_ids: []  # F-001, F-002
-  nonfunctional_ids: []  # NFR-P-001
-  architecture_refs: []  # components/services referenced
+task-context:
+  summary: ""
+  requirements-mapping:
+    functional_ids: []
+    non_functional_ids: []
+  architecture-context:
+    components: []
+    integration_points: []
 
-tdd_phases:
-  red_phase:
-    acceptance_criteria:
-      - criterion: ""
-        test_condition: ""
-    
-    test_cases:
-      - test_name: ""
-        scenario: ""
-        expected_result: ""
+tdd-phases:
+  red-phase:
+    objective: ""
+    acceptance-to-tests: []
+    test-cases: []
+    test-files: []
   
-  green_phase:
-    implementation_steps:
-      - step: ""
-        files: []
-        architecture_component: ""
-    
-    files_to_modify:
-      - path: ""
-        type: "source|test|config"
-        modification: "create|update"
+  green-phase:
+    objective: ""
+    implementation-steps: []
+    files: []
+    dependencies: []
   
-  refactor_phase:
-    optimization_targets:
-      - target: ""
-        quality_improvement: ""
-    
-    quality_improvements:
-      - improvement: ""
-        rationale: ""
+  refactor-phase:
+    objective: ""
+    refactoring-targets: []
+    quality-improvements: []
+    checklist: []
 
-risks:
-  - description: ""
-    probability: "High|Medium|Low"
-    impact: "High|Medium|Low"
-    mitigation: ""
+additional-details:
+  configuration-changes: []
+  database-migrations: []
+  api-documentation: []
+  security-considerations: []
+
+risk-management: []
+
+validation-checklist: []
+
+notes: ""

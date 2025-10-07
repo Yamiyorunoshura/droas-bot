@@ -96,7 +96,7 @@
       "fix-acceptance-issues": ["dev"],
       "help": ["architect", "dev", "pm", "po", "qa"],
       "init": ["dev"],
-      "plan-tasks": ["pm", "dev"],
+      "plan-tasks": ["dev"],
       "review": ["qa", "pm"]
     },
     "agentToTasks": {
@@ -123,7 +123,6 @@
         "create-prd",
         "create-requirements",
         "help",
-        "plan-tasks",
         "review"
       ],
       "po": [

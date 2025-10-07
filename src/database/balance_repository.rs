@@ -5,7 +5,7 @@ use sqlx::{postgres::PgPool, Row};
 use bigdecimal::BigDecimal;
 use chrono::{DateTime, Utc};
 use crate::error::{DiscordError, Result};
-use tracing::{info, error, debug};
+use tracing::{info, error, debug, warn};
 
 /// 用戶餘額資訊結構
 #[derive(Debug, Clone)]
@@ -136,6 +136,37 @@ impl BalanceRepository {
         let exists = result.is_some();
         info!("User {} exists: {}", user_id, exists);
         Ok(exists)
+    }
+
+    /// 更新用戶餘額
+    pub async fn update_balance(&self, user_id: u64, new_balance: &BigDecimal) -> Result<()> {
+        debug!("Updating balance for user ID: {} to {}", user_id, new_balance);
+
+        let query = sqlx::query(
+            r#"
+            UPDATE users
+            SET balance = $1, updated_at = CURRENT_TIMESTAMP
+            WHERE discord_user_id = $2
+            "#
+        )
+        .bind(new_balance)
+        .bind(user_id as i64);
+
+        let result = query
+            .execute(&self.pool)
+            .await
+            .map_err(|e| {
+                error!("Failed to update balance for user {}: {}", user_id, e);
+                DiscordError::DatabaseQueryError(format!("Failed to update balance: {}", e))
+            })?;
+
+        if result.rows_affected() == 0 {
+            warn!("No rows affected when updating balance for user {}", user_id);
+            return Err(DiscordError::UserNotFound(format!("用戶 {} 不存在", user_id)));
+        }
+
+        info!("Successfully updated balance for user ID: {} to {}", user_id, new_balance);
+        Ok(())
     }
 }
 

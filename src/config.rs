@@ -7,6 +7,7 @@ pub struct Config {
     pub discord_token: String,
     pub database: DatabaseConfig,
     pub cache: CacheConfig,
+    pub admin: AdminConfig,
 }
 
 #[derive(Debug, Clone)]
@@ -26,6 +27,48 @@ pub struct CacheConfig {
     pub enable_redis: bool,
     pub fallback_to_memory: bool,
     pub namespace: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct AdminConfig {
+    pub authorized_admins: Vec<i64>,
+}
+
+impl AdminConfig {
+    pub fn from_env() -> Result<Self> {
+        dotenv::dotenv().ok();
+
+        let admin_ids_str = env::var("ADMIN_USER_IDS")
+            .unwrap_or_else(|_| "".to_string());
+
+        let authorized_admins = if admin_ids_str.is_empty() {
+            // 如果沒有設置環境變數，使用預設的測試 ID
+            vec![123456789_i64] // 預設管理員 ID，生產環境中應該從環境變數設置
+        } else {
+            // 解析逗號分隔的用戶 ID 列表
+            admin_ids_str
+                .split(',')
+                .filter_map(|s| s.trim().parse().ok())
+                .collect()
+        };
+
+        if authorized_admins.is_empty() {
+            return Err(DiscordError::ConfigError(
+                "至少需要一個授權管理員 ID".to_string()
+            ));
+        }
+
+        Ok(AdminConfig {
+            authorized_admins,
+        })
+    }
+
+    /// 創建測試用管理員配置
+    pub fn for_test() -> Self {
+        AdminConfig {
+            authorized_admins: vec![123456789_i64, 987654321_i64],
+        }
+    }
 }
 
 impl DatabaseConfig {
@@ -56,6 +99,17 @@ impl DatabaseConfig {
             min_connections,
             connection_timeout,
         })
+    }
+
+    /// 創建測試用資料庫配置
+    pub fn for_test() -> Self {
+        DatabaseConfig {
+            url: std::env::var("TEST_DATABASE_URL")
+                .unwrap_or_else(|_| "postgres://localhost/droas_test".to_string()),
+            max_connections: 5,
+            min_connections: 1,
+            connection_timeout: 30,
+        }
     }
 }
 
@@ -182,6 +236,7 @@ impl Config {
 
         let database = DatabaseConfig::from_env()?;
         let cache = CacheConfig::from_env()?;
+        let admin = AdminConfig::from_env()?;
 
         // 驗證配置
         cache.validate()?;
@@ -189,7 +244,8 @@ impl Config {
         Ok(Config {
             discord_token,
             database,
-            cache
+            cache,
+            admin
         })
     }
 
@@ -216,6 +272,7 @@ impl Config {
                 connection_timeout: 30,
             },
             cache: CacheConfig::default(),
+            admin: AdminConfig::for_test(),
         })
     }
 
@@ -230,6 +287,7 @@ impl Config {
                 connection_timeout: 5,
             },
             cache: CacheConfig::for_test(),
+            admin: AdminConfig::for_test(),
         }
     }
 

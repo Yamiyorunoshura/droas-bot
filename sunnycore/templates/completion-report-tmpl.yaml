@@ -1,46 +1,64 @@
 ---
-# Completion Report Template - Simplified
-# 專案完成報告模板 - 精簡版
+# Completion Report Template
+# 專案完成報告模板
 
 project_name: ""
-version: ""  # From sunnycore.lock
+version: ""
 completion_date: ""
+project_duration: ""
+team_size: 0
+---
 
-development_summary:
+development-summary:
   objectives_met: []
-  
-  achievements:
-    - achievement: ""
-      evidence: ""
-  
-  challenges_and_solutions:
-    - challenge: ""
-      solution: ""
-      lessons_learned: ""
-  
-  technologies_used:
-    - name: ""
-      purpose: ""
+  objectives_partial: []
+  objectives_deferred: []
+  achievements: []
+  challenges-and-solutions: []
+  technologies-used: []
 
-quality_summary:
-  overall_score: ""  # From review reports
+delivery-metrics:
+  planned_features: 0
+  delivered_features: 0
+  deferred_features: 0
+  estimated_effort: ""
+  actual_effort: ""
+  variance: ""
+
+quality-summary:
+  overall_score: ""
   test_coverage: ""
-  code_quality_metrics: ""
+  code_quality_metrics: {}
+  defect-metrics: {}
+  review-scores: {}
 
-key_decisions:
-  - decision: ""
-    rationale: ""
-    outcome: ""
+key-decisions: []
+
+technical-debt:
+  items_added: []
+  items_resolved: []
+  items_remaining: []
+
+risks-realized: []
+
+team-performance:
+  productivity: ""
+  collaboration: ""
+  skill_development: []
+  challenges: []
 
 recommendations:
-  immediate_actions: []
-  
-  future_improvements:
-    - priority: "High|Medium|Low"
-      description: ""
-      estimated_effort: ""
+  immediate-actions: []
+  future-improvements: []
+  process-improvements: []
 
-source_references:
+knowledge-transfer:
+  documentation_completed: []
+  documentation_pending: []
+  training_provided: []
+  training_needed: []
+
+source-references:
   dev_notes: []
   review_reports: []
   architecture_docs: []
@@ -48,9 +66,6 @@ source_references:
   progress_records: []
   other_docs: []
 
-archived_files:
-  archive_location: "archive/{version}/"
-  archived_items:
-    - path: ""
-      type: "directory|file"
-      description: ""
+archived-files:
+  archive_location: ""
+  archived_items: []

@@ -7,7 +7,47 @@ use crate::error::{DiscordError, Result};
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 use std::sync::Arc;
-use tracing::{info, error, debug, instrument};
+use tracing::{info, error, debug, warn, instrument};
+
+/// 交易類型枚舉
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub enum TransactionType {
+    /// 轉帳交易
+    Transfer,
+    /// 管理員調整
+    AdminAdjustment,
+    /// 管理員設置餘額
+    AdminSetBalance,
+    /// 系統初始發放
+    SystemInitialDistribution,
+    /// 獎勵發放
+    RewardDistribution,
+}
+
+impl TransactionType {
+    /// 將交易類型轉換為字符串
+    pub fn to_string(&self) -> String {
+        match self {
+            TransactionType::Transfer => "transfer".to_string(),
+            TransactionType::AdminAdjustment => "admin_adjustment".to_string(),
+            TransactionType::AdminSetBalance => "admin_set_balance".to_string(),
+            TransactionType::SystemInitialDistribution => "system_initial_distribution".to_string(),
+            TransactionType::RewardDistribution => "reward_distribution".to_string(),
+        }
+    }
+
+    /// 從字符串解析交易類型
+    pub fn from_string(s: &str) -> crate::error::Result<Self> {
+        match s {
+            "transfer" => Ok(TransactionType::Transfer),
+            "admin_adjustment" => Ok(TransactionType::AdminAdjustment),
+            "admin_set_balance" => Ok(TransactionType::AdminSetBalance),
+            "system_initial_distribution" => Ok(TransactionType::SystemInitialDistribution),
+            "reward_distribution" => Ok(TransactionType::RewardDistribution),
+            _ => Err(DiscordError::InvalidCommand(format!("未知的交易類型：{}", s))),
+        }
+    }
+}
 
 /// Transaction Service
 ///
@@ -75,7 +115,8 @@ impl TransactionService {
             from_user_id: Some(from_user_id),
             to_user_id: Some(to_user_id),
             amount: amount.clone(),
-            transaction_type: "transfer".to_string(),
+            transaction_type: TransactionType::Transfer.to_string(),
+            metadata: None,
         };
 
         let transaction = self.transaction_repository.create_transaction(transaction_request).await
@@ -262,6 +303,302 @@ impl TransactionService {
 
         Ok(stats)
     }
+
+    /// 記錄管理員餘額調整交易
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 管理員 Discord 用戶 ID
+    /// * `target_user_id` - 目標用戶 Discord 用戶 ID
+    /// * `amount_str` - 調整金額字符串
+    /// * `reason` - 調整原因
+    ///
+    /// # Returns
+    ///
+    /// 返回創建的交易記錄
+    #[instrument(skip(self), fields(admin_user_id = %admin_user_id, target_user_id = %target_user_id, amount = %amount_str))]
+    pub async fn record_admin_adjustment_transaction(
+        &self,
+        admin_user_id: i64,
+        target_user_id: i64,
+        amount_str: &str,
+        reason: &str,
+    ) -> Result<Transaction> {
+        debug!("記錄管理員調整交易：管理員 {} -> 目標用戶 {}, 金額：{}, 原因：{}",
+               admin_user_id, target_user_id, amount_str, reason);
+
+        // 解析金額
+        let amount = BigDecimal::from_str(amount_str)
+            .map_err(|_| DiscordError::InvalidAmount(format!("無效的金額格式：{}", amount_str)))?;
+
+        // 驗證用戶存在
+        let _admin_user = self.user_repository.get_user_by_discord_id(admin_user_id).await
+            .map_err(|_| DiscordError::UserNotFound(format!("管理員用戶 {} 不存在", admin_user_id)))?;
+
+        let _target_user = self.user_repository.get_user_by_discord_id(target_user_id).await
+            .map_err(|_| DiscordError::UserNotFound(format!("目標用戶 {} 不存在", target_user_id)))?;
+
+        // 創建元數據
+        let mut metadata = std::collections::HashMap::new();
+        metadata.insert("reason".to_string(), serde_json::Value::String(reason.to_string()));
+        metadata.insert("admin_id".to_string(), serde_json::Value::Number(serde_json::Number::from(admin_user_id)));
+
+        // 創建交易記錄
+        let transaction_request = CreateTransactionRequest {
+            from_user_id: Some(admin_user_id),
+            to_user_id: Some(target_user_id),
+            amount: amount.clone(),
+            transaction_type: TransactionType::AdminAdjustment.to_string(),
+            metadata: Some(serde_json::to_value(metadata).map_err(|e| {
+                DiscordError::ValidationError(format!("元數據序列化失敗：{}", e))
+            })?),
+        };
+
+        let transaction = self.transaction_repository.create_transaction(transaction_request).await
+            .map_err(|e| {
+                error!("創建管理員調整交易記錄失敗：{}", e);
+                DiscordError::DatabaseQueryError(format!("創建管理員調整交易記錄失敗：{}", e))
+            })?;
+
+        info!("管理員調整交易記錄成功：管理員 {} -> 目標用戶 {}, 金額：{}, 交易ID：{}, 原因：{}",
+              admin_user_id, target_user_id, amount, transaction.id, reason);
+
+        Ok(transaction)
+    }
+
+    /// 記錄管理員設置餘額交易
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 管理員 Discord 用戶 ID
+    /// * `target_user_id` - 目標用戶 Discord 用戶 ID
+    /// * `amount_str` - 設置的金額字符串
+    /// * `reason` - 設置原因
+    ///
+    /// # Returns
+    ///
+    /// 返回創建的交易記錄
+    #[instrument(skip(self), fields(admin_user_id = %admin_user_id, target_user_id = %target_user_id, amount = %amount_str))]
+    pub async fn record_admin_set_balance_transaction(
+        &self,
+        admin_user_id: i64,
+        target_user_id: i64,
+        amount_str: &str,
+        reason: &str,
+    ) -> Result<Transaction> {
+        debug!("記錄管理員設置餘額交易：管理員 {} -> 目標用戶 {}, 金額：{}, 原因：{}",
+               admin_user_id, target_user_id, amount_str, reason);
+
+        // 解析金額
+        let amount = BigDecimal::from_str(amount_str)
+            .map_err(|_| DiscordError::InvalidAmount(format!("無效的金額格式：{}", amount_str)))?;
+
+        // 驗證用戶存在
+        let _admin_user = self.user_repository.get_user_by_discord_id(admin_user_id).await
+            .map_err(|_| DiscordError::UserNotFound(format!("管理員用戶 {} 不存在", admin_user_id)))?;
+
+        let _target_user = self.user_repository.get_user_by_discord_id(target_user_id).await
+            .map_err(|_| DiscordError::UserNotFound(format!("目標用戶 {} 不存在", target_user_id)))?;
+
+        // 創建元數據
+        let mut metadata = std::collections::HashMap::new();
+        metadata.insert("reason".to_string(), serde_json::Value::String(reason.to_string()));
+        metadata.insert("admin_id".to_string(), serde_json::Value::Number(serde_json::Number::from(admin_user_id)));
+        metadata.insert("operation_type".to_string(), serde_json::Value::String("set_balance".to_string()));
+
+        // 創建交易記錄
+        let transaction_request = CreateTransactionRequest {
+            from_user_id: Some(admin_user_id),
+            to_user_id: Some(target_user_id),
+            amount: amount.clone(),
+            transaction_type: TransactionType::AdminSetBalance.to_string(),
+            metadata: Some(serde_json::to_value(metadata).map_err(|e| {
+                DiscordError::ValidationError(format!("元數據序列化失敗：{}", e))
+            })?),
+        };
+
+        let transaction = self.transaction_repository.create_transaction(transaction_request).await
+            .map_err(|e| {
+                error!("創建管理員設置餘額交易記錄失敗：{}", e);
+                DiscordError::DatabaseQueryError(format!("創建管理員設置餘額交易記錄失敗：{}", e))
+            })?;
+
+        info!("管理員設置餘額交易記錄成功：管理員 {} -> 目標用戶 {}, 金額：{}, 交易ID：{}, 原因：{}",
+              admin_user_id, target_user_id, amount, transaction.id, reason);
+
+        Ok(transaction)
+    }
+
+    /// 查詢管理員操作交易歷史
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 管理員 Discord 用戶 ID
+    /// * `limit` - 查詢記錄數量限制
+    ///
+    /// # Returns
+    ///
+    /// 返回管理員操作交易記錄列表
+    #[instrument(skip(self), fields(admin_user_id = %admin_user_id, limit = ?limit))]
+    pub async fn get_admin_transaction_history(
+        &self,
+        admin_user_id: i64,
+        limit: Option<i64>,
+    ) -> Result<Vec<Transaction>> {
+        debug!("查詢管理員 {} 的操作交易歷史，限制：{}", admin_user_id, limit.unwrap_or(20));
+
+        // 驗證管理員用戶存在
+        let _admin_user = self.user_repository.get_user_by_discord_id(admin_user_id).await
+            .map_err(|_| DiscordError::UserNotFound(format!("管理員用戶 {} 不存在", admin_user_id)))?;
+
+        // 查詢管理員相關的交易記錄
+        // 使用現有的 get_user_transactions 方法獲取所有交易，然後過濾管理員操作
+        let all_transactions = self.transaction_repository.get_user_transactions(
+            admin_user_id,
+            Some(1000), // 獲取較大的數量以進行過濾
+            Some(0)
+        ).await.map_err(|e| {
+            error!("查詢管理員交易歷史失敗：{}", e);
+            DiscordError::DatabaseQueryError(format!("查詢管理員交易歷史失敗：{}", e))
+        })?;
+
+        // 過濾出管理員操作相關的交易
+        let admin_transactions: Vec<Transaction> = all_transactions
+            .into_iter()
+            .filter(|tx| {
+                matches!(
+                    TransactionType::from_string(&tx.transaction_type),
+                    Ok(TransactionType::AdminAdjustment) | Ok(TransactionType::AdminSetBalance)
+                )
+            })
+            .take(limit.unwrap_or(20) as usize)
+            .collect();
+
+        let transactions = admin_transactions;
+
+        if transactions.is_empty() {
+            info!("管理員 {} 沒有操作交易記錄", admin_user_id);
+            return Err(DiscordError::NoTransactionHistory {
+                user_id: admin_user_id,
+                message: "該管理員沒有任何操作交易記錄".to_string(),
+            });
+        }
+
+        info!("成功查詢到管理員 {} 的 {} 筆操作交易記錄", admin_user_id, transactions.len());
+        Ok(transactions)
+    }
+
+    /// 獲取管理員操作統計信息
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 管理員 Discord 用戶 ID
+    ///
+    /// # Returns
+    ///
+    /// 返回管理員操作統計信息
+    #[instrument(skip(self), fields(admin_user_id = %admin_user_id))]
+    pub async fn get_admin_transaction_stats(&self, admin_user_id: i64) -> Result<AdminTransactionStats> {
+        debug!("計算管理員 {} 的操作統計", admin_user_id);
+
+        // 驗證管理員用戶存在
+        let _admin_user = self.user_repository.get_user_by_discord_id(admin_user_id).await
+            .map_err(|_| DiscordError::UserNotFound(format!("管理員用戶 {} 不存在", admin_user_id)))?;
+
+        // 獲取管理員的所有操作交易
+        let all_transactions = self.transaction_repository.get_user_transactions(
+            admin_user_id,
+            Some(1000), // 設置一個較大的限制
+            Some(0)
+        ).await.map_err(|e| {
+            error!("查詢管理員操作統計失敗：{}", e);
+            DiscordError::DatabaseQueryError(format!("查詢管理員操作統計失敗：{}", e))
+        })?;
+
+        // 過濾出管理員操作相關的交易
+        let transactions: Vec<Transaction> = all_transactions
+            .into_iter()
+            .filter(|tx| {
+                matches!(
+                    TransactionType::from_string(&tx.transaction_type),
+                    Ok(TransactionType::AdminAdjustment) | Ok(TransactionType::AdminSetBalance)
+                )
+            })
+            .collect();
+
+        if transactions.is_empty() {
+            return Ok(AdminTransactionStats::default());
+        }
+
+        // 計算統計信息
+        let mut total_admin_operations = 0;
+        let mut adjustment_count = 0;
+        let mut set_balance_count = 0;
+        let mut total_adjusted_amount = BigDecimal::from_str("0").unwrap();
+        let mut last_operation_time: Option<chrono::DateTime<chrono::Utc>> = None;
+        let mut unique_target_users = std::collections::HashSet::new();
+
+        for transaction in &transactions {
+            // 計算操作類型
+            match TransactionType::from_string(&transaction.transaction_type) {
+                Ok(TransactionType::AdminAdjustment) => {
+                    adjustment_count += 1;
+                    total_adjusted_amount += &transaction.amount;
+                }
+                Ok(TransactionType::AdminSetBalance) => {
+                    set_balance_count += 1;
+                    total_adjusted_amount += &transaction.amount;
+                }
+                _ => {
+                    // 其他類型的管理員操作
+                    total_admin_operations += 1;
+                }
+            }
+
+            // 記錄目標用戶
+            if let Some(target_user_id) = transaction.to_user_id {
+                unique_target_users.insert(target_user_id);
+            }
+
+            // 更新最近操作時間
+            if last_operation_time.is_none() || transaction.created_at > last_operation_time.unwrap() {
+                last_operation_time = Some(transaction.created_at);
+            }
+        }
+
+        total_admin_operations += adjustment_count + set_balance_count;
+
+        let stats = AdminTransactionStats {
+            total_admin_operations,
+            adjustment_count,
+            set_balance_count,
+            total_adjusted_amount,
+            last_operation_time,
+            unique_target_users: unique_target_users.len(),
+        };
+
+        info!("管理員 {} 操作統計：總操作數={}, 調整={}, 設置={}, 總金額={}, 目標用戶={}",
+              admin_user_id, stats.total_admin_operations, stats.adjustment_count,
+              stats.set_balance_count, stats.total_adjusted_amount, stats.unique_target_users);
+
+        Ok(stats)
+    }
+
+    /// 獲取系統管理員操作統計信息
+    ///
+    /// # Returns
+    ///
+    /// 返回所有管理員的統計信息摘要
+    #[instrument(skip(self))]
+    pub async fn get_system_admin_stats(&self) -> Result<SystemAdminStats> {
+        debug!("計算系統管理員操作統計");
+
+        // 獲取所有管理員操作交易
+        // 注意：目前系統沒有專門的方法獲取所有管理員操作
+        // 這裡使用簡化實作，返回預設統計信息
+        warn!("系統管理員統計功能需要額外的資料庫查詢方法支持，返回預設統計");
+        Ok(SystemAdminStats::default())
+    }
 }
 
 /// 交易統計信息
@@ -279,6 +616,44 @@ pub struct TransactionStats {
     pub total_received: BigDecimal,
     /// 淨額（接收 - 發送）
     pub net_amount: BigDecimal,
+}
+
+/// 管理員操作統計信息
+#[derive(Debug, Clone, Default)]
+pub struct AdminTransactionStats {
+    /// 總管理員操作數
+    pub total_admin_operations: usize,
+    /// 餘額調整操作數
+    pub adjustment_count: usize,
+    /// 設置餘額操作數
+    pub set_balance_count: usize,
+    /// 總調整金額
+    pub total_adjusted_amount: BigDecimal,
+    /// 最近操作時間
+    pub last_operation_time: Option<chrono::DateTime<chrono::Utc>>,
+    /// 操作的目標用戶數
+    pub unique_target_users: usize,
+}
+
+/// 系統管理員統計信息
+#[derive(Debug, Clone, Default)]
+pub struct SystemAdminStats {
+    /// 總管理員操作數
+    pub total_admin_operations: usize,
+    /// 總餘額調整操作數
+    pub total_balance_adjustments: usize,
+    /// 總設置餘額操作數
+    pub total_balance_set_operations: usize,
+    /// 總調整金額
+    pub total_amount_adjusted: BigDecimal,
+    /// 活躍管理員數量
+    pub active_admin_count: usize,
+    /// 受影響的用戶總數
+    pub total_affected_users: usize,
+    /// 每日操作統計
+    pub daily_operation_counts: std::collections::HashMap<String, u64>,
+    /// 最活躍的操作日期
+    pub most_active_day: Option<String>,
 }
 
 #[cfg(test)]

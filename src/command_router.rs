@@ -4,7 +4,7 @@ use crate::discord_gateway::{
     RouterErrorHandler, RouterMetrics, OperationTimer,
     Command, CommandResult
 };
-use crate::services::{UserAccountService, BalanceService, MessageService, TransferService, TransactionService, HelpService};
+use crate::services::{UserAccountService, BalanceService, MessageService, TransferService, TransactionService, HelpService, AdminService, AdminAuditService};
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
@@ -23,6 +23,8 @@ pub struct CommandRouter {
     transaction_service: Option<Arc<TransactionService>>,
     message_service: Option<Arc<MessageService>>,
     help_service: Option<Arc<HelpService>>,
+    admin_service: Option<Arc<AdminService>>,
+    admin_audit_service: Option<Arc<AdminAuditService>>,
 }
 
 impl CommandRouter {
@@ -42,6 +44,8 @@ impl CommandRouter {
             transaction_service: None,
             message_service: None,
             help_service: None,
+            admin_service: None,
+            admin_audit_service: None,
         }
     }
 
@@ -105,6 +109,26 @@ impl CommandRouter {
         self
     }
 
+    /// 設置管理員服務
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_service` - 管理員服務實例
+    pub fn with_admin_service(mut self, admin_service: Arc<AdminService>) -> Self {
+        self.admin_service = Some(admin_service);
+        self
+    }
+
+    /// 設置管理員審計服務
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_audit_service` - 管理員審計服務實例
+    pub fn with_admin_audit_service(mut self, admin_audit_service: Arc<AdminAuditService>) -> Self {
+        self.admin_audit_service = Some(admin_audit_service);
+        self
+    }
+
     /// 構建最終的 ServiceRouter（配置所有服務）
     fn build_service_router(&self) -> ServiceRouter {
         let mut service_router = ServiceRouter::new();
@@ -132,6 +156,16 @@ impl CommandRouter {
         // 設置幫助服務
         if let Some(ref help_service) = self.help_service {
             service_router = service_router.with_help_service(Arc::clone(help_service));
+        }
+
+        // 設置管理員服務
+        if let Some(ref admin_service) = self.admin_service {
+            service_router = service_router.with_admin_service(Arc::clone(admin_service));
+        }
+
+        // 設置管理員審計服務
+        if let Some(ref admin_audit_service) = self.admin_audit_service {
+            service_router = service_router.with_admin_audit_service(Arc::clone(admin_audit_service));
         }
 
         service_router
@@ -223,6 +257,8 @@ impl CommandRouter {
             Command::Balance => true,
             Command::Transfer => true,
             Command::History => true,
+            Command::AdjustBalance => true,  // 管理員命令也需要帳戶驗證
+            Command::AdminHistory => true,   // 管理員命令也需要帳戶驗證
             // 可以根據需要添加更多命令
             _ => false,
         }

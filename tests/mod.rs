@@ -4,6 +4,11 @@
 pub mod mock_repositories;
 
 // 基本功能測試
+pub mod admin_service_test;
+pub mod admin_audit_service_test;
+pub mod adjust_balance_command_test;
+pub mod admin_security_control_test;
+pub mod admin_non_functional_test;
 pub mod balance_service_test;
 pub mod cache_basic_test;
 pub mod cache_integration_test;

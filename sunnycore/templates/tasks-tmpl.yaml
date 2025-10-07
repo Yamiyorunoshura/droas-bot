@@ -1,27 +1,31 @@
 ---
-# Tasks Template - Flattened structure
-# 任務模板 - 扁平化結構
+# Tasks Document Template
+# 任務文檔模板
 
-functional_tasks:
-  - [ ] id: "Task-1"
-      - name: ""
-      - requirements: []  # F-001, F-002
-      - architecture_refs: []  # component names
-      - acceptance_hint: ""
+title: ""
+version: ""
+created_date: ""
+last_updated: ""
+total_tasks: 0
+completed_tasks: 0
+---
 
-  - [ ] id: "Task-2"
-      - name: ""
-      - requirements: []
-      - architecture_refs: []
-      - acceptance_hint: ""
+task-overview:
+  project_summary: ""
+  priority_levels: ""
 
-non_functional_tasks:
-  - [ ] id: "Task-N1"r
-      - name: ""
-      - requirements: []  # NFR-P-001
-      - architecture_refs: []
-      - acceptance_hint: ""
+functional-tasks: []
 
-task_dependencies:
-  - task_id: "Task-2"
-    depends_on: ["Task-1"]
+non-functional-tasks: []
+
+infrastructure-tasks: []
+
+documentation-tasks: []
+
+task-dependencies: []
+
+milestones: []
+
+progress-summary: {}
+
+notes: ""

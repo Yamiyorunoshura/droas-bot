@@ -135,20 +135,58 @@ pub async fn run_migrations(pool: &PgPool) -> Result<()> {
         warn!("Failed to migrate transactions table timezone columns (may already be migrated): {}", e);
     });
 
+    // 創建 admin_audit 表（管理員審計記錄）
+    info!("Creating admin_audit table if not exists");
+    sqlx::query(
+        r#"
+        CREATE TABLE IF NOT EXISTS admin_audit (
+            id BIGSERIAL PRIMARY KEY,
+            admin_id BIGINT NOT NULL REFERENCES users(discord_user_id),
+            operation_type VARCHAR(50) NOT NULL,
+            target_user_id BIGINT REFERENCES users(discord_user_id),
+            amount DECIMAL(15,2),
+            reason TEXT NOT NULL,
+            timestamp TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+            ip_address INET,
+            user_agent TEXT,
+            created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+        )
+        "#
+    )
+    .execute(pool)
+    .await
+    .map_err(|e| {
+        error!("Failed to create admin_audit table: {}", e);
+        DiscordError::MigrationError(format!("Failed to create admin_audit table: {}", e))
+    })?;
+
     // 創建索引以優化查詢效能
     info!("Creating indexes for performance optimization");
     let indexes = vec![
         "idx_transactions_from_user_id",
         "idx_transactions_to_user_id",
-        "idx_transactions_created_at"
+        "idx_transactions_created_at",
+        "idx_admin_audit_admin_id",
+        "idx_admin_audit_operation_type",
+        "idx_admin_audit_target_user_id",
+        "idx_admin_audit_timestamp"
     ];
 
     for index_name in indexes {
         debug!("Creating index: {}", index_name);
+        let (table_name, column_name) = if index_name.starts_with("idx_transactions_") {
+            ("transactions", index_name.strip_prefix("idx_transactions_").unwrap())
+        } else if index_name.starts_with("idx_admin_audit_") {
+            ("admin_audit", index_name.strip_prefix("idx_admin_audit_").unwrap())
+        } else {
+            continue; // 跳過未知的前綴
+        };
+
         let query = format!(
-            "CREATE INDEX IF NOT EXISTS {} ON transactions({})",
+            "CREATE INDEX IF NOT EXISTS {} ON {}({})",
             index_name,
-            index_name.strip_prefix("idx_transactions_").unwrap()
+            table_name,
+            column_name
         );
 
         sqlx::query(&query)

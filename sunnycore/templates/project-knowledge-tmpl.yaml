@@ -1,25 +1,35 @@
 ---
-# Project Knowledge Base Template - Simplified
-# 專案知識庫模板 - 精簡版
+# Project Knowledge Base Template
+# 專案知識庫模板
 
-metadata:
-  title: "Project Knowledge Base"
-  last_updated: ""
+title: ""
+project_name: ""
+last_updated: ""
+version: ""
+---
 
-best_practices:
-  - id: "BP-001"
-    title: ""
-    description: ""
-    practice_level: "platinum|gold|silver|bronze"  # Required for tracking
-    applicable_scenarios: []
-    evidence_source: ""  # File path + line numbers
+best-practices: []
 
-error_cases:
-  - id: "ERR-001"
-    title: ""
-    problem: ""
-    root_cause: ""
-    solution: ""
-    prevention: ""
-    severity: "high|medium|low"
-    evidence_source: ""  # File path + section reference
+error-cases: []
+
+design-patterns: []
+
+architecture-insights: []
+
+performance-optimizations: []
+
+security-practices: []
+
+testing-strategies: []
+
+code-snippets: []
+
+tools-and-libraries: []
+
+process-improvements: []
+
+metrics-and-kpis: []
+
+team-learnings: []
+
+external-resources: []

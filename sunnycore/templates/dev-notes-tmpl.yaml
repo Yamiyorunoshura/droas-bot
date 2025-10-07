@@ -1,39 +1,66 @@
 ---
-# Development Notes Template - Simplified
-# 開發筆記模板 - 精簡版
+# Development Notes Template
+# 開發筆記模板
 
 task_id: ""
+task_name: ""
 plan_reference: ""
-timestamp: ""
+developer: ""
+start_date: ""
+completion_date: ""
+actual_duration: ""
+---
 
-requirements_covered:
-  F-IDs: []
-  N-IDs: []
-  UI-IDs: []
+implementation-summary: ""
 
-implementation_summary: |
-  # Brief summary of what was implemented
+requirements-coverage:
+  functional_ids: []
+  non_functional_ids: []
+  ui_ids: []
 
-technical_decisions: |
-  # Key technical decisions and rationale
-  # - Technology selection reasons
-  # - Architecture decision explanations
-  # - Design pattern choices
+technical-decisions:
+  technology-choices: []
+  architecture-decisions: []
+  design-patterns: []
+  code-organization: {}
 
-challenges_and_solutions: |
-  # Problems encountered and how they were solved
-  # - Deviations from original plan
-  # - Reasons for changes
-  # - Solutions implemented
+challenges-and-solutions: []
 
-test_results:
-  coverage_percentage: ""
-  all_tests_passed: true|false
-  test_command: ""
+deviations-from-plan: []
 
-quality_metrics: |
-  # Performance metrics, security scan results, etc.
+implementation-details:
+  files-created: []
+  files-modified: []
+  configuration-changes: []
+  database-changes: []
 
-risks_and_maintenance: |
-  # Identified risks and mitigation measures
-  # Maintenance notes and monitoring recommendations
+testing:
+  coverage: {}
+  results: {}
+  test-cases-summary: []
+
+quality-metrics:
+  code-quality: {}
+  performance: []
+  security: []
+
+known-issues: []
+
+technical-debt: []
+
+risks-and-maintenance:
+  risks: []
+  maintenance-notes: []
+  monitoring-recommendations: []
+
+documentation-updates: []
+
+lessons-learned: []
+
+next-steps: []
+
+references:
+  implementation_plan: ""
+  related_docs: []
+  code_repository: ""
+  external_resources: []

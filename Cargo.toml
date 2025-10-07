@@ -19,6 +19,7 @@ rust_decimal = { version = "1.32", features = ["tokio-pg"] }
 bigdecimal = { version = "0.3", features = ["serde"] }
 regex = "1.10"
 serde = { version = "1.0", features = ["derive"] }
+serde_json = { version = "1.0", features = ["raw_value"] }
 redis = { version = "0.23", features = ["tokio-comp"] }
 warp = { version = "0.3", features = ["tls"] }
 prometheus = { version = "0.13", optional = true }

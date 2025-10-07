@@ -1,16 +1,16 @@
-[Input]
-  1. "{root}/docs/cutover.md" --Cutover report (required)
-  2. (Conditional) "{root}/docs/PRD.md" --Product Requirements Document (if exists, used as primary requirement and architecture source)
-  3. (Conditional) "{root}/docs/requirements/*.md" --Requirement documents (optional, used if "PRD.md" does not exist)
-  4. (Conditional) "{root}/docs/architecture/*.md" --Architecture documents (optional, used if "PRD.md" does not exist)
-  5. "{root}/sunnycore/templates/dev-notes-tmpl.yaml" --Development notes template (required)
+## [Input]
+  1. "{CUTOVER}" --Cutover report (required)
+  2. (Conditional) "{PRD}" --Product Requirements Document (if exists, used as primary requirement and architecture source)
+  3. (Conditional) "{REQ}/*.md" --Requirement documents (optional, used if "PRD.md" does not exist)
+  4. (Conditional) "{ARCH}/*.md" --Architecture documents (optional, used if "PRD.md" does not exist)
+  5. "{TMPL}/dev-notes-tmpl.yaml" --Development notes template (required)
 
-[Output]
+## [Output]
   1. "{root}/docs/cutover-fixes-dev-notes.md" --Development notes for fixes
   2. Fixed code implementation
   3. Updated documentation if needed
 
-[Constraints]
+## [Constraints]
   1. Must address all issues documented in cutover report
   2. Must follow TDD cycle for fixes: write/update tests first (RED), implement fix (GREEN), then refactor (REFACTOR)
   3. Must verify fixes resolve the reported issues
@@ -18,7 +18,7 @@
   5. Must re-run acceptance tests after fixes to ensure issues are resolved
   6. Must not introduce new issues or break existing functionality
 
-[Tools]
+## [Tools]
   1. **sequentialthinking (MCP)**: Perform structured reasoning and analysis
     - [Step 2: Analyze root causes; Step 3: Plan fix strategies; Step 6: Evaluate fix results]
   2. **todo_write**: Create and manage task list
@@ -26,7 +26,7 @@
   3. **claude-context (MCP)**: Search codebase for relevant code
     - [Step 2: Locate code related to issues]
 
-[Steps]
+## [Steps]
   1. Preparation Phase
     - Read cutover report to understand all reported issues
     - Verify existence of required input files
@@ -34,22 +34,21 @@
     - Create todo list based on issues to fix
 
   2. Root Cause Analysis Phase
-    - Check if "{root}/docs/PRD.md" exists
-    - if "PRD.md" exists then 2.1, else 2.2
+    - Check if "{PRD}" exists
+    - For each reported issue, analyze error messages and reproduction steps
+    - Locate relevant code using search tools and identify root cause of the issue
+    - Document analysis findings and determine appropriate fix strategy for each issue
+    - if "PRD.md" exists then proceed to 2.1, else proceed to 2.2
+      
       2.1. PRD-based Project
-        - Read "{root}/docs/PRD.md"
+        - Read "{PRD}"
         - Extract requirements from PRD requirements section
         - Extract architecture information from PRD architecture section
         - Use PRD as the primary context for understanding system design
+      
       2.2. Traditional Project Structure
-        - Read requirements from "{root}/docs/requirements/*.md" (if available)
-        - Read architecture from "{root}/docs/architecture/*.md" (if available)
-    - For each reported issue:
-      * Analyze error messages and reproduction steps
-      * Locate relevant code using search tools
-      * Identify root cause of the issue
-      * Document analysis findings
-    - Determine appropriate fix strategy for each issue
+        - Read requirements from "{REQ}/*.md" (if available)
+        - Read architecture from "{ARCH}/*.md" (if available)
 
   3. Fix Planning Phase
     - Plan fix approach for each issue
@@ -84,10 +83,8 @@
     - Document technical decisions and rationale
     - Record any risks or follow-up items
     - Save to "{root}/docs/dev-notes/cutover-fixes-dev-notes.md"
-    - Check all DoD items one by one to ensure they are met
-    - Confirm all todo items are completed
 
-[DoD]
+## [DoD]
   - [ ] Cutover report has been read and all issues identified
   - [ ] Root cause analysis completed for all issues
   - [ ] Fix strategy planned for each issue
@@ -97,5 +94,4 @@
   - [ ] Full test suite passes with no regressions
   - [ ] Acceptance tests re-run and all issues resolved
   - [ ] Development notes generated with complete documentation
-  - [ ] All todo items are completed
 
