@@ -208,15 +208,14 @@ impl ServiceRouter {
     async fn generate_basic_help(&self) -> String {
         let mut help_content = String::new();
 
-        help_content.push_str("## 🤖 DROAS 經濟機器人幫助\n\n");
+        help_content.push_str("🤖 DROAS 經濟機器人幫助\n\n");
         help_content.push_str("**可用指令**:\n\n");
         help_content.push_str("• `!balance` - 查詢帳戶餘額\n");
         help_content.push_str("• `!transfer <@用戶> <金額>` - 轉帳給指定用戶\n");
         help_content.push_str("• `!history` - 查看交易歷史記錄\n");
         help_content.push_str("• `!help` - 顯示此幫助信息\n");
         help_content.push_str("• `!adjust_balance` - 管理員專用：調整用戶帳戶餘額\n");
-        help_content.push_str("• `!admin_history` - 管理員專用：查看系統操作歷史記錄\n\n");
-        help_content.push_str("*提示: 使用 `!help <指令名稱>` 獲取特定指令的詳細幫助*");
+        help_content.push_str("• `!admin_history` - 管理員專用：查看系統操作歷史記錄\n");
 
         help_content
     }

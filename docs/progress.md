@@ -2,6 +2,12 @@
 
 ## 2025-10-08
 
+**02:53**: 修復幫助訊息格式錯誤和尾部信息重複問題 [IMPORTANT]
+- 移除幫助內容開頭的 Markdown 格式標題，改為純文本格式
+- 消除底部重複的提示信息，統一由 MessageService 提供
+- 修復 Cargo.toml 編譯兼容性問題 (edition: 2025 → 2021)
+- 確保幫助訊息格式正確，提升用戶界面一致性
+
 **02:18**: 完成 Discord 機器人幫助系統更新，新增 admin 功能指令說明 [IMPORTANT]
 - 新增管理員專用指令分類，包含 adjust_balance 和 admin_history 指令
 - 統一幫助訊息格式，避免重複內容
