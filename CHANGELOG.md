@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.3] - 2025-10-08
+
+### Fixed
+- 🔧 **測試編譯錯誤修復**
+  - 修復 `CommandResult` 結構體字段缺失導致的測試編譯失敗 (E0063, E0583)
+  - 更新 `command_router_test.rs` 中 5 個 `CommandResult` 初始化，添加 `guild_id` 和 `discord_context` 字段
+  - 更新 `discord_gateway_modules_test.rs` 中 4 個 `CommandResult` 初始化，添加缺失字段
+  - 從 `tests/mod.rs` 移除不存在的 `transfer_service_test` 模組引用
+  - 恢復項目編譯能力，確保所有測試可正常運行
+
+### Documentation
+- 📚 **錯誤知識庫更新**
+  - 新增 Rust 編譯錯誤修復文檔到 `errors-testing.md`
+  - 記錄 `CommandResult` 結構體演進和測試同步更新最佳實踐
+
 ## [0.2.2] - 2025-10-08
 
 ### Fixed

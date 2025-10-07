@@ -84,6 +84,8 @@ async fn test_service_router_basic_routing() {
         args: vec![],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let result = router.route_command(&command_result).await.unwrap();
     assert!(result.contains("balance"));
@@ -94,6 +96,8 @@ async fn test_service_router_basic_routing() {
         args: vec![],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let result = router.route_command(&command_result).await.unwrap();
     assert!(result.contains("Available commands"));
@@ -110,6 +114,8 @@ async fn test_service_router_error_handling() {
         args: vec![],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let result = router.route_command(&command_result).await;
     assert!(result.is_err());
@@ -121,6 +127,8 @@ async fn test_service_router_error_handling() {
         args: vec!["@user".to_string()],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let result = router.route_command(&command_result).await;
     assert!(result.is_err());

@@ -67,6 +67,8 @@ async fn test_route_balance_command() {
         args: vec![],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let response = router.route_command(&command_result).await.unwrap();
     assert!(response.contains("balance"));
@@ -80,6 +82,8 @@ async fn test_route_transfer_command() {
         args: vec!["@user".to_string(), "100".to_string()],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let response = router.route_command(&command_result).await.unwrap();
     assert!(response.contains("transfer"));
@@ -93,6 +97,8 @@ async fn test_route_help_command() {
         args: vec![],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let response = router.route_command(&command_result).await.unwrap();
     assert!(response.contains("Available commands"));
@@ -110,6 +116,8 @@ async fn test_route_unimplemented_command() {
         args: vec![],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let result = router.route_command(&command_result).await;
     assert!(result.is_err());
@@ -124,6 +132,8 @@ async fn test_route_transfer_with_insufficient_args() {
         args: vec!["@user".to_string()],
         user_id: Some(12345),
         username: Some("testuser".to_string()),
+        guild_id: None,
+        discord_context: None,
     };
     let result = router.route_command(&command_result).await;
     assert!(result.is_err());
