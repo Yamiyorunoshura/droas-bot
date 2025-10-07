@@ -117,6 +117,12 @@ impl Handler {
         updated_command_result.user_id = Some(msg.author.id.get() as i64);
         updated_command_result.username = Some(msg.author.name.clone());
 
+        // 添加 Discord Context 和 Guild ID（如果有的話）
+        if let Some(guild_id) = msg.guild_id {
+            updated_command_result.guild_id = Some(guild_id.get() as i64);
+        }
+        updated_command_result.discord_context = Some(Arc::new(ctx.clone()));
+
         // 路由命令並獲得響應
         let response = self.command_router.route_command(&updated_command_result).await?;
 

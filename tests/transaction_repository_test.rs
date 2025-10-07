@@ -20,6 +20,7 @@ async fn create_test_transaction_request(
         to_user_id,
         amount: BigDecimal::from_str(amount).unwrap(),
         transaction_type: transaction_type.to_string(),
+        metadata: None,
     }
 }
 
@@ -57,6 +58,7 @@ mod unit_tests {
             amount: BigDecimal::from_str("250.00").unwrap(),
             transaction_type: "transfer".to_string(),
             created_at: Utc::now(),
+            metadata: None,
         };
 
         // When: 驗證交易結構

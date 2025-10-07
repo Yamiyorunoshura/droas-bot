@@ -1,5 +1,7 @@
 use crate::error::{DiscordError, Result};
 use std::collections::HashMap;
+use std::sync::Arc;
+use serenity::prelude::*;
 
 #[derive(Debug, PartialEq, Clone)]
 pub enum Command {
@@ -7,6 +9,8 @@ pub enum Command {
     Transfer,
     History,
     Help,
+    AdjustBalance,
+    AdminHistory,
 }
 
 #[derive(Debug, Clone)]
@@ -15,6 +19,8 @@ pub struct CommandResult {
     pub args: Vec<String>,
     pub user_id: Option<i64>,
     pub username: Option<String>,
+    pub guild_id: Option<i64>,
+    pub discord_context: Option<Arc<Context>>,
 }
 
 pub struct CommandParser {
@@ -33,6 +39,8 @@ impl CommandParser {
         command_handlers.insert("transfer".to_string(), Command::Transfer);
         command_handlers.insert("history".to_string(), Command::History);
         command_handlers.insert("help".to_string(), Command::Help);
+        command_handlers.insert("adjust_balance".to_string(), Command::AdjustBalance);
+        command_handlers.insert("admin_history".to_string(), Command::AdminHistory);
 
         Self {
             command_prefix: prefix,
@@ -73,6 +81,8 @@ impl CommandParser {
             args,
             user_id: None,  // 需要從 Discord 訊息中獲取
             username: None, // 需要從 Discord 訊息中獲取
+            guild_id: None, // 需要從 Discord 訊息中獲取
+            discord_context: None, // 需要從 Discord 訊息中獲取
         })
     }
 

@@ -40,6 +40,7 @@ async fn create_test_transaction(
         amount: BigDecimal::from_str(amount).unwrap(),
         transaction_type: transaction_type.to_string(),
         created_at: Utc::now(),
+        metadata: None,
     }
 }
 
@@ -61,6 +62,7 @@ mod unit_tests {
             to_user_id: Some(touser_id),
             amount: amount.clone(),
             transaction_type: "transfer".to_string(),
+            metadata: None,
         };
 
         // Then: 交易記錄應該包含所有必需欄位
@@ -324,6 +326,7 @@ mod history_query_tests {
                 amount: BigDecimal::from_str("100.00").unwrap(),
                 transaction_type: "transfer".to_string(),
                 created_at: Utc::now(),
+                metadata: None,
             },
             Transaction {
                 id: 2,
@@ -332,6 +335,7 @@ mod history_query_tests {
                 amount: BigDecimal::from_str("50.00").unwrap(),
                 transaction_type: "transfer".to_string(),
                 created_at: Utc::now(),
+                metadata: None,
             },
         ];
 

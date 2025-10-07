@@ -72,6 +72,21 @@ impl RouterErrorHandler {
             DiscordError::NetworkError { message } => {
                 format!("🌐 Network error: {}. Please check your connection and try again.", message)
             },
+            DiscordError::PermissionDenied(msg) => {
+                format!("🔒 Permission denied: {}. You don't have permission to perform this action.", msg)
+            },
+            DiscordError::ConfirmationRequired(msg) => {
+                format!("⚠️ Confirmation required: {}. Please confirm this action.", msg)
+            },
+            DiscordError::AdditionalVerificationRequired(msg) => {
+                format!("🔐 Additional verification required: {}. Please complete additional verification.", msg)
+            },
+            DiscordError::SecurityViolation(msg) => {
+                format!("🚨 Security violation: {}. This action has been blocked for security reasons.", msg)
+            },
+            DiscordError::RateLimited(msg) => {
+                format!("⏱️ Rate limited: {}. Please wait before trying again.", msg)
+            },
         }
     }
 

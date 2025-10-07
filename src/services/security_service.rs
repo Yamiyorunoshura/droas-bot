@@ -562,6 +562,229 @@ impl SecurityService {
             }
         }
     }
+
+    /// 驗證管理員權限（實現雙重驗證機制基礎）
+    ///
+    /// # Arguments
+    ///
+    /// * `discord_user_id` - Discord 用戶 ID
+    /// * `admin_users` - 授權的管理員用戶 ID 列表
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<bool>，true 表示用戶具有管理員權限
+    pub async fn verify_admin_permission(&self, discord_user_id: i64, admin_users: &[i64]) -> Result<bool, DiscordError> {
+        debug!("驗證管理員權限：{}", discord_user_id);
+
+        // 第一重驗證：檢查用戶 ID 是否在授權列表中
+        if !admin_users.contains(&discord_user_id) {
+            warn!("用戶 {} 不在管理員授權列表中", discord_user_id);
+            return Err(DiscordError::PermissionDenied("用戶沒有管理員權限".to_string()));
+        }
+
+        // 第二重驗證：驗證用戶身份確實存在且有效
+        let user = self.authenticate_user(discord_user_id).await
+            .map_err(|e| {
+                error!("管理員身份驗證失敗：{}", e);
+                DiscordError::PermissionDenied(format!("管理員身份驗證失敗：{}", e))
+            })?;
+
+        // 第三重驗證：檢查用戶是否在黑名單中（額外安全檢查）
+        if self.is_user_blacklisted(discord_user_id) {
+            warn!("管理員 {} 在黑名單中，拒絕管理員操作", discord_user_id);
+            return Err(DiscordError::PermissionDenied("管理員帳戶已被限制".to_string()));
+        }
+
+        info!("管理員權限驗證通過：{} ({})", discord_user_id, user.username);
+        Ok(true)
+    }
+
+    /// 驗證大額操作的二次確認需求
+    ///
+    /// # Arguments
+    ///
+    /// * `amount` - 操作金額
+    /// * `operation_type` - 操作類型
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<bool>，true 表示需要二次確認
+    pub fn requires_double_confirmation(&self, amount: f64, operation_type: &str) -> Result<bool, DiscordError> {
+        debug!("檢查是否需要二次確認：金額 {}, 類型 {}", amount, operation_type);
+
+        // 根據操作類型和金額設置不同的閾值
+        let threshold = match operation_type {
+            "ADJUST_BALANCE" | "SET_BALANCE" => 10000.0,  // 金額調整超過 10000 需要確認
+            "FREEZE_ACCOUNT" | "UNFREEZE_ACCOUNT" => 0.0, // 帳戶操作總是需要確認
+            "TRANSFER_OWNERSHIP" => 0.0,                   // 所有權轉移總是需要確認
+            _ => 50000.0,                                   // 其他操作超過 50000 需要確認
+        };
+
+        let requires_confirmation = amount >= threshold;
+
+        if requires_confirmation {
+            info!("操作需要二次確認：金額 {} >= 閾值 {}, 類型 {}", amount, threshold, operation_type);
+        } else {
+            debug!("操作不需要二次確認：金額 {} < 閾值 {}, 類型 {}", amount, threshold, operation_type);
+        }
+
+        Ok(requires_confirmation)
+    }
+
+    /// 驗證操作是否屬於敏感操作
+    ///
+    /// # Arguments
+    ///
+    /// * `operation_type` - 操作類型
+    /// * `target_user_id` - 目標用戶 ID（可選）
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<bool>，true 表示是敏感操作
+    pub fn is_sensitive_operation(&self, operation_type: &str, target_user_id: Option<i64>) -> Result<bool, DiscordError> {
+        debug!("檢查是否為敏感操作：類型 {}, 目標用戶 {:?}", operation_type, target_user_id);
+
+        let sensitive_operations = vec![
+            "FREEZE_ACCOUNT",
+            "UNFREEZE_ACCOUNT",
+            "TRANSFER_OWNERSHIP",
+            "DELETE_ACCOUNT",
+            "RESET_PASSWORD",
+            "MODIFY_PERMISSIONS",
+        ];
+
+        let is_sensitive = sensitive_operations.contains(&operation_type) ||
+                           operation_type.starts_with("SYSTEM_") ||
+                           operation_type.starts_with("ADMIN_");
+
+        // 額外檢查：是否對其他管理員進行操作
+        let is_admin_operation = if let Some(target) = target_user_id {
+            // 這裡可以與管理員列表比較，但為了簡化，我們假設對非當前用戶的操作都是敏感的
+            target != 0
+        } else {
+            false
+        };
+
+        let result = is_sensitive || is_admin_operation;
+
+        if result {
+            info!("檢測到敏感操作：類型 {}, 目標用戶 {:?}", operation_type, target_user_id);
+        }
+
+        Ok(result)
+    }
+
+    /// 檢查異常操作模式
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 管理員用戶 ID
+    /// * `operation_count` - 短時間內的操作次數
+    /// * `time_window_minutes` - 時間窗口（分鐘）
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<bool>，true 表示檢測到異常模式
+    pub fn check_anomalous_pattern(&self, admin_user_id: i64, operation_count: u32, time_window_minutes: u32) -> Result<bool, DiscordError> {
+        debug!("檢查異常操作模式：管理員 {}, 操作次數 {}, 時間窗口 {} 分鐘",
+               admin_user_id, operation_count, time_window_minutes);
+
+        // 計算操作頻率（每分鐘操作次數）
+        let frequency = operation_count as f64 / time_window_minutes as f64;
+
+        // 異常閾值：每分鐘超過 5 次操作，或 10 分鐘內超過 20 次操作
+        let is_anomalous = frequency > 5.0 ||
+                          (time_window_minutes <= 10 && operation_count > 20);
+
+        if is_anomalous {
+            warn!("檢測到異常操作模式：管理員 {} 在 {} 分鐘內執行了 {} 次操作（頻率：{:.2}/分鐘）",
+                  admin_user_id, time_window_minutes, operation_count, frequency);
+        } else {
+            debug!("操作模式正常：管理員 {} 在 {} 分鐘內執行了 {} 次操作（頻率：{:.2}/分鐘）",
+                   admin_user_id, time_window_minutes, operation_count, frequency);
+        }
+
+        Ok(is_anomalous)
+    }
+
+    /// 驗證管理員操作的安全限制
+    ///
+    /// # Arguments
+    ///
+    /// * `admin_user_id` - 管理員用戶 ID
+    /// * `operation_type` - 操作類型
+    /// * `amount` - 操作金額
+    /// * `target_user_id` - 目標用戶 ID（可選）
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<AdminSecurityCheck>，包含安全檢查結果
+    pub async fn validate_admin_operation_security(
+        &self,
+        admin_user_id: i64,
+        operation_type: &str,
+        amount: f64,
+        target_user_id: Option<i64>
+    ) -> Result<AdminSecurityCheck, DiscordError> {
+        debug!("驗證管理員操作安全：{} 執行 {}，金額 {}", admin_user_id, operation_type, amount);
+
+        let mut security_check = AdminSecurityCheck::default();
+
+        // 檢查是否為敏感操作
+        security_check.is_sensitive = self.is_sensitive_operation(operation_type, target_user_id)?;
+
+        // 檢查是否需要二次確認
+        security_check.requires_confirmation = self.requires_double_confirmation(amount, operation_type)?;
+
+        // 檢查金額是否在允許範圍內
+        security_check.amount_valid = amount >= 0.0 && amount <= 1_000_000.0;
+
+        // 檢查操作類型是否有效
+        security_check.operation_valid = !operation_type.is_empty() && operation_type.len() <= 50;
+
+        // 綜合安全評估
+        security_check.is_safe = security_check.amount_valid &&
+                                security_check.operation_valid &&
+                                (!security_check.requires_confirmation || security_check.is_sensitive);
+
+        if security_check.is_safe {
+            info!("管理員操作安全檢查通過：{} 執行 {}", admin_user_id, operation_type);
+        } else {
+            warn!("管理員操作安全檢查未完全通過：{} 執行 {} (敏感: {}, 需確認: {}, 金額有效: {}, 操作有效: {})",
+                  admin_user_id, operation_type,
+                  security_check.is_sensitive, security_check.requires_confirmation,
+                  security_check.amount_valid, security_check.operation_valid);
+        }
+
+        Ok(security_check)
+    }
+}
+
+/// 管理員安全檢查結果
+#[derive(Debug, Clone)]
+pub struct AdminSecurityCheck {
+    /// 是否為敏感操作
+    pub is_sensitive: bool,
+    /// 是否需要二次確認
+    pub requires_confirmation: bool,
+    /// 金額是否有效
+    pub amount_valid: bool,
+    /// 操作類型是否有效
+    pub operation_valid: bool,
+    /// 綜合安全評估
+    pub is_safe: bool,
+}
+
+impl Default for AdminSecurityCheck {
+    fn default() -> Self {
+        Self {
+            is_sensitive: false,
+            requires_confirmation: false,
+            amount_valid: true,
+            operation_valid: true,
+            is_safe: true,
+        }
+    }
 }
 
 // 移除 Default 實作，因為現在需要 UserRepository

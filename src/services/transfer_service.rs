@@ -259,6 +259,7 @@ impl TransferService {
             to_user_id: Some(to_user.discord_user_id),
             amount: amount.clone(),
             transaction_type: "transfer".to_string(),
+            metadata: None,
         };
 
         let transaction = self.transaction_repository.create_transaction(transaction_request).await

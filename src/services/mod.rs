@@ -2,6 +2,8 @@
 // 包含所有業務邏輯服務
 
 pub mod user_account_service;
+pub mod admin_service;
+pub mod admin_audit_service;
 pub mod error_handler;
 pub mod security_service;
 pub mod transfer_service;
@@ -20,9 +22,15 @@ pub mod monitoring_error_handler;
 
 // 重新導出主要服務
 pub use user_account_service::{UserAccountService, AccountCreationResult};
+pub use admin_service::{
+    AdminService, AdminOperation, AdminOperationType, OperationResult
+};
+pub use admin_audit_service::{
+    AdminAuditService, AdminAuditRecord, AdminAuditQuery, AdminAuditStats
+};
+pub use security_service::{SecurityService, AdminSecurityCheck};
 pub use error_handler::ErrorHandler;
 pub use crate::error::ErrorSeverity;
-pub use security_service::SecurityService;
 pub use transfer_service::{TransferService, TransferResult};
 pub use transfer_validation_service::{
     TransferValidationService, ValidationResult, ValidationError, ValidationRule,
