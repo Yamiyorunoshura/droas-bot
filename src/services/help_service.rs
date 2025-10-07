@@ -31,6 +31,8 @@ pub enum CommandCategory {
     Query,
     /// 系統幫助
     System,
+    /// 管理員功能
+    Admin,
 }
 
 /// Help Service 結構體
@@ -81,6 +83,23 @@ impl HelpService {
             category: CommandCategory::Query,
         });
 
+        // 管理員功能指令
+        self.register_command(CommandInfo {
+            name: "adjust_balance".to_string(),
+            description: "管理員專用：調整用戶帳戶餘額".to_string(),
+            usage: "!adjust_balance <@用戶> <金額> <原因>".to_string(),
+            example: "!adjust_balance @user +1000 獎勵發放".to_string(),
+            category: CommandCategory::Admin,
+        });
+
+        self.register_command(CommandInfo {
+            name: "admin_history".to_string(),
+            description: "管理員專用：查看系統操作歷史記錄".to_string(),
+            usage: "!admin_history [用戶ID] [天數]".to_string(),
+            example: "!admin_history @user 7".to_string(),
+            category: CommandCategory::Admin,
+        });
+
         // 系統幫助指令
         self.register_command(CommandInfo {
             name: "help".to_string(),
@@ -121,6 +140,7 @@ impl HelpService {
                 CommandCategory::Account => "💰 帳戶管理",
                 CommandCategory::Transaction => "💸 交易功能",
                 CommandCategory::Query => "📊 查詢功能",
+                CommandCategory::Admin => "🔧 管理員功能",
                 CommandCategory::System => "⚙️ 系統幫助",
             };
 
@@ -138,7 +158,7 @@ impl HelpService {
 
         // 添加底部信息
         content.push_str("---\n");
-        content.push_str("*如需特定指令的詳細幫助，請使用 `!help <指令名稱>`*\n");
+        content.push_str("*提示: 使用 `!help <指令名稱>` 獲取特定指令的詳細幫助*\n");
 
         debug!("幫助內容生成完成，長度: {}", content.len());
         content
@@ -230,6 +250,7 @@ impl std::fmt::Display for CommandCategory {
             CommandCategory::Account => write!(f, "帳戶管理"),
             CommandCategory::Transaction => write!(f, "交易功能"),
             CommandCategory::Query => write!(f, "查詢功能"),
+            CommandCategory::Admin => write!(f, "管理員功能"),
             CommandCategory::System => write!(f, "系統幫助"),
         }
     }

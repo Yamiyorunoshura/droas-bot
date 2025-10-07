@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-10-08
+
+### Added
+- 📚 **幫助系統增強**
+  - 新增管理員功能指令到幫助系統（`!adjust_balance`, `!admin_history`）
+  - 新增管理員指令分類（🔧 管理員功能）
+  - 在所有幫助路徑中顯示管理員專用指令
+- 📖 **文檔新增**
+  - 新增 Discord 幫助系統最佳實踐文檔
+  - 新增開發進度追蹤文檔
+
+### Changed
+- 🎨 **訊息格式優化**
+  - 統一幫助訊息底部提示格式
+  - 改進指令說明的一致性和清晰度
+
 ## [0.2.0] - 2025-10-07
 
 ### Added

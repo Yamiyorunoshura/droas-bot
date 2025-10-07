@@ -104,7 +104,9 @@ impl RouterErrorHandler {
         • `!balance` - Check your account balance\n\
         • `!transfer @user amount` - Transfer money to another user\n\
         • `!history` - View your transaction history\n\
-        • `!help` - Show this help message\n\n\
+        • `!help` - Show this help message\n\
+        • `!adjust_balance` - Admin only: Adjust user account balance\n\
+        • `!admin_history` - Admin only: View system operation history\n\n\
         Need more help? Contact an administrator!"
         .to_string()
     }
