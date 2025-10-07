@@ -25,7 +25,6 @@ pub mod security_service_test;
 pub mod transaction_repository_test;
 pub mod transaction_service_test;
 pub mod transaction_service_test_simple;
-pub mod transfer_service_test;
 pub mod transfer_validation_service_test;
 pub mod ui_components_test;
 pub mod user_account_service_test;
