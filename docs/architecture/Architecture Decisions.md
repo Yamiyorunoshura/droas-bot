@@ -71,7 +71,7 @@
 **trade-offs**: 增加了驗證複雜度但提供多重安全保障
 **status**: active
 
-*source_refs: ["archive/0.2.0/prd-dev-notes.md:213-220", "src/services/admin_service.rs"]*
+*source_refs: ["archive/0.2.4/prd-dev-notes.md:213-220", "src/services/admin_service.rs"]*
 
 ### ADR-010: 審計記錄存儲策略
 **decision**: 使用專用 admin_audit 表存儲審計記錄
@@ -79,7 +79,7 @@
 **trade-offs**: 增加了存儲複雜性但提供完整的審計追蹤
 **status**: active
 
-*source_refs: ["archive/0.2.0/prd-dev-notes.md:221-227", "src/services/admin_audit_service.rs"]*
+*source_refs: ["archive/0.2.4/prd-dev-notes.md:221-227", "src/services/admin_audit_service.rs"]*
 
 ### ADR-011: 安全控制實現
 **decision**: 在 Security Service 中實現管理員專用安全檢查
@@ -87,7 +87,7 @@
 **trade-offs**: 集中式安全管理的複雜性與統一安全性
 **status**: active
 
-*source_refs: ["archive/0.2.0/prd-dev-notes.md:228-234", "src/services/security_service.rs"]*
+*source_refs: ["archive/0.2.4/prd-dev-notes.md:228-234", "src/services/security_service.rs"]*
 
-*source_refs: ["docs/architecture/Architecture Decisions.md", "archive/0.2.0/prd-dev-notes.md"]*
+*source_refs: ["docs/architecture/Architecture Decisions.md", "archive/0.2.4/prd-dev-notes.md"]*
 

@@ -11,6 +11,7 @@ pub enum Command {
     Help,
     AdjustBalance,
     AdminHistory,
+    SyncMembers,
 }
 
 #[derive(Debug, Clone)]
@@ -41,6 +42,8 @@ impl CommandParser {
         command_handlers.insert("help".to_string(), Command::Help);
         command_handlers.insert("adjust_balance".to_string(), Command::AdjustBalance);
         command_handlers.insert("admin_history".to_string(), Command::AdminHistory);
+        command_handlers.insert("sync_members".to_string(), Command::SyncMembers);
+        command_handlers.insert("sync_member".to_string(), Command::SyncMembers);
 
         Self {
             command_prefix: prefix,

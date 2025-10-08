@@ -23,5 +23,5 @@ DROAS Bot 是一個基於 Rust 的成熟單體應用程式，採用分層架構�
 - ✅ 交互式 Discord 用戶界面
 - ✅ 100% 測試覆蓋率 (71/71 測試通過)
 
-*source_refs: ["docs/architecture/Executive Summary.md", "archive/0.2.0/prd-dev-notes.md", "archive/0.2.0/cutover-fixes-dev-notes.md"]*
+*source_refs: ["docs/architecture/Executive Summary.md", "archive/0.2.4/prd-dev-notes.md", "archive/0.2.4/cutover-fixes-dev-notes.md"]*
 

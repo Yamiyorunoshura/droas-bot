@@ -132,6 +132,12 @@ impl MonitoringConfig {
             }
         }
 
+        if let Ok(interval) = std::env::var("DROAS_METRICS_COLLECTION_INTERVAL") {
+            if let Ok(seconds) = interval.parse::<u64>() {
+                config.metrics_collection_interval = Duration::from_secs(seconds);
+            }
+        }
+
         if let Ok(enabled) = std::env::var("DROAS_DETAILED_METRICS") {
             config.enable_detailed_metrics = enabled.to_lowercase() == "true";
         }
@@ -141,6 +147,42 @@ impl MonitoringConfig {
         }
 
         config
+    }
+
+    /// 創建配置並自動檢查端口可用性
+    pub fn from_env_with_port_check() -> Self {
+        let mut config = Self::from_env();
+
+        // 如果默認端口被佔用，嘗試尋找可用端口
+        if !Self::is_port_available(config.server_port) {
+            let available_port = Self::find_available_port(config.server_port);
+            if let Some(port) = available_port {
+                config.server_port = port;
+                eprintln!("警告: 默認監控端口 {} 被佔用，使用端口 {}", 8080, port);
+            } else {
+                eprintln!("錯誤: 無法找到可用端口進行監控服務");
+            }
+        }
+
+        config
+    }
+
+    /// 檢查端口是否可用
+    fn is_port_available(port: u16) -> bool {
+        match std::net::TcpListener::bind(("127.0.0.1", port)) {
+            Ok(_) => true, // 綁定成功表示端口可用
+            Err(_) => false, // 綁定失敗表示端口被佔用
+        }
+    }
+
+    /// 尋找可用端口（從指定端口開始）
+    fn find_available_port(start_port: u16) -> Option<u16> {
+        for port in start_port..(start_port + 100) {
+            if Self::is_port_available(port) {
+                return Some(port);
+            }
+        }
+        None
     }
 
     /// 從配置文件創建配置

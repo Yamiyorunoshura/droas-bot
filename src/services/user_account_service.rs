@@ -8,7 +8,7 @@ use crate::services::security_service::SecurityService;
 use bigdecimal::BigDecimal;
 use std::str::FromStr;
 use std::sync::Arc;
-use tracing::{info, error, debug};
+use tracing::{info, error, debug, warn, instrument};
 use chrono::{DateTime, Utc};
 
 /// 快取過期時間（秒）
@@ -252,6 +252,168 @@ impl UserAccountService {
                 DiscordError::DatabaseQueryError(e.to_string())
             })
     }
+
+    /// 批量創建帳戶 (F-013)
+    ///
+    /// 根據 Discord 群組成員列表批量創建帳戶
+    /// 跳過已存在的用戶，為新用戶創建帳戶並設置初始餘額
+    ///
+    /// # Arguments
+    ///
+    /// * `request` - 批量帳戶創建請求
+    ///
+    /// # Returns
+    ///
+    /// 返回 `BulkAccountCreationResult` 包含批量操作的詳細結果
+    #[instrument(skip(self), fields(total_users = request.user_ids.len()))]
+    pub async fn bulk_create_accounts(&self, request: BulkAccountCreationRequest) -> Result<BulkAccountCreationResult> {
+        info!("開始批量帳戶創建，總用戶數: {}", request.user_ids.len());
+
+        if request.user_ids.len() != request.usernames.len() {
+            return Err(DiscordError::InvalidCommand(
+                "用戶 ID 列表和用戶名稱列表長度不匹配".to_string()
+            ));
+        }
+
+        let mut result = BulkAccountCreationResult {
+            total_processed: request.user_ids.len(),
+            created_count: 0,
+            skipped_count: 0,
+            failed_count: 0,
+            created_accounts: Vec::new(),
+            failed_accounts: Vec::new(),
+            skipped_accounts: Vec::new(),
+        };
+
+        // 分批處理，每批最多 20 個成員，間隔 100ms (F-015)
+        let batch_size = 20;
+        let batch_delay = std::time::Duration::from_millis(100);
+
+        info!("開始批量處理，總用戶數: {}，批次大小: {}", request.user_ids.len(), batch_size);
+
+        for (batch_index, batch_start) in (0..request.user_ids.len()).step_by(batch_size).enumerate() {
+            let batch_end = std::cmp::min(batch_start + batch_size, request.user_ids.len());
+            let batch_user_ids = &request.user_ids[batch_start..batch_end];
+            let batch_usernames = &request.usernames[batch_start..batch_end];
+
+            // 確保切片邊界的正確性
+            assert!(batch_start < request.user_ids.len(), "批次起始位置 {} 超出範圍", batch_start);
+            assert!(batch_end <= request.user_ids.len(), "批次結束位置 {} 超出範圍", batch_end);
+            assert!(batch_start <= batch_end, "批次起始位置 {} 不應大於結束位置 {}", batch_start, batch_end);
+            assert_eq!(batch_user_ids.len(), batch_usernames.len(), "批次內用戶 ID 和用戶名數量不匹配");
+
+            let last_index_in_batch = if batch_end > 0 { batch_end - 1 } else { 0 };
+            info!("處理第 {} 批，範圍: {}-{} ({} 項目)",
+                  batch_index + 1, batch_start, last_index_in_batch, batch_user_ids.len());
+
+            for (user_id, username) in batch_user_ids.iter().zip(batch_usernames.iter()) {
+                match self.create_or_get_user_account(*user_id, username.clone()).await {
+                    Ok(account_result) => {
+                        if account_result.was_created {
+                            result.created_count += 1;
+                            result.created_accounts.push(account_result);
+                            info!("✅ 批量創建成功: {} ({})", username, user_id);
+                        } else {
+                            result.skipped_count += 1;
+                            result.skipped_accounts.push((*user_id, "帳戶已存在".to_string()));
+                            debug!("⏭️ 跳過已存在用戶: {} ({})", username, user_id);
+                        }
+                    },
+                    Err(e) => {
+                        result.failed_count += 1;
+
+                        // 改進錯誤消息，提供更詳細的診斷信息
+                        let error_message = match &e {
+                            DiscordError::DatabaseConnectionError(msg) => {
+                                format!("資料庫連接錯誤: {}", msg)
+                            },
+                            DiscordError::DatabaseQueryError(msg) => {
+                                format!("資料庫查詢錯誤: {}", msg)
+                            },
+                            DiscordError::ValidationError(msg) => {
+                                format!("驗證錯誤: {}", msg)
+                            },
+                            DiscordError::AccountCreationFailed(msg) => {
+                                format!("帳戶創建失敗: {}", msg)
+                            },
+                            _ => {
+                                format!("未知錯誤: {}", e)
+                            }
+                        };
+
+                        result.failed_accounts.push((*user_id, error_message.clone()));
+                        error!("❌ 批量創建失敗: {} ({}) - {}", username, user_id, error_message);
+                    }
+                }
+            }
+
+            // 批次間延遲（除了最後一批）
+            if batch_end < request.user_ids.len() {
+                tokio::time::sleep(batch_delay).await;
+            }
+        }
+
+        // 完整性檢查：確保所有輸入項目都被處理
+        let total_accounted = result.created_count + result.skipped_count + result.failed_count;
+        if total_accounted != result.total_processed {
+            error!("⚠️ 完整性檢查失敗：處理項目總數 {} 不等於輸入總數 {}",
+                   total_accounted, result.total_processed);
+
+            // 記錄詳細的錯誤信息
+            error!("創建: {}, 跳過: {}, 失敗: {}",
+                   result.created_count, result.skipped_count, result.failed_count);
+
+            // 返回一個包含完整性檢查信息的錯誤
+            return Err(DiscordError::TransactionError(
+                format!("批量處理完整性檢查失敗：期望處理 {} 項目，實際處理 {} 項目",
+                        result.total_processed, total_accounted)
+            ));
+        }
+
+        info!(
+            "批量帳戶創建完成 - 總計: {}, 創建: {}, 跳過: {}, 失敗: {} (✅ 完整性檢查通過)",
+            result.total_processed, result.created_count, result.skipped_count, result.failed_count
+        );
+
+        Ok(result)
+    }
+
+    /// 檢查缺失的帳戶 (F-013)
+    ///
+    /// 檢查給定的 Discord 用戶 ID 列表中哪些用戶沒有帳戶
+    ///
+    /// # Arguments
+    ///
+    /// * `user_ids` - Discord 用戶 ID 列表
+    ///
+    /// # Returns
+    ///
+    /// 返回沒有帳戶的用戶 ID 列表
+    pub async fn check_missing_accounts(&self, user_ids: &[i64]) -> Result<Vec<i64>> {
+        info!("檢查缺失帳戶，用戶數量: {}", user_ids.len());
+
+        let mut missing_accounts = Vec::new();
+
+        for &user_id in user_ids {
+            match self.check_user_exists(user_id).await {
+                Ok(false) => {
+                    missing_accounts.push(user_id);
+                    debug!("發現缺失帳戶: {}", user_id);
+                },
+                Ok(true) => {
+                    debug!("帳戶已存在: {}", user_id);
+                },
+                Err(e) => {
+                    warn!("檢查用戶 {} 帳戶狀態失敗: {}", user_id, e);
+                    // 將檢查失敗的用戶也視為缺失，以便重試創建
+                    missing_accounts.push(user_id);
+                }
+            }
+        }
+
+        info!("檢查完成，發現 {} 個缺失帳戶", missing_accounts.len());
+        Ok(missing_accounts)
+    }
 }
 
 /// 帳戶創建結果
@@ -267,6 +429,46 @@ pub struct AccountCreationResult {
     pub user: crate::database::user_repository::User,
     /// 操作結果訊息（用於 Discord 回覆）
     pub message: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct BulkAccountCreationResult {
+    /// 總處理成員數量
+    pub total_processed: usize,
+    /// 成功創建的帳戶數量
+    pub created_count: usize,
+    /// 跳過的帳戶數量（已存在）
+    pub skipped_count: usize,
+    /// 失敗的帳戶數量
+    pub failed_count: usize,
+    /// 創建成功的帳戶詳細結果
+    pub created_accounts: Vec<AccountCreationResult>,
+    /// 失敗的帳戶詳細結果 (user_id, error_message)
+    pub failed_accounts: Vec<(i64, String)>,
+    /// 跳過的帳戶詳細結果 (user_id, reason)
+    pub skipped_accounts: Vec<(i64, String)>,
+}
+
+/// 批量帳戶創建請求
+#[derive(Debug, Clone)]
+pub struct BulkAccountCreationRequest {
+    /// Discord 用戶 ID 列表
+    pub user_ids: Vec<i64>,
+    /// 用戶名稱列表（與 user_ids 對應）
+    pub usernames: Vec<String>,
+}
+
+/// 批量操作進度更新
+#[derive(Debug, Clone)]
+pub struct BulkOperationProgress {
+    /// 當前處理進度 (0.0 - 1.0)
+    pub progress: f32,
+    /// 已處理成員數量
+    pub processed_count: usize,
+    /// 總成員數量
+    pub total_count: usize,
+    /// 當前處理的用戶名稱
+    pub current_user: Option<String>,
 }
 
 #[cfg(test)]

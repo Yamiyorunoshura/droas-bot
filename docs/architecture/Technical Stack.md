@@ -7,7 +7,7 @@
 **infrastructure**: Redis 8.x 快取 (可選，支援記憶體快取降級)
 
 ### External Services
-- **Discord API**: v2+, Gateway Intents: GUILD_MESSAGES, MESSAGE_CONTENT, Serenity 0.12
+- **Discord API**: v2+, Gateway Intents: GUILD_MESSAGES, MESSAGE_CONTENT, GUILD_MESSAGE_REACTIONS, DIRECT_MESSAGES, GUILD_MEMBERS, Serenity 0.12
 - **PostgreSQL**: 16.x, 主資料庫，ACID 交易支援
 - **Redis**: 8.x, 快取層，熱數據存取優化
 

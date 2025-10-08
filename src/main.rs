@@ -21,7 +21,7 @@ async fn main() -> Result<()> {
     // 1. 初始化日誌系統
     logging::init_logging();
     info!("🚀 DROAS Discord Economy Bot 啟動中...");
-    info!("版本: 0.1.0");
+    info!("版本: {}", env!("CARGO_PKG_VERSION"));
 
     // 2. 載入配置
     let config = match Config::from_env() {
@@ -86,7 +86,7 @@ async fn main() -> Result<()> {
     let monitoring_service = create_monitoring_service(database_pool.clone()).await;
 
     // 8. 啟動監控服務器
-    let monitoring_config = droas_bot::services::MonitoringConfig::default();
+    let monitoring_config = droas_bot::services::MonitoringConfig::from_env_with_port_check();
     start_monitoring_servers(monitoring_service.clone(), monitoring_config).await?;
 
     // 9. 創建並配置 Discord Gateway

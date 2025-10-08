@@ -42,7 +42,7 @@
 - 管理員餘額調整介面
 **dependencies**: Database Layer, Cache Layer, Security Service
 
-*source_refs: ["src/services/balance_service.rs", "archive/0.2.0/prd-dev-notes.md:168-189"]*
+*source_refs: ["src/services/balance_service.rs", "archive/0.2.4/prd-dev-notes.md:168-189"]*
 
 #### Transfer Service
 **responsibility**: 管理點對點轉帳，包含驗證和原子操作
@@ -74,7 +74,7 @@
 - 動態管理員列表管理
 **dependencies**: Security Service, Database Layer, Admin Audit Service
 
-*source_refs: ["src/services/admin_service.rs", "archive/0.2.0/prd-dev-notes.md:106-124"]*
+*source_refs: ["src/services/admin_service.rs", "archive/0.2.4/prd-dev-notes.md:106-124"]*
 
 #### Admin Audit Service
 **responsibility**: 記錄管理員操作、提供審計查詢和統計
@@ -85,7 +85,7 @@
 - 審計統計分析
 **dependencies**: Database Layer
 
-*source_refs: ["src/services/admin_audit_service.rs", "archive/0.2.0/prd-dev-notes.md:124-135"]*
+*source_refs: ["src/services/admin_audit_service.rs", "archive/0.2.4/prd-dev-notes.md:124-135"]*
 
 #### Message/UI Service
 **responsibility**: 構建 Discord 嵌入消息和管理交互組件
@@ -117,7 +117,7 @@
 - 異常操作模式檢測
 **dependencies**: Cache Layer, Database Layer
 
-*source_refs: ["src/services/security_service.rs", "archive/0.2.0/prd-dev-notes.md:136-142"]*
+*source_refs: ["src/services/security_service.rs", "archive/0.2.4/prd-dev-notes.md:136-142"]*
 
 #### Monitoring Service
 **responsibility**: 提供健康檢查、指標收集和監控端點
@@ -161,7 +161,7 @@ Admin Command → Discord Permission Check → Admin Service → Security Valida
 ### Integration Points
 
 #### Discord API 整合
-- Gateway Intents: GUILD_MESSAGES, MESSAGE_CONTENT, GUILD_MESSAGE_REACTIONS, DIRECT_MESSAGES
+- Gateway Intents: GUILD_MESSAGES, MESSAGE_CONTENT, GUILD_MESSAGE_REACTIONS, DIRECT_MESSAGES, GUILD_MEMBERS
 - 命令解析: !balance, !transfer, !history, !help, !adjust_balance, !admin_history
 - 交互組件: 嵌入消息、按鈕、表單
 - 原生權限: 伺服器擁有者、Administrator、MANAGE_GUILD

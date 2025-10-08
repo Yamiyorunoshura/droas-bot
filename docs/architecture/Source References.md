@@ -2,9 +2,9 @@
 
 
 ### Requirements
-- archive/0.2.0/PRD.md
+- archive/0.2.4/PRD.md
 - docs/architecture/Requirements Traceability.md
-- archive/0.2.0/prd-dev-notes.md
+- archive/0.2.4/prd-dev-notes.md
 
 ### Code
 - src/main.rs
@@ -20,9 +20,9 @@
 
 ### Documentation
 - docs/architecture/*.md
-- archive/0.2.0/cutover-fixes-dev-notes.md
-- archive/0.2.0/prd-dev-notes.md
-- archive/0.2.0/progress.md
+- archive/0.2.4/cutover-fixes-dev-notes.md
+- archive/0.2.4/prd-dev-notes.md
+- archive/0.2.4/progress.md
 - docs/knowledge/*.md
 - CLAUDE.md
 
@@ -31,7 +31,7 @@
 - tests/admin_audit_service_test.rs
 - tests/adjust_balance_command_test.rs
 - tests/admin_integration_test.rs
-- archive/0.2.0/cutover-fixes-dev-notes.md
-- archive/0.2.0/prd-dev-notes.md
+- archive/0.2.4/cutover-fixes-dev-notes.md
+- archive/0.2.4/prd-dev-notes.md
 
 *source_refs: ["docs/architecture/Source References.md", "tests/", "docs/"]*
