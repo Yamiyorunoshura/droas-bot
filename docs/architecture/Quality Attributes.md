@@ -1,4 +1,4 @@
-## Architecture Quality
+## Quality Attributes
 
 
 ### Strengths
@@ -22,5 +22,5 @@
 - 快取策略可以根據實際使用情況進一步調整
 - 監控指標可以更加豐富和精確
 
-*source_refs: ["docs/architecture/Architecture Quality.md", "archive/0.2.0/cutover-fixes-dev-notes.md", "archive/0.2.0/progress.md"]*
+*source_refs: ["docs/architecture/Architecture Quality.md", "archive/0.2.4/cutover-fixes-dev-notes.md", "archive/0.2.4/progress.md"]*
 

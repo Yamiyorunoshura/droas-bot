@@ -16,12 +16,16 @@ impl CommandRegistry {
         commands.insert("transfer".to_string(), Command::Transfer);
         commands.insert("history".to_string(), Command::History);
         commands.insert("help".to_string(), Command::Help);
+        commands.insert("sync_members".to_string(), Command::SyncMembers);
+        commands.insert("sync_member".to_string(), Command::SyncMembers);
 
         // Add descriptions
         descriptions.insert("balance".to_string(), "Check your account balance".to_string());
         descriptions.insert("transfer".to_string(), "Transfer money to another user: !transfer @user amount".to_string());
         descriptions.insert("history".to_string(), "View your transaction history".to_string());
         descriptions.insert("help".to_string(), "Show this help message".to_string());
+        descriptions.insert("sync_members".to_string(), "Sync all server members (Admin only): !sync_members".to_string());
+        descriptions.insert("sync_member".to_string(), "Sync all server members (Admin only): !sync_member".to_string());
 
         Self { commands, descriptions }
     }

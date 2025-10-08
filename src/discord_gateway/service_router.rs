@@ -119,6 +119,9 @@ impl ServiceRouter {
             Command::AdminHistory => {
                 self.handle_admin_history_command(command_result).await
             },
+            Command::SyncMembers => {
+                self.handle_sync_members_command(command_result).await
+            },
         }
     }
 
@@ -421,7 +424,7 @@ impl ServiceRouter {
                 info!("管理員操作審計記錄創建成功，ID: {:?}", recorded_audit.id);
 
                 // 執行餘額調整操作
-                match admin_service.coordinate_admin_operation(admin_operation).await {
+                match admin_service.coordinate_admin_operation(admin_operation, true).await {
                     Ok(operation_result) => {
                         if operation_result.success {
                             // 格式化成功響應 - 使用現有的餘額響應格式
@@ -560,6 +563,65 @@ impl ServiceRouter {
             ));
         }
         Ok(())
+    }
+
+    /// 處理同步群組成員命令
+    ///
+    /// # Arguments
+    /// * `command_result` - 命令結果
+    ///
+    /// # Returns
+    /// * `Result<String>` - 響應結果
+    async fn handle_sync_members_command(&self, command_result: &CommandResult) -> Result<String> {
+        // 檢查是否有設置管理員服務
+        let admin_service = self.admin_service.as_ref()
+            .ok_or_else(|| DiscordError::UnimplementedCommand("管理員服務未初始化".to_string()))?;
+
+        // 檢查是否有管理員用戶 ID
+        let admin_user_id = command_result.user_id
+            .ok_or_else(|| DiscordError::InvalidCommand("缺少管理員用戶 ID".to_string()))?;
+
+        // 驗證管理員權限
+        let has_permission = if let (Some(ctx), Some(guild_id)) =
+            (&command_result.discord_context, command_result.guild_id) {
+            admin_service.verify_admin_permission_with_discord(
+                ctx.as_ref(),
+                serenity::model::id::GuildId::new(guild_id as u64),
+                serenity::model::id::UserId::new(admin_user_id as u64),
+            ).await.unwrap_or(false)
+        } else {
+            admin_service.verify_admin_permission(admin_user_id).await.unwrap_or(false)
+        };
+
+        if !has_permission {
+            let error_response = self.message_service.format_error_response(
+                &DiscordError::PermissionDenied("您沒有執行此管理員操作的權限".to_string())
+            );
+            return Ok(self.message_service.to_discord_string(&error_response));
+        }
+
+        // 執行同步成員操作
+        let operation = crate::services::admin_service::AdminOperation {
+            operation_type: crate::services::admin_service::AdminOperationType::SyncMembers,
+            admin_user_id,
+            target_user_id: None,
+            amount: None,
+            reason: "管理員執行同步群組成員".to_string(),
+            timestamp: chrono::Utc::now(),
+        };
+
+        match admin_service.coordinate_admin_operation(operation, true).await {
+            Ok(result) => {
+                let success_response = self.message_service.format_text_response(
+                    &format!("✅ {}", result.message)
+                );
+                Ok(self.message_service.to_discord_string(&success_response))
+            },
+            Err(e) => {
+                let error_response = self.message_service.format_error_response(&e);
+                Ok(self.message_service.to_discord_string(&error_response))
+            }
+        }
     }
 }
 

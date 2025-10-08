@@ -79,45 +79,40 @@ All templates are minimal structural frameworks using placeholders (`""`, `[]`, 
 
 ### YAML to Markdown Conversion Rules
 
-1. **YAML Front Matter**
-   - Preserve the `---` delimited front matter block at the start of the file
-   - Front matter contains metadata (not displayed in rendered Markdown body)
-   - Common metadata: project name, version, date, status, etc.
-
-2. **Heading Level Conversion**
+1. **Heading Level Conversion**
    - 1st level key → h1 (`#`)
    - 2nd level key → h2 (`##`)
    - 3rd level key → h3 (`###`)
    - 4th level and deeper → h4 (`####`)
    - Avoid using h5 and h6 to maintain clear hierarchy
 
-3. **Value Type Conversion**
+2. **Value Type Conversion**
    - **Simple string values**: Render as paragraph text below the heading
    - **Nested object values**: Each key-value pair as `**Key**: Value` format
    - **Multi-line text** (using `|` or `>`): Convert to paragraph text, preserving line breaks
    - **Numbers and booleans**: Display as plain text
 
-4. **List Conversion**
+3. **List Conversion**
    - **Simple lists**: Convert to Markdown unordered list using `-`
    - **Empty lists**: Omit the section (assume no content to display)
 
-5. **Object Array Conversion**
+4. **Object Array Conversion**
    - Each object in the array becomes a subsection
    - First property (typically `id`, `name`, or `title`) becomes h4 heading
    - Remaining properties formatted as `**Property**: Value` below the heading
    - If objects have no natural heading property, use numeric subsections
 
-6. **Empty Value Handling** (Critical for minimal templates)
+5. **Empty Value Handling** (Critical for minimal templates)
    - **Empty strings** (`""`): Omit the section entirely
    - **Empty lists** (`[]`): Omit the section entirely
    - **Empty objects** (`{}`): Omit the section entirely
    - **Only display sections with actual content**
 
-7. **Special Markers**
+6. **Special Markers**
    - **YAML comments** (`# comment`): Remove during conversion (used only as template guidance)
    - **Inline code/references**: Preserve in backticks when appropriate
 
-8. **Formatting Best Practices**
+7. **Formatting Best Practices**
    - Use bold (`**text**`) for property labels and important terms
    - Use code formatting (`` `text` ``) for technical terms, file paths, IDs, and identifiers
    - Add blank lines between sections for readability

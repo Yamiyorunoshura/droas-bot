@@ -5,6 +5,7 @@
 ## 功能特性
 
 - 🏦 **自動帳戶創建** - 新用戶首次使用時自動創建經濟帳戶
+- 🎉 **新成員自動入帳** - 新成員加入伺服器時自動創建帳戶並發送歡迎訊息（v0.2.4+）
 - 💰 **餘額查詢** - 使用美觀的嵌入消息界面查詢帳戶餘額
 - 💸 **安全轉帳** - 用戶間安全的點對點虛擬貨幣轉帳
 - 📊 **交易歷史** - 查看最近 10 筆交易記錄
@@ -114,10 +115,14 @@ RUST_LOG=info
 1. 前往 [Discord Developer Portal](https://discord.com/developers/applications)
 2. 創建新應用程式
 3. 在 "Bot" 頁面創建機器人
-4. 複製機器人 Token
-5. 在 "OAuth2" → "URL Generator" 中設置：
+4. **⚠️ 重要：啟用 Privileged Gateway Intents**
+   - 在 "Bot" 頁面向下滾動到 "Privileged Gateway Intents"
+   - 啟用 **SERVER MEMBERS INTENT**（必須，用於自動成員帳戶創建）
+   - 啟用 **MESSAGE CONTENT INTENT**（必須，用於讀取命令內容）
+5. 複製機器人 Token
+6. 在 "OAuth2" → "URL Generator" 中設置：
    - Scopes: `bot`
-   - Bot Permissions: `Send Messages`, `Read Message History`, `Embed Links`
+   - Bot Permissions: `Send Messages`, `Read Message History`, `Embed Links`, `Send Messages in Threads`
 
 ### 5. 編譯和運行
 
@@ -363,6 +368,21 @@ WantedBy=multi-user.target
 - 📖 **文檔**: [Wiki](https://github.com/droas/droas-bot/wiki)
 
 ## 更新日誌
+
+### v0.2.4 (2025-10-08)
+- 🎉 **新增自動成員帳戶創建系統**：
+  - 新成員加入伺服器時自動創建經濟帳戶（初始餘額：1000 幣）
+  - 自動發送歡迎私訊通知
+  - 重複檢查機制防止帳戶重複創建
+  - ⚠️ 需要在 Discord Developer Portal 啟用 **SERVER MEMBERS INTENT**
+- 🧪 **測試覆蓋大幅提升**：
+  - 新增 5 個測試文件（約 1,697 行測試代碼）
+  - 涵蓋自動帳戶創建、cutover 修復、權限同步等功能
+- 📚 **知識庫擴充**：
+  - 新增 6 個最佳實踐和錯誤處理文檔
+  - Discord 整合、測試、編譯、配置等領域知識
+- 📦 **版本歸檔**：
+  - 新增 0.2.4 版本完整開發文檔歸檔
 
 ### v0.2.0 (2025-10-07)
 - 👑 **新增完整的管理員功能系統**：

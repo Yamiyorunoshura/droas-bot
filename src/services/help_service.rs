@@ -100,6 +100,14 @@ impl HelpService {
             category: CommandCategory::Admin,
         });
 
+        self.register_command(CommandInfo {
+            name: "sync_members".to_string(),
+            description: "管理員專用：同步群組成員帳戶".to_string(),
+            usage: "!sync_members".to_string(),
+            example: "!sync_members".to_string(),
+            category: CommandCategory::Admin,
+        });
+
         // 系統幫助指令
         self.register_command(CommandInfo {
             name: "help".to_string(),

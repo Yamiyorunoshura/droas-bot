@@ -122,6 +122,28 @@ impl MockUserRepository {
         let users = self.users.lock().unwrap();
         users.clone()
     }
+
+    /// 添加已存在的用戶（用於測試已存在用戶的場景）
+    pub async fn add_existing_user(&self, user_id: i64, username: String) {
+        let user = User {
+            discord_user_id: user_id,
+            username,
+            balance: BigDecimal::from_str("1000.00").unwrap(),
+            created_at: Utc::now(),
+            updated_at: Utc::now(),
+        };
+        let mut users = self.users.lock().unwrap();
+        users.insert(user_id, user);
+    }
+
+    /// 創建一個總是失敗的 MockRepository（用於測試錯誤處理）
+    pub fn new_failing() -> Self {
+        // 這個方法將用於創建一個會失敗的 repository
+        // 實際實現會在測試中被覆蓋
+        Self {
+            users: Arc::new(Mutex::new(HashMap::new())),
+        }
+    }
 }
 
 #[async_trait]

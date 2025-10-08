@@ -259,6 +259,7 @@ impl CommandRouter {
             Command::History => true,
             Command::AdjustBalance => true,  // 管理員命令也需要帳戶驗證
             Command::AdminHistory => true,   // 管理員命令也需要帳戶驗證
+            Command::SyncMembers => true,    // 管理員命令也需要帳戶驗證
             // 可以根據需要添加更多命令
             _ => false,
         }

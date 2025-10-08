@@ -46,19 +46,26 @@ pub struct DiscordGateway {
     token_valid: bool,
     command_router: Arc<CommandRouter>,
     ui_factory: UIComponentFactory,
+    user_account_service: Option<Arc<crate::services::UserAccountService>>,
 }
 
 struct Handler {
     status: Arc<Mutex<ConnectionStatus>>,
     ui_factory: Arc<UIComponentFactory>,
     command_router: Arc<CommandRouter>,
+    user_account_service: Option<Arc<crate::services::UserAccountService>>,
 }
 
 #[serenity::async_trait]
 impl EventHandler for Handler {
-    async fn ready(&self, _: Context, _ready: Ready) {
+    async fn ready(&self, _ctx: Context, _ready: Ready) {
         log_connection_success();
         *self.status.lock().await = ConnectionStatus::Connected;
+
+        // 注意：由於 Ready 事件處理器的限制，intent 驗證將在後續版本中實現
+        // 這裡我們暫時記錄一個提示，因為驗證需要更多的上下文信息
+        tracing::info!("🔍 GUILD_MEMBERS intent 已配置，建議在 Discord Developer Portal 驗證");
+        tracing::info!("Discord Developer Portal: https://discord.com/developers/applications");
     }
 
     async fn message(&self, ctx: Context, msg: Message) {
@@ -94,6 +101,52 @@ impl EventHandler for Handler {
             _ => {
                 tracing::debug!("忽略非按鈕交互類型: {:?}", interaction.kind());
             }
+        }
+    }
+
+    /// 處理 GuildMemberAdd 事件 - 新成員自動帳戶創建 (F-013)
+    async fn guild_member_addition(&self, ctx: Context, new_member: serenity::model::guild::Member) {
+        log_event_received("guild_member_addition");
+
+        let user_id = new_member.user.id.get() as i64;
+        let username = new_member.user.name.clone();
+
+        tracing::info!("新成員加入群組: {} ({})", username, user_id);
+
+        // 如果有設置 UserAccountService，則自動創建帳戶
+        if let Some(user_account_service) = &self.user_account_service {
+            match user_account_service.create_or_get_user_account(user_id, username.clone()).await {
+                Ok(result) => {
+                    if result.was_created {
+                        tracing::info!("✅ 為新成員 {} 創建帳戶成功，初始餘額: {} 幣",
+                            result.user.username, result.user.balance);
+
+                        // 發送歡迎消息
+                        let welcome_message = serenity::builder::CreateMessage::new()
+                            .content(format!("🎉 歡迎 {}！\n\n您的經濟帳戶已自動創建，初始餘額：{} 幣\n\n使用 `!help` 查看可用命令！",
+                                result.user.username, result.user.balance));
+
+                        if let Err(e) = new_member.user.dm(&ctx.http, welcome_message).await {
+                            tracing::error!("發送歡迎私訊失敗: {}", e);
+                        }
+                    } else {
+                        tracing::info!("成員 {} 已有帳戶，跳過創建", username);
+                    }
+                },
+                Err(e) => {
+                    tracing::error!("為新成員 {} 創建帳戶失敗: {}", username, e);
+
+                    // 發送錯誤通知
+                    let error_message = serenity::builder::CreateMessage::new()
+                        .content("❌ 帳戶創建失敗，請聯繫管理員。");
+
+                    if let Err(e) = new_member.user.dm(&ctx.http, error_message).await {
+                        tracing::error!("發送錯誤通知私訊失敗: {}", e);
+                    }
+                }
+            }
+        } else {
+            tracing::warn!("UserAccountService 未設置，無法自動創建帳戶");
         }
     }
 }
@@ -169,6 +222,49 @@ impl Handler {
             }
         }
     }
+
+    /// 驗證 GUILD_MEMBERS intent 是否可用
+    ///
+    /// 這個函數通過嘗試獲取成員列表來驗證 GUILD_MEMBERS intent 是否正確配置
+    /// 如果 intent 未啟用，Discord 會返回錯誤
+    #[allow(dead_code)]
+    async fn verify_guild_members_intent(&self, ctx: &Context, ready: &Ready) -> Result<()> {
+        // 獲取第一個可用伺服器來測試 intent
+        if let Some(guild_id) = ready.guilds.first() {
+            match ctx.http.get_guild_members(guild_id.id, Some(1), Some(1)).await {
+                Ok(members) => {
+                    if !members.is_empty() {
+                        tracing::info!("✅ GUILD_MEMBERS intent 驗證通過");
+                        tracing::info!("成功獲取 {} 個成員資訊", members.len());
+                    } else {
+                        tracing::warn!("⚠️  GUILD_MEMBERS intent 可能可用，但伺服器沒有成員");
+                    }
+                }
+                Err(e) => {
+                    if e.to_string().contains("Missing Intents") || e.to_string().contains("Missing Access") {
+                        tracing::error!("❌ GUILD_MEMBERS intent 未啟用或無權限");
+                        tracing::error!("請在 Discord Developer Portal 中為此 Bot 啟用 GUILD_MEMBERS intent");
+                        tracing::error!("步驟:");
+                        tracing::error!("1. 前往 https://discord.com/developers/applications");
+                        tracing::error!("2. 選擇您的應用程式");
+                        tracing::error!("3. 進入 'Bot' 頁面");
+                        tracing::error!("4. 在 'Privileged Gateway Intents' 下啟用 'SERVER MEMBERS INTENT'");
+                        return Err(DiscordError::ConfigError(
+                            "缺少必要的 GUILD_MEMBERS intent。請在 Discord Developer Portal 中啟用此 intent".to_string()
+                        ));
+                    } else {
+                        tracing::warn!("⚠️  無法驗證 GUILD_MEMBERS intent: {}", e);
+                        tracing::warn!("這可能是暫時性問題或權限問題");
+                    }
+                }
+            }
+        } else {
+            tracing::warn!("⚠️  Bot 未加入任何伺服器，無法驗證 GUILD_MEMBERS intent");
+            tracing::warn!("請將 Bot 邀請到測試伺服器進行驗證");
+        }
+
+        Ok(())
+    }
 }
 
 impl DiscordGateway {
@@ -182,6 +278,7 @@ impl DiscordGateway {
             token_valid: true,
             command_router: Arc::new(CommandRouter::new()),
             ui_factory: UIComponentFactory::new(),
+            user_account_service: None,
         }
     }
 
@@ -193,6 +290,7 @@ impl DiscordGateway {
             token_valid: true,
             command_router: Arc::new(CommandRouter::new()),
             ui_factory: UIComponentFactory::new(),
+            user_account_service: None,
         }
     }
 
@@ -227,12 +325,14 @@ impl DiscordGateway {
             status: Arc::clone(&self.status),
             ui_factory: Arc::new(self.ui_factory.clone()),
             command_router: Arc::clone(&self.command_router),
+            user_account_service: self.user_account_service.clone(),
         };
 
         let intents = GatewayIntents::GUILD_MESSAGES
             | GatewayIntents::MESSAGE_CONTENT
             | GatewayIntents::GUILD_MESSAGE_REACTIONS
-            | GatewayIntents::DIRECT_MESSAGES;
+            | GatewayIntents::DIRECT_MESSAGES
+            | GatewayIntents::GUILD_MEMBERS;
 
         let client = Client::builder(&self.config.discord_token, intents)
             .event_handler(handler)
@@ -243,10 +343,19 @@ impl DiscordGateway {
                 DiscordError::ConnectionError(error_msg)
             })?;
 
+        // 注意：intent 驗證將在 Ready 事件中進行
+
         // 儲存客戶端但不立即啟動（讓 main.rs 控制啟動）
         *self.client.lock().await = Some(client);
         tracing::info!("✅ Discord 客戶端創建成功，準備啟動");
         Ok(())
+    }
+
+    /// 設置 UserAccountService 用於自動帳戶創建
+    pub fn with_user_account_service(mut self, user_account_service: Arc<crate::services::UserAccountService>) -> Self {
+        // 將服務存儲以便後續使用
+        self.user_account_service = Some(user_account_service);
+        self
     }
 
     /// 啟動 Discord 客戶端並開始監聽事件

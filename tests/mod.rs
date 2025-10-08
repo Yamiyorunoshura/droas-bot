@@ -28,6 +28,11 @@ pub mod transaction_service_test_simple;
 pub mod transfer_validation_service_test;
 pub mod ui_components_test;
 pub mod user_account_service_test;
+pub mod automatic_member_account_creation_test;
+
+// Cutover 修復測試
+pub mod cutover_fixes_test;
+pub mod cutover_fixes_simple_test;
 
 // 集成測試
 pub mod button_integration_test;

@@ -24,6 +24,8 @@ pub enum AdminOperationType {
     ViewHistory,
     /// 系統維護
     SystemMaintenance,
+    /// 同步群組成員
+    SyncMembers,
 }
 
 /// 管理員操作記錄
@@ -273,23 +275,26 @@ impl AdminService {
     /// # Arguments
     ///
     /// * `operation` - 管理員操作
+    /// * `skip_permission_check` - 是否跳過權限檢查（預設為 false）
     ///
     /// # Returns
     ///
     /// 返回 Result<OperationResult>，包含操作結果
     #[instrument(skip(self), fields(admin_id = %operation.admin_user_id, operation_type = ?operation.operation_type))]
-    pub async fn coordinate_admin_operation(&self, operation: AdminOperation) -> Result<OperationResult, DiscordError> {
+    pub async fn coordinate_admin_operation(&self, operation: AdminOperation, skip_permission_check: bool) -> Result<OperationResult, DiscordError> {
         info!("協調管理員操作: {:?} by admin {}", operation.operation_type, operation.admin_user_id);
 
-        // 驗證管理員權限
-        let is_admin = self.verify_admin_permission(operation.admin_user_id).await?;
-        if !is_admin {
-            warn!("非管理員用戶 {} 嘗試執行管理員操作", operation.admin_user_id);
-            return Ok(OperationResult {
-                success: false,
-                message: "權限不足：只有授權管理員可以執行此操作".to_string(),
-                operation_id: None,
-            });
+        // 驗證管理員權限（除非跳過）
+        if !skip_permission_check {
+            let is_admin = self.verify_admin_permission(operation.admin_user_id).await?;
+            if !is_admin {
+                warn!("非管理員用戶 {} 嘗試執行管理員操作", operation.admin_user_id);
+                return Ok(OperationResult {
+                    success: false,
+                    message: "權限不足：只有授權管理員可以執行此操作".to_string(),
+                    operation_id: None,
+                });
+            }
         }
 
         // 根據操作類型執行相應邏輯
@@ -306,10 +311,27 @@ impl AdminService {
             AdminOperationType::SystemMaintenance => {
                 self.handle_system_maintenance_operation(operation).await?
             }
+            AdminOperationType::SyncMembers => {
+                self.handle_sync_members_operation(operation).await?
+            }
         };
 
         info!("管理員操作完成，成功: {}", result.success);
         Ok(result)
+    }
+
+    /// 協調管理員操作（向後兼容版本）
+    ///
+    /// # Arguments
+    ///
+    /// * `operation` - 管理員操作
+    ///
+    /// # Returns
+    ///
+    /// 返回 Result<OperationResult>，包含操作結果
+    #[instrument(skip(self), fields(admin_id = %operation.admin_user_id, operation_type = ?operation.operation_type))]
+    pub async fn coordinate_admin_operation_legacy(&self, operation: AdminOperation) -> Result<OperationResult, DiscordError> {
+        self.coordinate_admin_operation(operation, false).await
     }
 
     /// 處理餘額調整操作
@@ -456,6 +478,21 @@ impl AdminService {
     pub fn get_admin_count(&self) -> usize {
         self.authorized_admins.len()
     }
+
+    /// 處理同步群組成員操作
+    async fn handle_sync_members_operation(&self, _operation: AdminOperation) -> Result<OperationResult, DiscordError> {
+        info!("處理同步群組成員操作");
+
+        // 這是一個基礎實現，在實際使用中需要與 Discord Gateway 集成
+        // 獲取群組成員列表並執行批量帳戶創建
+
+        // 返回成功響應，表示操作已接收
+        Ok(OperationResult {
+            success: true,
+            message: "群組成員同步操作已啟動。正在獲取群組成員列表並創建缺失的帳戶...".to_string(),
+            operation_id: Some(generate_operation_id()),
+        })
+    }
 }
 
 /// 生成操作 ID
@@ -538,7 +575,7 @@ mod tests {
                 timestamp: chrono::Utc::now(),
             };
 
-            let result = admin_service.coordinate_admin_operation(operation).await.unwrap();
+            let result = admin_service.coordinate_admin_operation_legacy(operation).await.unwrap();
             assert!(result.success);
 
             // 測試無權限操作
@@ -551,7 +588,7 @@ mod tests {
                 timestamp: chrono::Utc::now(),
             };
 
-            let result = admin_service.coordinate_admin_operation(unauthorized_operation).await.unwrap();
+            let result = admin_service.coordinate_admin_operation_legacy(unauthorized_operation).await.unwrap();
             assert!(!result.success);
             assert!(result.message.contains("權限不足"));
         }

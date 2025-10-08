@@ -15,5 +15,5 @@ GitHub Actions 自動化 CI/CD；自動化測試；容器構建；部署到多�
 ### Scaling Strategy
 水平擴展；無狀態服務設計；資料庫讀寫分離；快取層擴展
 
-*source_refs: ["docs/architecture/Deployment Architecture.md", "Cargo.toml", "archive/0.2.0/cutover.md"]*
+*source_refs: ["docs/architecture/Deployment Architecture.md", "Cargo.toml", "archive/0.2.4/cutover.md"]*
 

@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.4] - 2025-10-08
+
+### Added
+- 🎉 **自動成員帳戶創建系統 (F-013/F-014/F-015)**
+  - 新成員加入伺服器時自動創建經濟帳戶（初始餘額：1000 幣）
+  - 自動發送歡迎私訊通知新成員帳戶已創建
+  - 新增 GUILD_MEMBERS intent 支援以監聽成員加入事件
+  - 新增 `guild_member_addition` 事件處理器實現自動帳戶創建
+  - 重複檢查機制：已有帳戶的成員不會重複創建
+  - 完善的錯誤處理：創建失敗時通知用戶並記錄錯誤日誌
+
+### Changed
+- 🔧 **Discord Gateway 增強**
+  - DiscordGateway 支援注入 UserAccountService 用於自動帳戶創建
+  - 新增 `with_user_account_service()` 方法設置服務依賴
+  - 更新 GatewayIntents 配置，新增 GUILD_MEMBERS intent
+  - 新增 intent 驗證機制和配置指導日誌
+
+### Testing
+- 🧪 **測試覆蓋大幅提升**
+  - 新增 `automatic_member_account_creation_test.rs` - 自動帳戶創建功能測試（511 行）
+  - 新增 `cutover_fixes_test.rs` - 上線修復綜合測試（690 行）
+  - 新增 `cutover_fixes_simple_test.rs` - 簡化上線修復測試（274 行）
+  - 新增 `sync_member_permission_fix_test.rs` - 權限同步修復測試（114 行）
+  - 新增 `sync_member_permission_simple_test.rs` - 簡化權限同步測試（108 行）
+  - 測試總計新增約 1,697 行測試代碼
+
+### Documentation
+- 📚 **知識庫擴充**
+  - 新增 `best-practices-discord-integration.md` - Discord 整合最佳實踐（125 行）
+  - 新增 `best-practices-testing.md` - 測試最佳實踐指南（121 行）
+  - 新增 `errors-compilation.md` - 編譯錯誤處理知識（151 行）
+  - 新增 `errors-configuration.md` - 配置錯誤處理知識（164 行）
+  - 新增 `errors-discord-commands.md` - Discord 指令錯誤處理（79 行）
+  - 新增 `sync_member_permission_fix.md` - 權限同步修復文檔（122 行）
+- 📦 **版本歸檔**
+  - 新增 archive/0.2.4/ 目錄，包含 PRD、cutover 文檔、開發筆記和進度追蹤
+- 🏗️ **架構文檔更新**
+  - 更新多個架構文檔反映新功能和最佳實踐
+  - 更新需求追溯矩陣和完成報告
+
+### Technical Details
+- 自動帳戶創建在成員加入時異步執行，不影響其他操作
+- 支援帳戶創建失敗時的友好錯誤提示
+- GUILD_MEMBERS intent 配置驗證和錯誤指導
+- 完整的事件處理日誌追蹤
+
+### Configuration
+⚠️ **重要配置變更** - 需要在 Discord Developer Portal 啟用 GUILD_MEMBERS intent：
+1. 前往 https://discord.com/developers/applications
+2. 選擇您的應用程式
+3. 進入 'Bot' 頁面
+4. 在 'Privileged Gateway Intents' 下啟用 'SERVER MEMBERS INTENT'
+
 ## [0.2.3] - 2025-10-08
 
 ### Fixed
