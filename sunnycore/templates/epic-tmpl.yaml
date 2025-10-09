@@ -1,0 +1,31 @@
+---
+# Tasks Document Template
+# 任務文檔模板
+
+title: ""
+version: ""
+created_date: ""
+last_updated: ""
+total_tasks: 0
+completed_tasks: 0
+---
+
+task-overview:
+  project_summary: ""
+  priority_levels: ""
+
+functional-tasks: []
+
+non-functional-tasks: []
+
+infrastructure-tasks: []
+
+documentation-tasks: []
+
+task-dependencies: []
+
+milestones: []
+
+progress-summary: {}
+
+notes: ""

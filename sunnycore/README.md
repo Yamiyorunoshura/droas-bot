@@ -77,9 +77,10 @@
 |------|------|------|
 | 1 | `/sunnycore_architect *document-project` | （可選）若為 Brownfield 專案，先更新架構文檔 |
 | 2 | `/sunnycore_pm *create-prd` | 創建 PRD（產品需求文檔），包含需求、架構、任務 |
+| 2.5 | `/sunnycore_po *validate-design prd` | （可選）驗證 PRD 內部一致性和與現有架構的對齊 |
 | 3 | `/sunnycore_dev *develop-prd` | 基於 PRD 一次性完成所有開發任務 |
 | 4 | `/sunnycore_po *cutover` | 項目驗收 |
-| 5 | `/sunnycore_architect *document-project` | 更新專案架構文檔 |
+| 5 | `/sunnycore_architect *document-project` | 更新專案架構文檔（建議先親身驗收項目，如發現問題可使用 `/sunnycore_assistant` 協助解決） |
 | 6 | `/sunnycore_po *conclude` | 總結文檔並歸檔 |
 
 **特點：**
@@ -140,41 +141,42 @@ flowchart TD
 
 > 適用於從零開始的新專案開發
 
-### 📋 階段一：需求分析
+### 📋 階段一：需求分析與計劃
 
 | 步驟 | 命令 | 說明 |
 |------|------|------|
 | 1 | `/sunnycore_pm *create-requirements` | 互動式創建需求文檔 |
-| 2 | `/sunnycore_pm *create-architecture` | 互動式創建架構文檔 |
+| 2 | `/sunnycore_architect *create-architecture` | 互動式創建架構文檔 |
 | 3 | `/sunnycore_pm *create-epic` | 互動式創建任務文檔 |
+| 4 | `/sunnycore_dev *create-plan` | 為所有任務創建實作計劃 |
+| 5 | `/sunnycore_po *validate-design full` | （可選）驗證需求、架構、任務、計劃之間的完整一致性 |
 
 ### 💻 階段二：開發迭代
 
 | 步驟 | 命令 | 說明 |
 |------|------|------|
-| 4 | `/sunnycore_dev *init` | 初始化開發環境與專案文檔 |
-| 5 | `/sunnycore_dev *plan-tasks {task_id}` | 創建特定 task 的計劃文檔 |
-| 6 | `/sunnycore_dev *develop-tasks {task_id}` | 創建特定 task 的開發文檔 |
-| 7 | `/sunnycore_qa *review {task_id}` | 審查特定 task 的文檔 |
+| 6 | `/sunnycore_dev *init` | 初始化開發環境與專案文檔 |
+| 7 | `/sunnycore_dev *develop-plan {task_id}` | 基於計劃開發特定 task |
+| 8 | `/sunnycore_qa *review {task_id}` | 審查特定 task 的文檔 |
 
 **流程控制：**
 - ✅ **Review 通過**：檢查是否還有其他任務
-  - 有任務 → 回到步驟 5
+  - 有任務 → 回到步驟 7
   - 無任務 → 進入階段三
-- ❌ **Review 未通過**：使用 `/sunnycore_dev *brownfield-tasks {task_id}` 進行重開發，回到步驟 6
+- ❌ **Review 未通過**：使用 `/sunnycore_dev *brownfield-tasks {task_id}` 進行重開發，回到步驟 7
 
 ### 📊 階段三：驗收與總結
 
 | 步驟 | 命令 | 說明 |
 |------|------|------|
-| 8 | `/sunnycore_po *cutover` | 項目驗收 |
-| 9 | `/sunnycore_architect *document-project` | 產出專案架構文件 |
-| 10 | `/sunnycore_architect *curate-knowledge` | 整理知識文檔 |
-| 11 | `/sunnycore_po *conclude` | 總結文檔 |
+| 9 | `/sunnycore_po *cutover` | 項目驗收 |
+| 10 | `/sunnycore_architect *document-project` | 產出專案架構文件（建議先親身驗收項目，如發現問題可使用 `/sunnycore_assistant` 協助解決） |
+| 11 | `/sunnycore_architect *curate-knowledge` | 整理知識文檔 |
+| 12 | `/sunnycore_po *conclude` | 總結文檔 |
 
 **流程控制：**
-- ✅ **Cutover 通過**：進入總結流程（步驟 9）
-- ❌ **Cutover 未通過**：使用 `/sunnycore_dev *fix-acceptance-issues` 進行修復，回到步驟 8
+- ✅ **Cutover 通過**：進入總結流程（步驟 10）
+- ❌ **Cutover 未通過**：使用 `/sunnycore_dev *fix-acceptance-issues` 進行修復，回到步驟 9
 
 ## ⚙️ 配置說明
 
@@ -223,19 +225,21 @@ flowchart TD
 flowchart TD
     Start([開始 Greenfield 專案]) --> A1
     
-    subgraph Phase1 ["📋 階段一：需求分析"]
+    subgraph Phase1 ["📋 階段一：需求分析與計劃"]
         A1["1️⃣ /sunnycore_pm<br/>*create-requirements<br/>📝 建立需求"]
-        A2["2️⃣ /sunnycore_pm<br/>*create-architecture<br/>🏗️ 建立架構"]
+        A2["2️⃣ /sunnycore_architect<br/>*create-architecture<br/>🏗️ 建立架構"]
         A3["3️⃣ /sunnycore_pm<br/>*create-epic<br/>📌 建立任務"]
-        A1 --> A2 --> A3
+        A4["4️⃣ /sunnycore_dev<br/>*create-plan<br/>🗓️ 建立計劃"]
+        A5["5️⃣ /sunnycore_po<br/>*validate-design full<br/>✅ 驗證設計（可選）"]
+        A1 --> A2 --> A3 --> A4
+        A4 -.->|"可選"| A5
     end
     
     subgraph Phase2 ["💻 階段二：開發迭代"]
-        B0["4️⃣ /sunnycore_dev<br/>*init<br/>⚙️ 初始化專案"]
-        B1["5️⃣ /sunnycore_dev<br/>*plan-tasks<br/>🗓️ 規劃任務"]
-        B2["6️⃣ /sunnycore_dev<br/>*develop-tasks<br/>⚙️ 開發實作"]
-        B3["7️⃣ /sunnycore_qa<br/>*review<br/>🔍 文件審查"]
-        B0 --> B1 --> B2 --> B3
+        B0["6️⃣ /sunnycore_dev<br/>*init<br/>⚙️ 初始化專案"]
+        B1["7️⃣ /sunnycore_dev<br/>*develop-plan<br/>⚙️ 開發實作"]
+        B2["8️⃣ /sunnycore_qa<br/>*review<br/>🔍 文件審查"]
+        B0 --> B1 --> B2
     end
     
     D1{"✅ Review<br/>通過?"}
@@ -243,10 +247,10 @@ flowchart TD
     R1["🔄 /sunnycore_dev<br/>*brownfield-tasks<br/>重新開發"]
     
     subgraph Phase3 ["📊 階段三：驗收與總結"]
-        C0["8️⃣ /sunnycore_po<br/>*cutover<br/>✅ 項目驗收"]
-        C1["9️⃣ /sunnycore_architect<br/>*document-project<br/>📖 產出專案文件"]
-        C2["🔟 /sunnycore_architect<br/>*curate-knowledge<br/>📚 整理知識"]
-        C3["1️⃣1️⃣ /sunnycore_po<br/>*conclude<br/>📋 總結文檔"]
+        C0["9️⃣ /sunnycore_po<br/>*cutover<br/>✅ 項目驗收"]
+        C1["🔟 /sunnycore_architect<br/>*document-project<br/>📖 產出專案文件"]
+        C2["1️⃣1️⃣ /sunnycore_architect<br/>*curate-knowledge<br/>📚 整理知識"]
+        C3["1️⃣2️⃣ /sunnycore_po<br/>*conclude<br/>📋 總結文檔"]
         C0 --> C1 --> C2 --> C3
     end
     
@@ -255,10 +259,11 @@ flowchart TD
     
     Done([✨ 完成開發 Cycle])
     
-    A3 --> B0
-    B3 --> D1
+    A5 --> B0
+    A4 --> B0
+    B2 --> D1
     D1 -->|"❌ 否"| R1
-    R1 --> B2
+    R1 --> B1
     D1 -->|"✅ 是"| D2
     D2 -->|"📝 是"| B1
     D2 -->|"✅ 否"| C0
@@ -286,7 +291,7 @@ flowchart TD
 
 > 適用於現有專案的擴展與維護
 
-### 📋 階段一：需求分析
+### 📋 階段一：需求分析與計劃
 
 | 步驟 | 命令 | 說明 |
 |------|------|------|
@@ -294,34 +299,35 @@ flowchart TD
 | 2 | `/sunnycore_pm *create-requirements` | 互動式創建需求文檔 |
 | 3 | `/sunnycore_pm *create-brownfield-architecture` | 互動式創建架構文檔 |
 | 4 | `/sunnycore_pm *create-epic` | 互動式創建任務文檔 |
+| 5 | `/sunnycore_dev *create-plan` | 為所有任務創建實作計劃 |
+| 6 | `/sunnycore_po *validate-design full` | （可選）驗證需求、架構、任務、計劃之間的完整一致性 |
 
 ### 💻 階段二：開發迭代
 
 | 步驟 | 命令 | 說明 |
 |------|------|------|
-| 5 | `/sunnycore_dev *init` | 初始化開發環境與專案文檔 |
-| 6 | `/sunnycore_dev *plan-tasks {task_id}` | 創建特定 task 的計劃文檔 |
-| 7 | `/sunnycore_dev *develop-tasks {task_id}` | 創建特定 task 的開發文檔 |
-| 8 | `/sunnycore_qa *review {task_id}` | 審查特定 task 的文檔 |
+| 7 | `/sunnycore_dev *init` | 初始化開發環境與專案文檔 |
+| 8 | `/sunnycore_dev *develop-plan {task_id}` | 基於計劃開發特定 task |
+| 9 | `/sunnycore_qa *review {task_id}` | 審查特定 task 的文檔 |
 
 **流程控制：**
 - ✅ **Review 通過**：檢查是否還有其他任務
-  - 有任務 → 回到步驟 6
+  - 有任務 → 回到步驟 8
   - 無任務 → 進入階段三
-- ❌ **Review 未通過**：使用 `/sunnycore_dev *brownfield-tasks {task_id}` 進行重開發，回到步驟 7
+- ❌ **Review 未通過**：使用 `/sunnycore_dev *brownfield-tasks {task_id}` 進行重開發，回到步驟 8
 
 ### 📊 階段三：驗收與總結
 
 | 步驟 | 命令 | 說明 |
 |------|------|------|
-| 9 | `/sunnycore_po *cutover` | 項目驗收 |
-| 10 | `/sunnycore_architect *document-project` | 更新專案架構文件 |
-| 11 | `/sunnycore_architect *curate-knowledge` | 整理知識文檔 |
-| 12 | `/sunnycore_po *conclude` | 總結文檔 |
+| 10 | `/sunnycore_po *cutover` | 項目驗收 |
+| 11 | `/sunnycore_architect *document-project` | 更新專案架構文件（建議先親身驗收項目，如發現問題可使用 `/sunnycore_assistant` 協助解決） |
+| 12 | `/sunnycore_architect *curate-knowledge` | 整理知識文檔 |
+| 13 | `/sunnycore_po *conclude` | 總結文檔 |
 
 **流程控制：**
-- ✅ **Cutover 通過**：進入總結流程（步驟 10）
-- ❌ **Cutover 未通過**：使用 `/sunnycore_dev *fix-acceptance-issues` 進行修復，回到步驟 9
+- ✅ **Cutover 通過**：進入總結流程（步驟 11）
+- ❌ **Cutover 未通過**：使用 `/sunnycore_dev *fix-acceptance-issues` 進行修復，回到步驟 10
 
 ### 🔄 流程圖
 
@@ -329,20 +335,22 @@ flowchart TD
 flowchart TD
     Start([開始 Brownfield 專案]) --> A0
     
-    subgraph Phase1 ["📋 階段一：需求分析"]
+    subgraph Phase1 ["📋 階段一：需求分析與計劃"]
         A0["1️⃣ /sunnycore_architect<br/>*document-project<br/>📖 更新專案文件"]
         A1["2️⃣ /sunnycore_pm<br/>*create-requirements<br/>📝 建立需求"]
         A2["3️⃣ /sunnycore_pm<br/>*create-brownfield-architecture<br/>🏗️ 建立架構"]
         A3["4️⃣ /sunnycore_pm<br/>*create-epic<br/>📌 建立任務"]
-        A0 --> A1 --> A2 --> A3
+        A4["5️⃣ /sunnycore_dev<br/>*create-plan<br/>🗓️ 建立計劃"]
+        A5["6️⃣ /sunnycore_po<br/>*validate-design full<br/>✅ 驗證設計（可選）"]
+        A0 --> A1 --> A2 --> A3 --> A4
+        A4 -.->|"可選"| A5
     end
     
     subgraph Phase2 ["💻 階段二：開發迭代"]
-        B0["5️⃣ /sunnycore_dev<br/>*init<br/>⚙️ 初始化專案"]
-        B1["6️⃣ /sunnycore_dev<br/>*plan-tasks<br/>🗓️ 規劃任務"]
-        B2["7️⃣ /sunnycore_dev<br/>*develop-tasks<br/>⚙️ 開發實作"]
-        B3["8️⃣ /sunnycore_qa<br/>*review<br/>🔍 文件審查"]
-        B0 --> B1 --> B2 --> B3
+        B0["7️⃣ /sunnycore_dev<br/>*init<br/>⚙️ 初始化專案"]
+        B1["8️⃣ /sunnycore_dev<br/>*develop-plan<br/>⚙️ 開發實作"]
+        B2["9️⃣ /sunnycore_qa<br/>*review<br/>🔍 文件審查"]
+        B0 --> B1 --> B2
     end
     
     D1{"✅ Review<br/>通過?"}
@@ -350,10 +358,10 @@ flowchart TD
     R1["🔄 /sunnycore_dev<br/>*brownfield-tasks<br/>重新開發"]
     
     subgraph Phase3 ["📊 階段三：驗收與總結"]
-        C0["9️⃣ /sunnycore_po<br/>*cutover<br/>✅ 項目驗收"]
-        C1["🔟 /sunnycore_architect<br/>*document-project<br/>📖 更新專案文件"]
-        C2["1️⃣1️⃣ /sunnycore_architect<br/>*curate-knowledge<br/>📚 整理知識"]
-        C3["1️⃣2️⃣ /sunnycore_po<br/>*conclude<br/>📋 總結文檔"]
+        C0["🔟 /sunnycore_po<br/>*cutover<br/>✅ 項目驗收"]
+        C1["1️⃣1️⃣ /sunnycore_architect<br/>*document-project<br/>📖 更新專案文件"]
+        C2["1️⃣2️⃣ /sunnycore_architect<br/>*curate-knowledge<br/>📚 整理知識"]
+        C3["1️⃣3️⃣ /sunnycore_po<br/>*conclude<br/>📋 總結文檔"]
         C0 --> C1 --> C2 --> C3
     end
     
@@ -362,10 +370,11 @@ flowchart TD
     
     Done([✨ 完成開發 Cycle])
     
-    A3 --> B0
-    B3 --> D1
+    A5 --> B0
+    A4 --> B0
+    B2 --> D1
     D1 -->|"❌ 否"| R1
-    R1 --> B2
+    R1 --> B1
     D1 -->|"✅ 是"| D2
     D2 -->|"📝 是"| B1
     D2 -->|"✅ 否"| C0
@@ -396,13 +405,14 @@ flowchart TD
 | 特性 | PRD 流程 | Greenfield | Brownfield |
 |------|---------|-----------|------------|
 | **適用場景** | 小型變更、快速迭代 | 全新專案 | 現有專案擴展/維護 |
-| **文檔結構** | 單一 PRD 文檔 | 分離的需求、架構、任務文檔 | 分離的需求、架構、任務文檔 |
+| **文檔結構** | 單一 PRD 文檔 | 分離的需求、架構、任務、計劃文檔 | 分離的需求、架構、任務、計劃文檔 |
 | **起始步驟** | 創建 PRD | 直接建立需求 | 先更新專案文件 |
 | **需求命令** | `*create-prd` | `*create-requirements` | `*create-requirements` |
 | **架構命令** | 內建於 PRD | `*create-architecture` | `*create-brownfield-architecture` |
 | **任務命令** | 內建於 PRD | `*create-epic` | `*create-epic` |
-| **開發命令** | `*develop-prd`（一次性） | `*develop-tasks`（逐個） | `*develop-tasks`（逐個） |
-| **總步驟數** | 6 步 | 11 步 | 12 步 |
+| **計劃命令** | 內建於 PRD | `*create-plan`（批量） | `*create-plan`（批量） |
+| **開發命令** | `*develop-prd`（一次性） | `*develop-plan`（逐個） | `*develop-plan`（逐個） |
+| **總步驟數** | 6 步 | 12 步 | 13 步 |
 | **適合規模** | 小型（1-5 個任務） | 中大型（5+ 個任務） | 中大型（5+ 個任務） |
 
 ### 🎯 關鍵決策點
@@ -429,9 +439,9 @@ flowchart TD
 | 角色 | 職責 | 關鍵命令 |
 |------|------|----------|
 | **Architect** | 技術架構設計、知識管理、技術決策支持 | *create-architecture, *create-brownfield-architecture, *conclude, *curate-knowledge, *document-project |
-| **Developer** | 開發實作、任務規劃、技術實現、問題修復 | *init, *plan-tasks, *develop-tasks, *develop-prd, *fix-acceptance-issues |
+| **Developer** | 開發實作、任務規劃、技術實現、問題修復 | *init, *create-plan, *develop-plan, *develop-prd, *fix-acceptance-issues |
 | **PM** | 產品需求管理、PRD 創建 | *create-requirements, *create-prd, *create-epic |
-| **PO** | 業務驗收、需求確認、項目交付 | *cutover |
+| **PO** | 業務驗收、需求確認、項目交付、設計驗證與修復 | *cutover, *validate-design, *fix-design-conflicts |
 | **QA** | 代碼審查、質量保證 | *review |
 
 ### 💡 最佳實踐
@@ -440,3 +450,54 @@ flowchart TD
 - 🔄 保持文檔與代碼同步
 - ✅ 確保所有 Review 問題都已解決再進入下一階段
 - 📚 及時整理和歸檔知識文檔
+
+### 🔍 設計驗證與修復
+
+#### 何時使用設計驗證？
+
+**推薦在以下時機使用 `*validate-design`：**
+- ✅ **PRD 創建後**：驗證 PRD 內部一致性和與現有架構的對齊
+- ✅ **需求分析階段完成後**：確保需求、架構、任務之間完整對齊
+- ✅ **開發前**：避免基於有問題的設計文檔進行開發
+- ✅ **發現文檔不一致時**：主動檢查和修復問題
+
+#### 設計驗證工作流程
+
+**PRD 驗證流程：**
+```
+/sunnycore_po *validate-design prd
+↓
+查看 docs/design-validation.md
+↓ (如有問題)
+/sunnycore_po *fix-design-conflicts
+↓
+重新驗證確認修復
+```
+
+**完整驗證流程：**
+```
+/sunnycore_po *validate-design full
+↓
+查看 docs/design-validation.md
+↓ (如有問題)
+/sunnycore_po *fix-design-conflicts
+↓
+重新驗證確認修復
+```
+
+#### 驗證內容說明
+
+| 驗證類型 | 檢查項目 | 輸出 |
+|---------|---------|------|
+| **PRD 驗證** | • PRD 內部一致性<br>• 需求-架構-任務對齊<br>• 與現有架構的兼容性<br>• 內容真實性（無捏造引用） | `docs/design-validation.md` |
+| **完整驗證** | • 雙向引用完整性<br>• 覆蓋率分析（100%）<br>• 跨文檔一致性<br>• 衝突檢測<br>• 內容真實性 | `docs/design-validation.md` |
+
+#### 修復衝突流程
+
+`*fix-design-conflicts` 命令會：
+1. 讀取驗證報告中的所有問題
+2. 按嚴重性排序（Critical → High → Medium → Low）
+3. 與用戶互動確認修復策略
+4. 自動修改相關文檔
+5. 完成後刪除驗證報告
+6. 建議重新運行驗證確認
